@@ -12,15 +12,15 @@ namespace BusinessLogicLayer
         private const string text = " – это вид текста, который содержит в себе информацию или ссылку на место в произведении, на другую литературу или на какое-то событие в мире.";
         private const string longText = "Гипертекст в тексте может выглядеть как гипертекст, а может как гипертекст на гипертексте, где гипертекст сам является гипертекстом.";
         private readonly List<string> wordCase;
+        private readonly Document document;
 
         public WordDocument()
         {
-            wordCase = new List<string> { "ы", "и", "а", "я", "у", "е", "ю", "о", "ой", "ою", "ей", "ею", "ом", "ем", "ью" };
+            wordCase = new List<string> {"", "ы", "и", "а", "я", "у", "е", "ю", "о", "ой", "ою", "ей", "ею", "ом", "ем", "ью" };
+            document = new Document();
         }
         public void CreateDocument()
         {
-            //Create Word
-            Document document = new Document();
             Section section = document.AddSection();
             Paragraph paragraph = section.AddParagraph();
 
@@ -40,6 +40,7 @@ namespace BusinessLogicLayer
 
             Paragraph paragraph1 = section.AddParagraph();
             paragraph1.AppendText(longText);
+            ReplaceWords("гипертекст", "!!!");
 
             ////поиск и замена слов
             //List<TextSelection> searchedWords = FindWords(document, "гипертекст");
@@ -75,6 +76,19 @@ namespace BusinessLogicLayer
 
             SaveDocument(document);
 
+        }
+
+        /// <summary>
+        /// Заменяет одни слова на другие
+        /// </summary>
+        /// <param name="replacedWord">заменяемое слово</param>
+        /// <param name="wordToReplace">слово-замена</param>
+        private void ReplaceWords(string replacedWord, string wordToReplace)
+        {
+            foreach (var item in wordCase)
+            {
+                document.Replace($"{replacedWord}{item}", wordToReplace, false, true);
+            }
         }
 
         private List<TextSelection> FindWords(Document document, string word)
