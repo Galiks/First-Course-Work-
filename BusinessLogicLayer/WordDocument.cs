@@ -13,15 +13,18 @@ namespace BusinessLogicLayer
         private const string longText = "Гипертекст в тексте может выглядеть как гипертекст, а может как гипертекст на гипертексте, где гипертекст сам является гипертекстом.";
         private readonly List<string> wordCase;
         private readonly Document document;
+        private readonly Section section;
+        private readonly Paragraph mainParagraph;
 
         public WordDocument()
         {
             wordCase = new List<string> {"", "ы", "и", "а", "я", "у", "е", "ю", "о", "ой", "ою", "ей", "ею", "ом", "ем", "ью" };
             document = new Document();
+            section = document.AddSection();
+            mainParagraph = section.AddParagraph();
         }
         public void CreateDocument()
         {
-            Section section = document.AddSection();
             Paragraph paragraph = section.AddParagraph();
 
             //Set Paragraph Styles
@@ -31,25 +34,16 @@ namespace BusinessLogicLayer
             txtStyle.CharacterFormat.FontSize = 16;
             txtStyle.CharacterFormat.TextColor = Color.RosyBrown;
             document.Styles.Add(txtStyle);
-
+            //Set Hyperlink Styles
             ParagraphStyle hyperlinkstyle = new ParagraphStyle(document);
             hyperlinkstyle.Name = "linkStyle";
             hyperlinkstyle.CharacterFormat.FontName = "Calibri";
             hyperlinkstyle.CharacterFormat.FontSize = 15;
             document.Styles.Add(hyperlinkstyle);
 
-            Paragraph paragraph1 = section.AddParagraph();
-            paragraph1.AppendText(longText);
+            ///главный параграф
+            mainParagraph.AppendText(longText);
             ReplaceWords("гипертекст", "!!!");
-
-            ////поиск и замена слов
-            //List<TextSelection> searchedWords = FindWords(document, "гипертекст");
-            //for (int i = 0; i < searchedWords.Count; i++)
-            //{
-            //    var item = searchedWords[i];
-            //    document.Replace(item.SelectedText, "!!!!!!!!!!!!!!", false, true);
-            //}
-
 
 
 
@@ -87,39 +81,9 @@ namespace BusinessLogicLayer
         {
             foreach (var item in wordCase)
             {
-                document.Replace($"{replacedWord}{item}", wordToReplace, false, true);
+                
+                document.Replace($"{replacedWord}{item}", "", false, true);
             }
-        }
-
-        private List<TextSelection> FindWords(Document document, string word)
-        {
-            var searchedWords = document.FindAllString(word, true, true).ToList();
-            foreach (var item in wordCase)
-            {
-                try
-                {
-                    searchedWords.AddRange(document.FindAllString($"{word}{item}", true, true).ToList());
-                }
-                catch (ArgumentNullException e)
-                {
-
-                }
-            }
-            word = FirstUpper(word);
-            searchedWords.AddRange(document.FindAllString(word, true, true).ToList());
-            foreach (var item in wordCase)
-            {
-                try
-                {
-                    searchedWords.AddRange(document.FindAllString($"{word}{item}", true, true).ToList());
-                }
-                catch (ArgumentNullException e)
-                {
-
-                }
-            }
-
-            return searchedWords;
         }
 
 
