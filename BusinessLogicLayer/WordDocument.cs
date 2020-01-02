@@ -1,5 +1,6 @@
 ﻿using Spire.Doc;
 using Spire.Doc.Documents;
+using Spire.Doc.Fields;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -9,7 +10,7 @@ namespace BusinessLogicLayer
 {
     public class WordDocument
     {
-        private const string text = " – это вид текста, который содержит в себе информацию или ссылку на место в произведении, на другую литературу или на какое-то событие в мире.";
+        //private const string text = " – это вид текста, который содержит в себе информацию или ссылку на место в произведении, на другую литературу или на какое-то событие в мире.";
         private const string longText = "Гипертекст в тексте может выглядеть как гипертекст, а может как гипертекст на гипертексте, где гипертекст сам является гипертекстом.";
         private readonly List<string> wordCase;
         private readonly Document document;
@@ -43,7 +44,7 @@ namespace BusinessLogicLayer
 
             ///главный параграф
             mainParagraph.AppendText(longText);
-            ReplaceWords("гипертекст", "!!!");
+            // ReplaceWords("гипертекст", "!!!");
 
 
 
@@ -53,22 +54,22 @@ namespace BusinessLogicLayer
 
 
             ////////заготовка на гипертекст
-            //paragraph1.AppendHyperlink("Гипертекст", "Гипертекст", HyperlinkType.Bookmark);
-            //paragraph1.ApplyStyle(hyperlinkstyle.Name);
+            //mainParagraph.AppendHyperlink("Гипертекст", "Гипертекст", HyperlinkType.Bookmark);
+            mainParagraph.ApplyStyle(hyperlinkstyle.Name);
 
-            //for (int i = 0; i < 10; i++)
-            //{
-            //    paragraph = section.AddParagraph();
-            //    paragraph.AppendHyperlink(paragraph1.Text, "Гипертекст", HyperlinkType.Bookmark);
-            //    paragraph.AppendText(" поможет людям лучше понять текст.");
-            //    Paragraph subParagraph = section.AddParagraph();
-            //    subParagraph.AppendText("Слово употребляется в следующих параграфах: ");
-            //    subParagraph.AppendHyperlink(paragraph1.ToString(), paragraph1.GetIndex(document).ToString(), HyperlinkType.Bookmark);
-            //    paragraph.ApplyStyle(hyperlinkstyle.Name); 
-            //}
+            for (int i = 0; i < 10; i++)
+            {
+                paragraph = section.AddParagraph();
+                paragraph.AppendHyperlink(mainParagraph.Text, "Гипертекст", HyperlinkType.Bookmark);
+                paragraph.AppendText(" поможет людям лучше понять текст.");
+                //Paragraph subParagraph = section.AddParagraph();
+                //subParagraph.AppendText("Слово употребляется в следующих параграфах: ");
+                //subParagraph.AppendHyperlink(mainParagraph.ToString(), mainParagraph.GetIndex(document).ToString(), HyperlinkType.Bookmark);
+                paragraph.ApplyStyle(hyperlinkstyle.Name);
+            }
 
 
-            SaveDocument(document);
+            SaveDocument(document, "Hyperlink.docx");
 
         }
 
@@ -87,7 +88,7 @@ namespace BusinessLogicLayer
         }
 
 
-        public static string FirstUpper(string str)
+        public string FirstUpper(string str)
         {
             string[] s = str.Split(' ');
 
@@ -99,9 +100,79 @@ namespace BusinessLogicLayer
             }
             return string.Join(" ", s);
         }
-        private static void SaveDocument(Document document)
+        private void SaveDocument(Document docum, string filename)
         {
-            document.SaveToFile("Hyperlink.docx", FileFormat.Docx);
+            docum.SaveToFile(filename, FileFormat.Docx);
+        }
+
+        public void Result()
+        {
+          
+            //Find the string "Hypertext"
+
+            string word = "Hypertext";
+            CreateHyperlink(word);
+        }
+
+        private void CreateHyperlink(string word)
+        {
+            Document doc = new Document();
+
+            doc.LoadFromFile("result.docx");
+
+            Section section = doc.AddSection();
+
+            //Paragraph mainPara = section.AddParagraph();
+
+            //mainPara.AppendText(longText);
+
+            Paragraph para = section.AddParagraph();
+
+            //para.AppendText("Hypertext is also text. Hypertext is also text. Hypertext is also text.");
+            TextSelection[] text = doc.FindAllString(word, false, true);
+
+            foreach (TextSelection seletion in text)
+            {
+
+                //Get the text range
+
+                TextRange tr = seletion.GetAsOneRange();
+
+                int index = tr.OwnerParagraph.ChildObjects.IndexOf(tr);
+
+                //Add hyperlink
+
+                Field field = new Field(doc);
+
+                field.Code = $"HYPERLINK \\ #{FirstUpper(word)}\\";
+
+                //field.Code = "HYPERLINK \"" + "http://www.e-iceblue.com" + "\"";
+
+                field.Type = FieldType.FieldHyperlink;
+
+                tr.OwnerParagraph.ChildObjects.Insert(index, field);
+
+                FieldMark fm = new FieldMark(doc, FieldMarkType.FieldSeparator);
+
+                tr.OwnerParagraph.ChildObjects.Insert(index + 1, fm);
+
+                //Set character format
+
+                tr.CharacterFormat.TextColor = Color.Blue;
+
+                tr.CharacterFormat.UnderlineStyle = UnderlineStyle.Single;
+
+                tr.CharacterFormat.Bold = tr.CharacterFormat.Bold;
+
+                FieldMark fmend = new FieldMark(doc, FieldMarkType.FieldEnd);
+
+                tr.OwnerParagraph.ChildObjects.Insert(index + 3, fmend);
+
+                field.End = fmend;
+
+            }
+
+            SaveDocument(doc, "result");
         }
     }
 }

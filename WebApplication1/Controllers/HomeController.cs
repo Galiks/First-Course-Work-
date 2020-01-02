@@ -25,7 +25,8 @@ namespace WebApplication1.Controllers
         public IActionResult Index()
         {
             WordDocument wordDocument = new WordDocument();
-            wordDocument.CreateDocument();
+            //wordDocument.CreateDocument();
+            wordDocument.Result();
             return View();
         }
 
