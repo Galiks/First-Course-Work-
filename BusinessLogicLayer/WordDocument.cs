@@ -115,9 +115,14 @@ namespace BusinessLogicLayer
 
             mainPara.AppendText(longText);
 
+            mainPara = section.AddParagraph();
+
+            mainPara.AppendText("Ссылка на текст это полезная штука");
+
             Paragraph para = section.AddParagraph();
 
             para.AppendText("Hypertext is also text. Hypertext is also text. Hypertext is also text.");
+            para.AppendText("Делайте ссылки на предложения");
 
             //Find the string "Hypertext"
 
@@ -137,6 +142,51 @@ namespace BusinessLogicLayer
                 Field field = new Field(doc);
 
                 field.Code = "HYPERLINK \"" + "#Гипертекст" + "\"";
+
+                //field.Code = "HYPERLINK \"" + "http://www.e-iceblue.com" + "\"";
+
+                field.Type = FieldType.FieldHyperlink;
+
+                tr.OwnerParagraph.ChildObjects.Insert(index, field);
+
+                FieldMark fm = new FieldMark(doc, FieldMarkType.FieldSeparator);
+
+                tr.OwnerParagraph.ChildObjects.Insert(index + 1, fm);
+
+                //Set character format
+
+                tr.CharacterFormat.TextColor = Color.Blue;
+
+                tr.CharacterFormat.UnderlineStyle = UnderlineStyle.Single;
+
+                tr.CharacterFormat.Bold = tr.CharacterFormat.Bold;
+
+                FieldMark fmend = new FieldMark(doc, FieldMarkType.FieldEnd);
+
+                tr.OwnerParagraph.ChildObjects.Insert(index + 3, fmend);
+
+                field.End = fmend;
+
+            }
+
+            //Find the string "ссылки"
+
+            text = doc.FindAllString("ссылки", false, true);
+
+            foreach (TextSelection seletion in text)
+            {
+
+                //Get the text range
+
+                TextRange tr = seletion.GetAsOneRange();
+
+                int index = tr.OwnerParagraph.ChildObjects.IndexOf(tr);
+
+                //Add hyperlink
+
+                Field field = new Field(doc);
+
+                field.Code = "HYPERLINK \"" + "#Ссылка" + "\"";
 
                 //field.Code = "HYPERLINK \"" + "http://www.e-iceblue.com" + "\"";
 
