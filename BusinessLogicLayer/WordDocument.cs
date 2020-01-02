@@ -69,7 +69,7 @@ namespace BusinessLogicLayer
             }
 
 
-            SaveDocument(document, "Hyperlink.docx");
+            SaveDocument(document);
 
         }
 
@@ -100,36 +100,28 @@ namespace BusinessLogicLayer
             }
             return string.Join(" ", s);
         }
-        private void SaveDocument(Document docum, string filename)
+        private void SaveDocument(Document document)
         {
-            docum.SaveToFile(filename, FileFormat.Docx);
+            document.SaveToFile("Hyperlink.docx", FileFormat.Docx);
         }
 
         public void Result()
         {
-          
-            //Find the string "Hypertext"
-
-            string word = "Hypertext";
-            CreateHyperlink(word);
-        }
-
-        private void CreateHyperlink(string word)
-        {
             Document doc = new Document();
-
-            doc.LoadFromFile("result.docx");
 
             Section section = doc.AddSection();
 
-            //Paragraph mainPara = section.AddParagraph();
+            Paragraph mainPara = section.AddParagraph();
 
-            //mainPara.AppendText(longText);
+            mainPara.AppendText(longText);
 
             Paragraph para = section.AddParagraph();
 
-            //para.AppendText("Hypertext is also text. Hypertext is also text. Hypertext is also text.");
-            TextSelection[] text = doc.FindAllString(word, false, true);
+            para.AppendText("Hypertext is also text. Hypertext is also text. Hypertext is also text.");
+
+            //Find the string "Hypertext"
+
+            TextSelection[] text = doc.FindAllString("Hypertext", false, true);
 
             foreach (TextSelection seletion in text)
             {
@@ -144,7 +136,7 @@ namespace BusinessLogicLayer
 
                 Field field = new Field(doc);
 
-                field.Code = $"HYPERLINK \\ #{FirstUpper(word)}\\";
+                field.Code = "HYPERLINK \"" + "#Гипертекст" + "\"";
 
                 //field.Code = "HYPERLINK \"" + "http://www.e-iceblue.com" + "\"";
 
@@ -172,7 +164,7 @@ namespace BusinessLogicLayer
 
             }
 
-            SaveDocument(doc, "result");
+            doc.SaveToFile("result.docx", FileFormat.Docx);
         }
     }
 }
