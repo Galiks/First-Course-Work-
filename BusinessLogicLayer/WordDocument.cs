@@ -126,7 +126,7 @@ namespace BusinessLogicLayer
 
             //Find the string "Hypertext"
 
-            TextSelection[] text = doc.FindAllString("Hypertext", false, true);
+            TextSelection[] text = doc.FindAllString("гипертекст", false, false);
 
             foreach (TextSelection seletion in text)
             {

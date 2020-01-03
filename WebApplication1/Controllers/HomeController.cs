@@ -22,11 +22,12 @@ namespace WebApplication1.Controllers
             _logger = logger;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string text)
         {
-            WordDocument wordDocument = new WordDocument();
+            //WordDocument wordDocument = new WordDocument();
             //wordDocument.CreateDocument();
-            wordDocument.Result();
+            // wordDocument.Result();
+            ViewBag.Text = text;
             return View();
         }
 

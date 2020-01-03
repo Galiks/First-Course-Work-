@@ -13,7 +13,18 @@
         </div>
 
         <div>
-            <h1>Text</h1>
-            <p>@Model</p>
+            <form method="post">
+                <p>
+                    <input type="text" name="text" />
+                </p>
+            </form>
+        </div>
+
+        <div>
+                @if (!String.IsNullOrWhiteSpace(ViewBag.Text))
+                {
+                    <p>@ViewBag.Text</p>
+                }
+            
         </div>
     </div>
