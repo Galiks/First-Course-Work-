@@ -1,4 +1,5 @@
-﻿using DocumentFormat.OpenXml;
+﻿using BusinessLogicLayer;
+using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Mvc;
@@ -23,39 +24,30 @@ namespace WebApplication1.Controllers
 
         public IActionResult Index(string text)
         {
-            //WordDocument wordDocument = new WordDocument();
+            WordDocument wordDocument = new WordDocument();
             //wordDocument.CreateDocument();
-            // wordDocument.Result();
+            //wordDocument.Result();
             StringBuilder longText = new StringBuilder();
 
-            WordprocessingDocument wordProcessingDocument = WordprocessingDocument.Open("result.docx", false);
+            WordprocessingDocument wordProcessingDocument = WordprocessingDocument.Open("test.docx", false);
             IEnumerable<Paragraph> paragraphElements =
                 wordProcessingDocument.MainDocumentPart.Document.Body.Descendants<Paragraph>();
 
             foreach (Paragraph p in paragraphElements)
             {
-                IEnumerable<Text> textElements = p.Descendants<Text>();
 
-                foreach (Text t in textElements)
-                {
-                   longText.Append(t.Text + "\n");
-                }
+                //IEnumerable<Text> textElements = p.Descendants<Text>();
 
-                longText.AppendLine();
+                //foreach (Text t in textElements)
+                //{
+                //   longText.Append(t.Text);
+                //}
+
+                longText.AppendLine(p.InnerText);
+                //longText.AppendLine();
             }
 
-
-            //using (var doc = WordprocessingDocument.Open(@"result.docx", false))
-            //{
-            //    MainDocumentPart mainPart = doc.MainDocumentPart;
-            //    WordprocessingCommentsPart WordprocessingCommentsPart = mainPart.WordprocessingCommentsPart;
-            //    using (StreamReader streamReader = new StreamReader(WordprocessingCommentsPart.GetStream()))
-            //    {
-            //        longText.Append(streamReader.ReadToEnd());
-            //    }
-            //}
-
-            ViewBag.LongText = longText.ToString();
+            ViewBag.LongText = longText;
             ViewBag.Text = text;
             return View();
         }

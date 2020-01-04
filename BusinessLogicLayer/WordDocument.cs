@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace BusinessLogicLayer
 {
@@ -108,111 +109,113 @@ namespace BusinessLogicLayer
         public void Result()
         {
             Document doc = new Document();
-
-            Section section = doc.AddSection();
-
-            Paragraph mainPara = section.AddParagraph();
+            
+            doc.LoadFromFile("result.docx", FileFormat.Docx);
+            int indexOfSection = doc.Sections.Count - 1;
+            Paragraph mainPara = doc.Sections[indexOfSection].AddParagraph();
 
             mainPara.AppendText(longText);
 
-            mainPara = section.AddParagraph();
+            mainPara = doc.Sections[0].AddParagraph();
 
             mainPara.AppendText("Ссылка на текст это полезная штука");
 
-            Paragraph para = section.AddParagraph();
+            Paragraph para = doc.Sections[0].AddParagraph();
 
             para.AppendText("Hypertext is also text. Hypertext is also text. Hypertext is also text.");
             para.AppendText("Делайте ссылки на предложения");
 
             //Find the string "Hypertext"
 
-            TextSelection[] text = doc.FindAllString("гипертекст", false, false);
+            #region hypertext create
+            //TextSelection[] text = doc.FindAllPattern(new Regex("[Г,г]ипертекст[a-zа-я]*"));
 
-            foreach (TextSelection seletion in text)
-            {
+            //foreach (TextSelection seletion in text)
+            //{
 
-                //Get the text range
+            //    //Get the text range
 
-                TextRange tr = seletion.GetAsOneRange();
+            //    TextRange tr = seletion.GetAsOneRange();
 
-                int index = tr.OwnerParagraph.ChildObjects.IndexOf(tr);
+            //    int index = tr.OwnerParagraph.ChildObjects.IndexOf(tr);
 
-                //Add hyperlink
+            //    //Add hyperlink
 
-                Field field = new Field(doc);
+            //    Field field = new Field(doc);
 
-                field.Code = "HYPERLINK \"" + "#Гипертекст" + "\"";
+            //    field.Code = "HYPERLINK \"" + "#Гипертекст" + "\"";
 
-                //field.Code = "HYPERLINK \"" + "http://www.e-iceblue.com" + "\"";
+            //    //field.Code = "HYPERLINK \"" + "http://www.e-iceblue.com" + "\"";
 
-                field.Type = FieldType.FieldHyperlink;
+            //    field.Type = FieldType.FieldHyperlink;
 
-                tr.OwnerParagraph.ChildObjects.Insert(index, field);
+            //    tr.OwnerParagraph.ChildObjects.Insert(index, field);
 
-                FieldMark fm = new FieldMark(doc, FieldMarkType.FieldSeparator);
+            //    FieldMark fm = new FieldMark(doc, FieldMarkType.FieldSeparator);
 
-                tr.OwnerParagraph.ChildObjects.Insert(index + 1, fm);
+            //    tr.OwnerParagraph.ChildObjects.Insert(index + 1, fm);
 
-                //Set character format
+            //    //Set character format
 
-                tr.CharacterFormat.TextColor = Color.Blue;
+            //    tr.CharacterFormat.TextColor = Color.Blue;
 
-                tr.CharacterFormat.UnderlineStyle = UnderlineStyle.Single;
+            //    tr.CharacterFormat.UnderlineStyle = UnderlineStyle.Single;
 
-                tr.CharacterFormat.Bold = tr.CharacterFormat.Bold;
+            //    tr.CharacterFormat.Bold = tr.CharacterFormat.Bold;
 
-                FieldMark fmend = new FieldMark(doc, FieldMarkType.FieldEnd);
+            //    FieldMark fmend = new FieldMark(doc, FieldMarkType.FieldEnd);
 
-                tr.OwnerParagraph.ChildObjects.Insert(index + 3, fmend);
+            //    tr.OwnerParagraph.ChildObjects.Insert(index + 3, fmend);
 
-                field.End = fmend;
+            //    field.End = fmend;
 
-            }
+            //}
 
-            //Find the string "ссылки"
+            ////Find the string "ссылки"
 
-            text = doc.FindAllString("ссылки", false, true);
+            //text = doc.FindAllString("ссылки", false, true);
 
-            foreach (TextSelection seletion in text)
-            {
+            //foreach (TextSelection seletion in text)
+            //{
 
-                //Get the text range
+            //    //Get the text range
 
-                TextRange tr = seletion.GetAsOneRange();
+            //    TextRange tr = seletion.GetAsOneRange();
 
-                int index = tr.OwnerParagraph.ChildObjects.IndexOf(tr);
+            //    int index = tr.OwnerParagraph.ChildObjects.IndexOf(tr);
 
-                //Add hyperlink
+            //    //Add hyperlink
 
-                Field field = new Field(doc);
+            //    Field field = new Field(doc);
 
-                field.Code = "HYPERLINK \"" + "#Ссылка" + "\"";
+            //    field.Code = "HYPERLINK \"" + "#Ссылка" + "\"";
 
-                //field.Code = "HYPERLINK \"" + "http://www.e-iceblue.com" + "\"";
+            //    //field.Code = "HYPERLINK \"" + "http://www.e-iceblue.com" + "\"";
 
-                field.Type = FieldType.FieldHyperlink;
+            //    field.Type = FieldType.FieldHyperlink;
 
-                tr.OwnerParagraph.ChildObjects.Insert(index, field);
+            //    tr.OwnerParagraph.ChildObjects.Insert(index, field);
 
-                FieldMark fm = new FieldMark(doc, FieldMarkType.FieldSeparator);
+            //    FieldMark fm = new FieldMark(doc, FieldMarkType.FieldSeparator);
 
-                tr.OwnerParagraph.ChildObjects.Insert(index + 1, fm);
+            //    tr.OwnerParagraph.ChildObjects.Insert(index + 1, fm);
 
-                //Set character format
+            //    //Set character format
 
-                tr.CharacterFormat.TextColor = Color.Blue;
+            //    tr.CharacterFormat.TextColor = Color.Blue;
 
-                tr.CharacterFormat.UnderlineStyle = UnderlineStyle.Single;
+            //    tr.CharacterFormat.UnderlineStyle = UnderlineStyle.Single;
 
-                tr.CharacterFormat.Bold = tr.CharacterFormat.Bold;
+            //    tr.CharacterFormat.Bold = tr.CharacterFormat.Bold;
 
-                FieldMark fmend = new FieldMark(doc, FieldMarkType.FieldEnd);
+            //    FieldMark fmend = new FieldMark(doc, FieldMarkType.FieldEnd);
 
-                tr.OwnerParagraph.ChildObjects.Insert(index + 3, fmend);
+            //    tr.OwnerParagraph.ChildObjects.Insert(index + 3, fmend);
 
-                field.End = fmend;
+            //    field.End = fmend;
 
-            }
+            //} 
+            #endregion
 
             doc.SaveToFile("result.docx", FileFormat.Docx);
         }

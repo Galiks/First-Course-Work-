@@ -5,11 +5,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Files\" />
+    <None Remove="Files\test.html" />
+    <None Remove="Views\Home\test.html" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Files\test.html" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Open-XML-SDK" Version="2.9.1" />
+    <PackageReference Include="Syncfusion.EJ2.AspNet.Core" Version="17.4.0.40" />
+    <PackageReference Include="Syncfusion.EJ2.PdfViewer.AspNet.Core.Windows" Version="17.4.0.40" />
   </ItemGroup>
 
   <ItemGroup>

@@ -7,6 +7,8 @@
   <ItemGroup>
     <PackageReference Include="Open-XML-SDK" Version="2.9.1" />
     <PackageReference Include="Spire.Doc" Version="7.12.23" />
+    <PackageReference Include="Syncfusion.EJ2.AspNet.Core" Version="17.4.0.40" />
+    <PackageReference Include="Syncfusion.EJ2.PdfViewer.AspNet.Core.Windows" Version="17.4.0.40" />
   </ItemGroup>
 
 </Project>
