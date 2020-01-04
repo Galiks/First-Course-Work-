@@ -1,13 +1,12 @@
-﻿using System;
+﻿using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using BusinessLogicLayer;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
@@ -27,6 +26,36 @@ namespace WebApplication1.Controllers
             //WordDocument wordDocument = new WordDocument();
             //wordDocument.CreateDocument();
             // wordDocument.Result();
+            StringBuilder longText = new StringBuilder();
+
+            WordprocessingDocument wordProcessingDocument = WordprocessingDocument.Open("result.docx", false);
+            IEnumerable<Paragraph> paragraphElements =
+                wordProcessingDocument.MainDocumentPart.Document.Body.Descendants<Paragraph>();
+
+            foreach (Paragraph p in paragraphElements)
+            {
+                IEnumerable<Text> textElements = p.Descendants<Text>();
+
+                foreach (Text t in textElements)
+                {
+                   longText.Append(t.Text + "\n");
+                }
+
+                longText.AppendLine();
+            }
+
+
+            //using (var doc = WordprocessingDocument.Open(@"result.docx", false))
+            //{
+            //    MainDocumentPart mainPart = doc.MainDocumentPart;
+            //    WordprocessingCommentsPart WordprocessingCommentsPart = mainPart.WordprocessingCommentsPart;
+            //    using (StreamReader streamReader = new StreamReader(WordprocessingCommentsPart.GetStream()))
+            //    {
+            //        longText.Append(streamReader.ReadToEnd());
+            //    }
+            //}
+
+            ViewBag.LongText = longText.ToString();
             ViewBag.Text = text;
             return View();
         }
