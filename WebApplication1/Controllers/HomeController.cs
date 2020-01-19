@@ -1,14 +1,15 @@
 ﻿using BusinessLogicLayer;
-using DocumentFormat.OpenXml;
-using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
+using System.Linq;
 using System.Text;
 using WebApplication1.Models;
+using Spire.Doc;
+using Spire.Doc.Documents;
+using Spire.Doc.Fields;
+using System;
 
 namespace WebApplication1.Controllers
 {
@@ -27,24 +28,18 @@ namespace WebApplication1.Controllers
             WordDocument wordDocument = new WordDocument();
             //wordDocument.CreateDocument();
             //wordDocument.Result();
+            //wordDocument.RemoveHyperlinks();
             StringBuilder longText = new StringBuilder();
 
-            WordprocessingDocument wordProcessingDocument = WordprocessingDocument.Open("test.docx", false);
-            IEnumerable<Paragraph> paragraphElements =
-                wordProcessingDocument.MainDocumentPart.Document.Body.Descendants<Paragraph>();
+            Document document = new Document();
+            document.LoadFromFile("test.docx");
 
-            foreach (Paragraph p in paragraphElements)
+            foreach (Section section in document.Sections)
             {
-
-                //IEnumerable<Text> textElements = p.Descendants<Text>();
-
-                //foreach (Text t in textElements)
-                //{
-                //   longText.Append(t.Text);
-                //}
-
-                longText.AppendLine(p.InnerText);
-                //longText.AppendLine();
+                foreach (Paragraph paragraph in section.Paragraphs)
+                {
+                    longText.AppendLine($"{paragraph.Text}<br>");
+                }
             }
 
             ViewBag.LongText = longText;

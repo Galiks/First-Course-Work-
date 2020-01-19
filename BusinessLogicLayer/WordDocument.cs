@@ -1,11 +1,8 @@
 ﻿using Spire.Doc;
 using Spire.Doc.Documents;
 using Spire.Doc.Fields;
-using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace BusinessLogicLayer
 {
@@ -20,7 +17,7 @@ namespace BusinessLogicLayer
 
         public WordDocument()
         {
-            wordCase = new List<string> {"", "ы", "и", "а", "я", "у", "е", "ю", "о", "ой", "ою", "ей", "ею", "ом", "ем", "ью" };
+            wordCase = new List<string> { "", "ы", "и", "а", "я", "у", "е", "ю", "о", "ой", "ою", "ей", "ею", "ом", "ем", "ью" };
             document = new Document();
             section = document.AddSection();
             mainParagraph = section.AddParagraph();
@@ -83,7 +80,7 @@ namespace BusinessLogicLayer
         {
             foreach (var item in wordCase)
             {
-                
+
                 document.Replace($"{replacedWord}{item}", "", false, true);
             }
         }
@@ -109,7 +106,7 @@ namespace BusinessLogicLayer
         public void Result()
         {
             Document doc = new Document();
-            
+
             doc.LoadFromFile("result.docx", FileFormat.Docx);
             int indexOfSection = doc.Sections.Count - 1;
             Paragraph mainPara = doc.Sections[indexOfSection].AddParagraph();
@@ -218,6 +215,143 @@ namespace BusinessLogicLayer
             #endregion
 
             doc.SaveToFile("result.docx", FileFormat.Docx);
+        }
+
+        public void RemoveHyperlinks()
+        {
+            Document document = new Document();
+            document.LoadFromFile("test.docx");
+
+            #region Find hyperlink
+            List<Field> hyperLink = FindAllHyperlinks(document);
+            #endregion
+
+            RemoveHyperlinksFromText(hyperLink);
+
+            document.SaveToFile("test.docx", FileFormat.Docx);
+        }
+
+        private void RemoveHyperlinksFromText(List<Field> hyperLink)
+        {
+            for (int i = hyperLink.Count - 1; i >= 0; i--)
+            {
+                Field field = hyperLink[i];
+                int ownerParagraphIndex = field.OwnerParagraph.OwnerTextBody.ChildObjects.IndexOf(field.OwnerParagraph);
+                int fieldIndex = field.OwnerParagraph.ChildObjects.IndexOf(field);
+                Paragraph sepOwnerParagraph = field.Separator.OwnerParagraph;
+                int sepOwnerParagraphIndex = field.Separator.OwnerParagraph.OwnerTextBody.ChildObjects.IndexOf(field.Separator.OwnerParagraph);
+                int sepIndex = field.Separator.OwnerParagraph.ChildObjects.IndexOf(field.Separator);
+                int endIndex = field.End.OwnerParagraph.ChildObjects.IndexOf(field.End);
+                int endOwnerParagraphIndex = field.End.OwnerParagraph.OwnerTextBody.ChildObjects.IndexOf(field.End.OwnerParagraph);
+
+                #region Remove font color and etc
+                FormatFieldResultText(field.Separator.OwnerParagraph.OwnerTextBody, sepOwnerParagraphIndex, endOwnerParagraphIndex, sepIndex, endIndex);
+                #endregion
+
+                field.End.OwnerParagraph.ChildObjects.RemoveAt(endIndex);
+
+                for (int j = sepOwnerParagraphIndex; j >= ownerParagraphIndex; j--)
+                {
+                    if (j.Equals(sepOwnerParagraphIndex) && j.Equals(ownerParagraphIndex))
+                    {
+                        for (int k = sepIndex; k >= fieldIndex; k--)
+                        {
+                            field.OwnerParagraph.ChildObjects.RemoveAt(k);
+                        }
+                    }
+                    else if (j.Equals(sepOwnerParagraphIndex))
+                    {
+                        for (int k = sepIndex; k >= 0; k--)
+                        {
+                            sepOwnerParagraph.ChildObjects.RemoveAt(k);
+                        }
+                    }
+                    else if (j.Equals(ownerParagraphIndex))
+                    {
+                        for (int k = field.OwnerParagraph.ChildObjects.Count - 1; k >= fieldIndex; k--)
+                        {
+                            field.OwnerParagraph.ChildObjects.RemoveAt(k);
+                        }
+                    }
+                    else
+                    {
+                        field.OwnerParagraph.ChildObjects.RemoveAt(j);
+                    }
+                }
+            }
+        }
+
+        private List<Field> FindAllHyperlinks(Document document)
+        {
+            var hyperLink = new List<Field>();
+            foreach (Section section in document.Sections)
+            {
+                foreach (DocumentObject sec in section.Body.ChildObjects)
+                {
+                    if (sec.DocumentObjectType == DocumentObjectType.Paragraph)
+                    {
+                        foreach (DocumentObject para in (sec as Paragraph).ChildObjects)
+                        {
+                            if (para.DocumentObjectType == DocumentObjectType.Field)
+                            {
+                                Field field = para as Field;
+
+                                if (field.Type == FieldType.FieldHyperlink)
+                                {
+                                    hyperLink.Add(field);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return hyperLink;
+        }
+
+        private void FormatFieldResultText(Body ownerBody, int sepOwnerParaIndex, int endOwnerParaIndex, int sepIndex, int endIndex)
+        {
+            for (int i = sepOwnerParaIndex; i <= endOwnerParaIndex; i++)
+            {
+                Paragraph para = ownerBody.ChildObjects[i] as Paragraph;
+                if (i == sepOwnerParaIndex && i == endOwnerParaIndex)
+                {
+                    for (int j = sepIndex + 1; j < endIndex; j++)
+                    {
+                        FormatText(para.ChildObjects[j] as TextRange);
+                    }
+
+                }
+                else if (i == sepOwnerParaIndex)
+                {
+                    for (int j = sepIndex + 1; j < para.ChildObjects.Count; j++)
+                    {
+                        FormatText(para.ChildObjects[j] as TextRange);
+                    }
+                }
+                else if (i == endOwnerParaIndex)
+                {
+                    for (int j = 0; j < endIndex; j++)
+                    {
+                        FormatText(para.ChildObjects[j] as TextRange);
+                    }
+                }
+                else
+                {
+                    for (int j = 0; j < para.ChildObjects.Count; j++)
+                    {
+                        FormatText(para.ChildObjects[j] as TextRange);
+                    }
+                }
+            }
+        }
+        private void FormatText(TextRange tr)
+        {
+            if (tr != null)
+            {
+                tr.CharacterFormat.TextColor = Color.Black;
+                tr.CharacterFormat.UnderlineStyle = UnderlineStyle.None; 
+            }
         }
     }
 }
