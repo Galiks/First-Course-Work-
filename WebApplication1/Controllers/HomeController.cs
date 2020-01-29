@@ -25,7 +25,7 @@ namespace WebApplication1.Controllers
         public IActionResult Index(string text)
         {
             WordDocument wordDocument = new WordDocument("test");
-
+            wordDocument.GetSections();
             StringBuilder longText = new StringBuilder();
 
             Document document = new Document();
@@ -59,9 +59,22 @@ namespace WebApplication1.Controllers
             {
                 try
                 {
-                    
                     CyrNounCollection cyrNounCollection = new CyrNounCollection();
                     CyrNoun noun = cyrNounCollection.Get(text, out CasesEnum @case, out NumbersEnum numbers);
+                    var words = noun.Decline().ToList();
+                    if (noun.WordType != WordTypesEnum.Surname)
+                    {
+                        int nounLength = words.Count;
+                        for (int i = 0; i < nounLength; i++)
+                        {
+                            words.Add(WordDocument.GetWordWithFirstLetterUpper(words[i]));
+                        } 
+                    }
+
+                    foreach (var word in words)
+                    {
+                        wordDocument.CreateHyperlinks(word);
+                    }
                 }
                 catch (CyrWordNotFoundException error)
                 {

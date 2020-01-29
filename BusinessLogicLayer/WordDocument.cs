@@ -1,4 +1,5 @@
 ﻿using Spire.Doc;
+using Spire.Doc.Collections;
 using Spire.Doc.Documents;
 using Spire.Doc.Fields;
 using System.Collections.Generic;
@@ -21,6 +22,9 @@ namespace BusinessLogicLayer
         {
             this.filename = filename;
             document = new Document();
+            document.LoadFromFile(filename + ".docx", FileFormat.Docx);
+
+            //not use
             section = document.AddSection();
             mainParagraph = section.AddParagraph();
         }
@@ -31,7 +35,7 @@ namespace BusinessLogicLayer
 
             //пока что заготовленный файл
             //string filename = "hyperlink";
-            document.LoadFromFile(filename + ".docx", FileFormat.Docx);
+            //document.LoadFromFile(filename + ".docx", FileFormat.Docx);
 
             //слово тоже заготовлено заранее
             //string word = "Гипертекст";
@@ -47,6 +51,11 @@ namespace BusinessLogicLayer
 
 
             TextSelection[] text = doc.FindAllPattern(new Regex(word));
+
+            if (text.Length == 0)
+            {
+                return;
+            }
 
             foreach (TextSelection seletion in text)
             {
@@ -87,29 +96,30 @@ namespace BusinessLogicLayer
             }
         }
 
-        public void GetSections()
+        public SectionCollection GetSections()
         {
-            Document document = new Document();
+            //Document document = new Document();
 
-            string filename = "hyperlink.docx";
-            document.LoadFromFile(filename + ".docx", FileFormat.Docx);
+            //string filename = "hyperlink.docx";
+            //document.LoadFromFile(filename + ".docx", FileFormat.Docx);
 
             var sections = document.Sections;
+            return sections;
 
-            Section tempSection = null;
+            //Section tempSection = null;
 
 
 
-            foreach (Section section in sections)
-            {
-                foreach (Paragraph paragraph in section.Paragraphs)
-                {
-                    if (paragraph.Text.Contains("Гипертекст"))
-                    {
-                        tempSection = section;
-                    }
-                }
-            }
+            //foreach (Section section in sections)
+            //{
+            //    foreach (Paragraph paragraph in section.Paragraphs)
+            //    {
+            //        if (paragraph.Text.Contains("Гипертекст"))
+            //        {
+            //            tempSection = section;
+            //        }
+            //    }
+            //}
 
         }
 
@@ -156,23 +166,9 @@ namespace BusinessLogicLayer
 
         }
 
-        private string GetFirstLetterUpper(string str)
+        public static string GetWordWithFirstLetterUpper(string str)
         {
-            return str[0].ToString().ToUpper();
-            //string[] s = str.Split(' ');
-
-            //for (int i = 0; i < s.Length; i++)
-            //{
-            //    if (s[i].Length > 1)
-            //        s[i] = s[i].Substring(0, 1).ToUpper() + s[i][1..].ToLower();
-            //    else s[i] = s[i].ToUpper();
-            //}
-            //return string.Join(" ", s);
-        }
-
-        private string GetFirstLetterLower(string str)
-        {
-            return str[0].ToString().ToLower();
+            return str.Replace(str[0].ToString(), str[0].ToString().ToUpper());
         }
 
         private void SaveDocument(Document document, string filename)
@@ -396,13 +392,27 @@ namespace BusinessLogicLayer
             StringBuilder longText = new StringBuilder();
 
             Document document = new Document();
-            document.LoadFromFile(filename + "docx", FileFormat.Docx);
+            document.LoadFromFile(filename + ".docx", FileFormat.Docx);
 
             foreach (Section section in document.Sections)
             {
                 foreach (Paragraph paragraph in section.Paragraphs)
                 {
-                    longText.AppendLine($"{paragraph.Text}<br>");
+                    StringBuilder paragraphText = new StringBuilder(paragraph.Text);
+
+                    foreach (DocumentObject child in paragraph.ChildObjects)
+                    {
+                        if (child.DocumentObjectType == DocumentObjectType.Field)
+                        {
+                            Field field = child as Field;
+                            if (field.Type == FieldType.FieldHyperlink & !string.IsNullOrWhiteSpace(field.FieldText))
+                            {
+                                paragraphText.Replace(field.FieldText, $"<strong>{field.FieldText}</strong>");
+                            }
+                        }
+                    }
+
+                    longText.AppendLine($"{paragraphText}<br>");
                 }
             }
 
