@@ -3,6 +3,8 @@ using Spire.Doc.Documents;
 using Spire.Doc.Fields;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace BusinessLogicLayer
 {
@@ -10,18 +12,107 @@ namespace BusinessLogicLayer
     {
         //private const string text = " – это вид текста, который содержит в себе информацию или ссылку на место в произведении, на другую литературу или на какое-то событие в мире.";
         private const string longText = "Гипертекст в тексте может выглядеть как гипертекст, а может как гипертекст на гипертексте, где гипертекст сам является гипертекстом.";
-        private readonly List<string> wordCase;
         private readonly Document document;
         private readonly Section section;
         private readonly Paragraph mainParagraph;
+        private readonly string filename;
 
-        public WordDocument()
+        public WordDocument(string filename)
         {
-            wordCase = new List<string> { "", "ы", "и", "а", "я", "у", "е", "ю", "о", "ой", "ою", "ей", "ею", "ом", "ем", "ью" };
+            this.filename = filename;
             document = new Document();
             section = document.AddSection();
             mainParagraph = section.AddParagraph();
         }
+
+        public void CreateHyperlinks(string word)
+        {
+            Document document = new Document();
+
+            //пока что заготовленный файл
+            //string filename = "hyperlink";
+            document.LoadFromFile(filename + ".docx", FileFormat.Docx);
+
+            //слово тоже заготовлено заранее
+            //string word = "Гипертекст";
+
+            CreateHyperlinkByWord(document, word);
+
+            SaveDocument(document, filename);
+        }
+
+        private void CreateHyperlinkByWord(Document doc, string word)
+        {
+
+
+
+            TextSelection[] text = doc.FindAllPattern(new Regex(word));
+
+            foreach (TextSelection seletion in text)
+            {
+
+                //Get the text range
+
+                TextRange tr = seletion.GetAsOneRange();
+
+                int index = tr.OwnerParagraph.ChildObjects.IndexOf(tr);
+
+                //Add hyperlink
+
+                Field field = new Field(doc);
+
+                field.Code = "HYPERLINK \"" + "#" + word + "\"";
+
+                field.Type = FieldType.FieldHyperlink;
+
+                tr.OwnerParagraph.ChildObjects.Insert(index, field);
+
+                FieldMark fm = new FieldMark(doc, FieldMarkType.FieldSeparator);
+
+                tr.OwnerParagraph.ChildObjects.Insert(index + 1, fm);
+
+                //Set character format
+
+                tr.CharacterFormat.TextColor = Color.Blue;
+
+                tr.CharacterFormat.UnderlineStyle = UnderlineStyle.Single;
+
+                tr.CharacterFormat.Bold = tr.CharacterFormat.Bold;
+
+                FieldMark fmend = new FieldMark(doc, FieldMarkType.FieldEnd);
+
+                tr.OwnerParagraph.ChildObjects.Insert(index + 3, fmend);
+
+                field.End = fmend;
+            }
+        }
+
+        public void GetSections()
+        {
+            Document document = new Document();
+
+            string filename = "hyperlink.docx";
+            document.LoadFromFile(filename + ".docx", FileFormat.Docx);
+
+            var sections = document.Sections;
+
+            Section tempSection = null;
+
+
+
+            foreach (Section section in sections)
+            {
+                foreach (Paragraph paragraph in section.Paragraphs)
+                {
+                    if (paragraph.Text.Contains("Гипертекст"))
+                    {
+                        tempSection = section;
+                    }
+                }
+            }
+
+        }
+
         public void CreateDocument()
         {
             Paragraph paragraph = section.AddParagraph();
@@ -45,12 +136,6 @@ namespace BusinessLogicLayer
             // ReplaceWords("гипертекст", "!!!");
 
 
-
-
-
-
-
-
             ////////заготовка на гипертекст
             //mainParagraph.AppendHyperlink("Гипертекст", "Гипертекст", HyperlinkType.Bookmark);
             mainParagraph.ApplyStyle(hyperlinkstyle.Name);
@@ -67,40 +152,32 @@ namespace BusinessLogicLayer
             }
 
 
-            SaveDocument(document);
+            SaveDocument(document, "Hyperlink");
 
         }
 
-        /// <summary>
-        /// Заменяет одни слова на другие
-        /// </summary>
-        /// <param name="replacedWord">заменяемое слово</param>
-        /// <param name="wordToReplace">слово-замена</param>
-        private void ReplaceWords(string replacedWord, string wordToReplace)
+        private string GetFirstLetterUpper(string str)
         {
-            foreach (var item in wordCase)
-            {
+            return str[0].ToString().ToUpper();
+            //string[] s = str.Split(' ');
 
-                document.Replace($"{replacedWord}{item}", "", false, true);
-            }
+            //for (int i = 0; i < s.Length; i++)
+            //{
+            //    if (s[i].Length > 1)
+            //        s[i] = s[i].Substring(0, 1).ToUpper() + s[i][1..].ToLower();
+            //    else s[i] = s[i].ToUpper();
+            //}
+            //return string.Join(" ", s);
         }
 
-
-        public string FirstUpper(string str)
+        private string GetFirstLetterLower(string str)
         {
-            string[] s = str.Split(' ');
-
-            for (int i = 0; i < s.Length; i++)
-            {
-                if (s[i].Length > 1)
-                    s[i] = s[i].Substring(0, 1).ToUpper() + s[i].Substring(1, s[i].Length - 1).ToLower();
-                else s[i] = s[i].ToUpper();
-            }
-            return string.Join(" ", s);
+            return str[0].ToString().ToLower();
         }
-        private void SaveDocument(Document document)
+
+        private void SaveDocument(Document document, string filename)
         {
-            document.SaveToFile("Hyperlink.docx", FileFormat.Docx);
+            document.SaveToFile(filename + ".docx", FileFormat.Docx);
         }
 
         public void Result()
@@ -124,51 +201,10 @@ namespace BusinessLogicLayer
 
             //Find the string "Hypertext"
 
-            #region hypertext create
-            //TextSelection[] text = doc.FindAllPattern(new Regex("[Г,г]ипертекст[a-zа-я]*"));
+            string word = "гипертекст";
+            CreateHyperlinkByWord(doc, word);
 
-            //foreach (TextSelection seletion in text)
-            //{
-
-            //    //Get the text range
-
-            //    TextRange tr = seletion.GetAsOneRange();
-
-            //    int index = tr.OwnerParagraph.ChildObjects.IndexOf(tr);
-
-            //    //Add hyperlink
-
-            //    Field field = new Field(doc);
-
-            //    field.Code = "HYPERLINK \"" + "#Гипертекст" + "\"";
-
-            //    //field.Code = "HYPERLINK \"" + "http://www.e-iceblue.com" + "\"";
-
-            //    field.Type = FieldType.FieldHyperlink;
-
-            //    tr.OwnerParagraph.ChildObjects.Insert(index, field);
-
-            //    FieldMark fm = new FieldMark(doc, FieldMarkType.FieldSeparator);
-
-            //    tr.OwnerParagraph.ChildObjects.Insert(index + 1, fm);
-
-            //    //Set character format
-
-            //    tr.CharacterFormat.TextColor = Color.Blue;
-
-            //    tr.CharacterFormat.UnderlineStyle = UnderlineStyle.Single;
-
-            //    tr.CharacterFormat.Bold = tr.CharacterFormat.Bold;
-
-            //    FieldMark fmend = new FieldMark(doc, FieldMarkType.FieldEnd);
-
-            //    tr.OwnerParagraph.ChildObjects.Insert(index + 3, fmend);
-
-            //    field.End = fmend;
-
-            //}
-
-            ////Find the string "ссылки"
+            //Find the string "ссылки"
 
             //text = doc.FindAllString("ссылки", false, true);
 
@@ -211,8 +247,8 @@ namespace BusinessLogicLayer
 
             //    field.End = fmend;
 
-            //} 
-            #endregion
+            //}
+
 
             doc.SaveToFile("result.docx", FileFormat.Docx);
         }
@@ -345,13 +381,32 @@ namespace BusinessLogicLayer
                 }
             }
         }
+
         private void FormatText(TextRange tr)
         {
             if (tr != null)
             {
                 tr.CharacterFormat.TextColor = Color.Black;
-                tr.CharacterFormat.UnderlineStyle = UnderlineStyle.None; 
+                tr.CharacterFormat.UnderlineStyle = UnderlineStyle.None;
             }
+        }
+
+        public string GetTextFromFile(string filename)
+        {
+            StringBuilder longText = new StringBuilder();
+
+            Document document = new Document();
+            document.LoadFromFile(filename + "docx", FileFormat.Docx);
+
+            foreach (Section section in document.Sections)
+            {
+                foreach (Paragraph paragraph in section.Paragraphs)
+                {
+                    longText.AppendLine($"{paragraph.Text}<br>");
+                }
+            }
+
+            return longText.ToString();
         }
     }
 }

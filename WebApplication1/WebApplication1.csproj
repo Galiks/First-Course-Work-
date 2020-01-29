@@ -22,6 +22,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.1.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.0" />
+    <PackageReference Include="Miyconst.Cyriller" Version="0.1.0" />
     <PackageReference Include="Open-XML-SDK" Version="2.9.1" />
     <PackageReference Include="Spire.Doc" Version="8.1.4" />
   </ItemGroup>

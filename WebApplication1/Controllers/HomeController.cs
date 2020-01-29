@@ -1,15 +1,14 @@
 ﻿using BusinessLogicLayer;
+using Cyriller;
+using Cyriller.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using WebApplication1.Models;
 using Spire.Doc;
 using Spire.Doc.Documents;
 using Spire.Doc.Fields;
-using System;
+using System.Diagnostics;
+using System.Text;
+using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
 {
@@ -25,25 +24,51 @@ namespace WebApplication1.Controllers
 
         public IActionResult Index(string text)
         {
-            WordDocument wordDocument = new WordDocument();
-            //wordDocument.CreateDocument();
-            //wordDocument.Result();
-            //wordDocument.RemoveHyperlinks();
+            WordDocument wordDocument = new WordDocument("test");
+
             StringBuilder longText = new StringBuilder();
 
             Document document = new Document();
+            //document.LoadFromFile("hyperlink.docx.docx");
             document.LoadFromFile("test.docx");
 
             foreach (Section section in document.Sections)
             {
                 foreach (Paragraph paragraph in section.Paragraphs)
                 {
-                    longText.AppendLine($"{paragraph.Text}<br>");
+                    StringBuilder paragraphText = new StringBuilder(paragraph.Text);
+
+                    foreach (DocumentObject child in paragraph.ChildObjects)
+                    {
+                        if (child.DocumentObjectType == DocumentObjectType.Field)
+                        {
+                            Field field = child as Field;
+                            if (field.Type == FieldType.FieldHyperlink & !string.IsNullOrWhiteSpace(field.FieldText))
+                            {
+                                paragraphText.Replace(field.FieldText, $"<strong>{field.FieldText}</strong>");
+                            }
+                        }
+                    }
+
+                    longText.AppendLine($"{paragraphText}<br>");
                 }
             }
 
             ViewBag.LongText = longText;
-            ViewBag.Text = text;
+            if (!string.IsNullOrWhiteSpace(text))
+            {
+                try
+                {
+                    
+                    CyrNounCollection cyrNounCollection = new CyrNounCollection();
+                    CyrNoun noun = cyrNounCollection.Get(text, out CasesEnum @case, out NumbersEnum numbers);
+                }
+                catch (CyrWordNotFoundException error)
+                {
+                    ViewBag.Error = error.Message;
+                }
+                
+            }
             return View();
         }
 

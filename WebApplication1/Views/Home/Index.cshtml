@@ -6,7 +6,9 @@
 
     <head>
         <link href="~/css/style.css" rel="stylesheet" />
-        <script src="https://cdn.tiny.cloud/1/wrl0wkirvr9jzs3w6uca24pdnk6z8t6dvevmktjg3j9i5vh6/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+        @*<script src="https://cdn.tiny.cloud/1/wrl0wkirvr9jzs3w6uca24pdnk6z8t6dvevmktjg3j9i5vh6/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>*@
+        <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+        <script>tinymce.init({ selector: 'textarea' });</script>
     </head>
 <body>
 
@@ -17,30 +19,20 @@
     <div class="text-center">
 
 
-        @*<div>
+        <div>
             <form method="post">
                 <p>
                     <input type="text" name="text" />
                 </p>
             </form>
-        </div>*@
+        </div>
 
-        @*<div>
-            @if (!String.IsNullOrWhiteSpace(ViewBag.Text))
-            {
-                <p>@ViewBag.Text</p>
-            }
-        </div>*@
+        <div>
+            <p>@ViewBag.Text</p>
+        </div>
 
-
-        @*<div>
-            <h1>Вывод содержимого файла</h1>
-            <textarea cols="200" rows="200" readonly>@ViewBag.LongText</textarea>
-
-
-
-            <iframe name="myIframe" id="myIframe" src="https://localhost:44335/" width="1200" height="1600"></iframe>
-            <ejs-pdfviewer id="container" style="height:600px" serviceUrl="/api/PdfViewer" src=""></ejs-pdfviewer>
+        @*<div>                
+            <textarea>@ViewBag.LongText</textarea>
         </div>*@
 
         <div>
