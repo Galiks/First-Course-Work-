@@ -25,36 +25,41 @@ namespace WebApplication1.Controllers
         public IActionResult Index(string text)
         {
             WordDocument wordDocument = new WordDocument("test");
-            wordDocument.GetSections();
-            StringBuilder longText = new StringBuilder();
+            var sectionAndParagraph = wordDocument.GetSectionAndParagraphByWord("Сноски");
+            sectionAndParagraph.Item2.AppendText("#Гринев - главный персонаж");
 
-            Document document = new Document();
-            //document.LoadFromFile("hyperlink.docx.docx");
-            document.LoadFromFile("test.docx");
+            wordDocument.SaveCurrentDicument();
 
-            foreach (Section section in document.Sections)
-            {
-                foreach (Paragraph paragraph in section.Paragraphs)
-                {
-                    StringBuilder paragraphText = new StringBuilder(paragraph.Text);
+            //StringBuilder longText = new StringBuilder();
 
-                    foreach (DocumentObject child in paragraph.ChildObjects)
-                    {
-                        if (child.DocumentObjectType == DocumentObjectType.Field)
-                        {
-                            Field field = child as Field;
-                            if (field.Type == FieldType.FieldHyperlink & !string.IsNullOrWhiteSpace(field.FieldText))
-                            {
-                                paragraphText.Replace(field.FieldText, $"<strong>{field.FieldText}</strong>");
-                            }
-                        }
-                    }
+            //Document document = new Document();
+            //document.LoadFromFile("test.docx");
 
-                    longText.AppendLine($"{paragraphText}<br>");
-                }
-            }
+            //foreach (Section section in document.Sections)
+            //{
+            //    foreach (Paragraph paragraph in section.Paragraphs)
+            //    {
+            //        StringBuilder paragraphText = new StringBuilder(paragraph.Text);
 
-            ViewBag.LongText = longText;
+            //        foreach (DocumentObject child in paragraph.ChildObjects)
+            //        {
+            //            if (child.DocumentObjectType == DocumentObjectType.Field)
+            //            {
+            //                Field field = child as Field;
+            //                if (field.Type == FieldType.FieldHyperlink & !string.IsNullOrWhiteSpace(field.FieldText))
+            //                {
+            //                    paragraphText.Replace(field.FieldText, $"<strong>{field.FieldText}</strong>");
+            //                }
+            //            }
+            //        }
+
+            //        longText.AppendLine($"{paragraphText}<br>");
+            //    }
+            //}
+
+            ViewBag.LongText = wordDocument.GetTextFromDocument();
+
+
             if (!string.IsNullOrWhiteSpace(text))
             {
                 try

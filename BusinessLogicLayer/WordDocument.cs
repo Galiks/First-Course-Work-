@@ -2,6 +2,7 @@
 using Spire.Doc.Collections;
 using Spire.Doc.Documents;
 using Spire.Doc.Fields;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
@@ -96,7 +97,7 @@ namespace BusinessLogicLayer
             }
         }
 
-        public SectionCollection GetSections()
+        public Tuple<Section, Paragraph> GetSectionAndParagraphByWord(string word)
         {
             //Document document = new Document();
 
@@ -104,7 +105,28 @@ namespace BusinessLogicLayer
             //document.LoadFromFile(filename + ".docx", FileFormat.Docx);
 
             var sections = document.Sections;
-            return sections;
+            foreach (Section section in sections)
+            {
+                int count = section.Paragraphs.Count;
+                ParagraphCollection paragraphCollection = section.Paragraphs;
+                for (int i = count - 1; i > 0; i--)
+                {
+                    Paragraph paragraph = paragraphCollection[i];
+                    if (paragraph.Text.Contains(word))
+                    {
+                        return new Tuple<Section, Paragraph>(section, paragraph);
+                    }
+                }
+                //foreach (Paragraph paragraph in section.Paragraphs)
+                //{
+                //if (paragraph.Text.Contains(word))
+                //{
+                //    return new Tuple<Section, Paragraph>(section, paragraph);
+                //}
+                //}
+            }
+
+            return null;
 
             //Section tempSection = null;
 
@@ -172,6 +194,11 @@ namespace BusinessLogicLayer
         }
 
         private void SaveDocument(Document document, string filename)
+        {
+            document.SaveToFile(filename + ".docx", FileFormat.Docx);
+        }
+
+        public void SaveCurrentDicument()
         {
             document.SaveToFile(filename + ".docx", FileFormat.Docx);
         }
@@ -387,7 +414,7 @@ namespace BusinessLogicLayer
             }
         }
 
-        public string GetTextFromFile(string filename)
+        public string GetTextFromDocument()
         {
             StringBuilder longText = new StringBuilder();
 
