@@ -6,7 +6,9 @@ using Microsoft.Extensions.Logging;
 using Spire.Doc;
 using Spire.Doc.Documents;
 using Spire.Doc.Fields;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using WebApplication1.Models;
 
@@ -57,7 +59,8 @@ namespace WebApplication1.Controllers
                 {
                     CyrNounCollection cyrNounCollection = new CyrNounCollection();
                     CyrNoun cyrNoun = cyrNounCollection.Get(word, out CasesEnum @case, out NumbersEnum numbers);
-                    var nouns = cyrNoun.Decline().ToList();
+                    var nounsSet = new HashSet<string>(cyrNoun.Decline().ToList());
+                    var nouns = nounsSet.ToList();
                     if (cyrNoun.WordType != WordTypesEnum.Surname)
                     {
                         int nounLength = nouns.Count;

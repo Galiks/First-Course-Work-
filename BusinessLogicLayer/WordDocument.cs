@@ -42,8 +42,8 @@ namespace BusinessLogicLayer
         public void CreateBookmarks(string word, string sentence)
         {
             //Create bookmark objects
-            BookmarkStart start = new BookmarkStart(document, sentence);
-            BookmarkEnd end = new BookmarkEnd(document, sentence);
+            BookmarkStart start = new BookmarkStart(document, word);
+            BookmarkEnd end = new BookmarkEnd(document, word);
             //BookmarkStart start = new BookmarkStart(document, "MyBk");
             //BookmarkEnd end = new BookmarkEnd(document, "MyBk");
 
@@ -114,7 +114,7 @@ namespace BusinessLogicLayer
 
                 field.Type = FieldType.FieldRef;
 
-                field.Code = @"REF " + word + @" \p \h";
+                field.Code = $@"REF {word} \p \h";
 
 
 
