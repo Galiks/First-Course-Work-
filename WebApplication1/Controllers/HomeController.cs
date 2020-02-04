@@ -44,6 +44,8 @@ namespace WebApplication1.Controllers
                 paragraph.AppendBreak(BreakType.LineBreak);
                 referencesParagraph = paragraph;
             }
+
+            
             
 
             if (!string.IsNullOrWhiteSpace(text) & !string.IsNullOrWhiteSpace(word))
@@ -67,7 +69,7 @@ namespace WebApplication1.Controllers
 
                     foreach (var noun in nouns)
                     {
-                        wordDocument.CreateHyperlinks(noun);
+                        wordDocument.CreateBookmarks(noun, text);
                     }
                 }
                 catch (CyrWordNotFoundException error)

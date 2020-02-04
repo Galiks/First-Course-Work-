@@ -2,7 +2,6 @@
 using Spire.Doc.Collections;
 using Spire.Doc.Documents;
 using Spire.Doc.Fields;
-using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
@@ -16,7 +15,7 @@ namespace BusinessLogicLayer
         private const string longText = "Гипертекст в тексте может выглядеть как гипертекст, а может как гипертекст на гипертексте, где гипертекст сам является гипертекстом.";
         private readonly Document document;
         //private readonly Section section;
-        //private readonly Paragraph mainParagraph;
+        private Paragraph referParagraph;
         private readonly string filename;
         private string referencesWord;
 
@@ -40,9 +39,111 @@ namespace BusinessLogicLayer
             ReferencesWord = word;
         }
 
+        public void CreateBookmarks(string word, string sentence)
+        {
+            //Create bookmark objects
+            BookmarkStart start = new BookmarkStart(document, sentence);
+            BookmarkEnd end = new BookmarkEnd(document, sentence);
+            //BookmarkStart start = new BookmarkStart(document, "MyBk");
+            //BookmarkEnd end = new BookmarkEnd(document, "MyBk");
+
+
+
+            //Get the last paragraph----"Hypertext – bla bla bla bla text bla bla blab la hyperlink and save the world"
+            Paragraph lastPara = referParagraph;
+
+
+
+            int startIndex = 0;
+
+            int endIndex = lastPara.ChildObjects.Count;
+
+
+
+            //Insert the bookmark for the last paragraph
+
+            lastPara.ChildObjects.Insert(startIndex, start);
+
+            lastPara.ChildObjects.Insert(endIndex, end);
+
+
+
+            //Find the keyword "Hypertext"
+
+            TextSelection[] text = document.FindAllString(word, true, true);
+
+            if (text == null)
+            {
+                return;
+            }
+
+            if (text.Length == 0)
+            {
+                return;
+            }
+
+            //Get the first keyword
+
+            for (int i = 0; i < text.Length; i++)
+            {
+                TextSelection keywordOne = text[i];
+
+                //Get the textrange its locates
+
+                TextRange tr = keywordOne.GetAsOneRange();
+
+                //Set the formatting
+
+                tr.CharacterFormat.UnderlineStyle = UnderlineStyle.Single;
+
+                tr.CharacterFormat.TextColor = Color.Blue;
+
+                //Get the paragraph it locates
+
+                Paragraph paragraph = tr.OwnerParagraph;
+
+                //Get the index of the keyword in its paragraph
+
+                int index = paragraph.ChildObjects.IndexOf(tr);
+
+
+
+                //Create a cross-reference field, and link it to bookmark                   
+
+                Field field = new Field(document);
+
+                field.Type = FieldType.FieldRef;
+
+                field.Code = @"REF " + word + @" \p \h";
+
+
+
+                //Insert field
+
+                paragraph.ChildObjects.Insert(index, field);
+
+
+
+                //Insert FieldSeparator object
+
+                FieldMark fieldSeparator = new FieldMark(document, FieldMarkType.FieldSeparator);
+
+                paragraph.ChildObjects.Insert(index + 1, fieldSeparator);
+
+
+
+                //Insert FieldEnd object to mark the end of the field
+
+                FieldMark fieldEnd = new FieldMark(document, FieldMarkType.FieldEnd);
+
+                paragraph.ChildObjects.Insert(index + 3, fieldEnd); 
+            }
+
+            SaveCurrentDicument();
+        }
+
         public void CreateHyperlinks(string word)
         {
-            Document document = new Document();
             //пока что заготовленный файл
             //string filename = "hyperlink";
             //document.LoadFromFile(filename + ".docx", FileFormat.Docx);
@@ -52,7 +153,6 @@ namespace BusinessLogicLayer
 
             CreateHyperlinkByWord(word);
             SaveCurrentDicument();
-            //SaveDocument(document, filename);
         }
 
         private void CreateHyperlinkByWord(string word)
@@ -120,6 +220,7 @@ namespace BusinessLogicLayer
                 {
                     if (paragraph.Text.Contains(word))
                     {
+                        referParagraph = paragraph;
                         return paragraph;
                     }
                 }
@@ -437,7 +538,7 @@ namespace BusinessLogicLayer
                 }
                 for (int i = 0; i < 5; i++)
                 {
-                    longText.AppendLine("<br>"); 
+                    longText.AppendLine("<br>");
                 }
                 longText.AppendLine("</div>");
             }
