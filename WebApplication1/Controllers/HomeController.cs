@@ -19,6 +19,7 @@ namespace WebApplication1.Controllers
         private const string path = "Files/Hypertext.docx";
         private readonly ILogger<HomeController> _logger;
         private Paragraph referencesParagraph;
+        private Section referencesSection;
 
         public HomeController(ILogger<HomeController> logger)
         {
@@ -28,8 +29,8 @@ namespace WebApplication1.Controllers
         public IActionResult Index(string word, string text)
         {
             WordDocument wordDocument = new WordDocument("hyperlink");
-            var paragraph = wordDocument.GetParagraphByWord("Сноски");
-            if (paragraph == null)
+            var sectionAndParagraph = wordDocument.GetSectionAndParagraphByWord("Сноски");
+            if (sectionAndParagraph == null)
             {
                 Section sectionForReferences = wordDocument.Document.AddSection();
                 var chapterForReferences = sectionForReferences.AddParagraph();
@@ -40,21 +41,20 @@ namespace WebApplication1.Controllers
 
                 //referencesParagraph = sectionForReferences.AddParagraph();
                 referencesParagraph = chapterForReferences;
+                referencesSection = sectionForReferences;
             }
             else
             {
-                paragraph.AppendBreak(BreakType.LineBreak);
-                referencesParagraph = paragraph;
+                referencesParagraph = sectionAndParagraph.Item2;
+                referencesSection = sectionAndParagraph.Item1;
             }
 
-            
-            
+            wordDocument.SaveCurrentDicument();
 
             if (!string.IsNullOrWhiteSpace(text) & !string.IsNullOrWhiteSpace(word))
             {
-                referencesParagraph.AppendText(text);
-                referencesParagraph.AppendBreak(BreakType.LineBreak);
-                wordDocument.SetReferencesWord(text.Split(' ')[0]);
+                Paragraph newParagraph = referencesSection.AddParagraph();
+
                 try
                 {
                     CyrNounCollection cyrNounCollection = new CyrNounCollection();
@@ -72,16 +72,21 @@ namespace WebApplication1.Controllers
 
                     foreach (var noun in nouns)
                     {
-                        wordDocument.CreateBookmarks(noun, text);
+                        wordDocument.CreateBookmarks(noun, newParagraph);
                     }
                 }
                 catch (CyrWordNotFoundException error)
                 {
                     ViewBag.Error = error.Message;
-                }                
+                    wordDocument.CreateBookmarks(word, newParagraph);
+                }
+                finally
+                {
+                    newParagraph.AppendText(text);
+                    wordDocument.SaveCurrentDicument();
+                }
             }
 
-            wordDocument.SaveCurrentDicument();
 
             ViewBag.LongText = wordDocument.GetTextFromDocument();
             return View();

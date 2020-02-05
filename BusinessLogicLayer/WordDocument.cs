@@ -2,6 +2,7 @@
 using Spire.Doc.Collections;
 using Spire.Doc.Documents;
 using Spire.Doc.Fields;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
@@ -15,13 +16,14 @@ namespace BusinessLogicLayer
         private const string longText = "Гипертекст в тексте может выглядеть как гипертекст, а может как гипертекст на гипертексте, где гипертекст сам является гипертекстом.";
         private readonly Document document;
         //private readonly Section section;
-        private Paragraph referParagraph;
+        //private Paragraph referParagraph;
+        //private Section referSection;
+        private string bookmark = "bookmark";
         private readonly string filename;
         private string referencesWord;
 
         public Document Document => document;
 
-        public string ReferencesWord { get => referencesWord; private set => referencesWord = value; }
 
         public WordDocument(string filename)
         {
@@ -36,40 +38,34 @@ namespace BusinessLogicLayer
 
         public void SetReferencesWord(string word)
         {
-            ReferencesWord = word;
+            referencesWord = word;
         }
 
-        public void CreateBookmarks(string word, string sentence)
+        public void CreateBookmarks(string word, Paragraph referParagraph)
         {
             //Create bookmark objects
-            BookmarkStart start = new BookmarkStart(document, word);
-            BookmarkEnd end = new BookmarkEnd(document, word);
+            BookmarkStart start = new BookmarkStart(document, bookmark);
+            BookmarkEnd end = new BookmarkEnd(document, bookmark);
             //BookmarkStart start = new BookmarkStart(document, "MyBk");
             //BookmarkEnd end = new BookmarkEnd(document, "MyBk");
 
 
 
-            //Get the last paragraph----"Hypertext – bla bla bla bla text bla bla blab la hyperlink and save the world"
-            Paragraph lastPara = referParagraph;
-
-
-
             int startIndex = 0;
 
-            int endIndex = lastPara.ChildObjects.Count;
+            int endIndex = referParagraph.ChildObjects.Count;
 
 
 
             //Insert the bookmark for the last paragraph
 
-            lastPara.ChildObjects.Insert(startIndex, start);
+            referParagraph.ChildObjects.Insert(startIndex, start);
 
-            lastPara.ChildObjects.Insert(endIndex, end);
+            referParagraph.ChildObjects.Insert(endIndex, end);
 
 
 
             //Find the keyword "Hypertext"
-
             TextSelection[] text = document.FindAllString(word, true, true);
 
             if (text == null)
@@ -114,7 +110,7 @@ namespace BusinessLogicLayer
 
                 field.Type = FieldType.FieldRef;
 
-                field.Code = $@"REF {word} \p \h";
+                field.Code = $@"REF {bookmark} \p \h";
 
 
 
@@ -136,12 +132,13 @@ namespace BusinessLogicLayer
 
                 FieldMark fieldEnd = new FieldMark(document, FieldMarkType.FieldEnd);
 
-                paragraph.ChildObjects.Insert(index + 3, fieldEnd); 
+                paragraph.ChildObjects.Insert(index + 3, fieldEnd);
             }
 
             SaveCurrentDicument();
         }
 
+        #region Create hyperlink
         public void CreateHyperlinks(string word)
         {
             //пока что заготовленный файл
@@ -208,7 +205,7 @@ namespace BusinessLogicLayer
             }
         }
 
-        public Paragraph GetParagraphByWord(string word)
+        public Tuple<Section, Paragraph> GetSectionAndParagraphByWord(string word)
         {
             var sections = Document.Sections;
             for (int i = sections.Count - 1; i > -1; i--)
@@ -220,14 +217,15 @@ namespace BusinessLogicLayer
                 {
                     if (paragraph.Text.Contains(word))
                     {
-                        referParagraph = paragraph;
-                        return paragraph;
+                        //referParagraph = paragraph;
+                        return new Tuple<Section, Paragraph>(section, paragraph);
                     }
                 }
             }
 
             return null;
-        }
+        } 
+        #endregion
 
         #region Create Document
         //public void CreateDocument()
@@ -279,226 +277,226 @@ namespace BusinessLogicLayer
             return str.Replace(str[0].ToString(), str[0].ToString().ToUpper());
         }
 
-        private void SaveDocument(Document document, string filename)
-        {
-            document.SaveToFile(filename + ".docx", FileFormat.Docx);
-        }
-
         public void SaveCurrentDicument()
         {
             Document.SaveToFile(filename + ".docx", FileFormat.Docx);
         }
+        #region Unused
+        //private void SaveDocument(Document document, string filename)
+        //{
+        //    document.SaveToFile(filename + ".docx", FileFormat.Docx);
+        //}
+        //public void Result()
+        //{
+        //    Document doc = new Document();
 
-        public void Result()
-        {
-            Document doc = new Document();
+        //    doc.LoadFromFile("result.docx", FileFormat.Docx);
+        //    int indexOfSection = doc.Sections.Count - 1;
+        //    Paragraph mainPara = doc.Sections[indexOfSection].AddParagraph();
 
-            doc.LoadFromFile("result.docx", FileFormat.Docx);
-            int indexOfSection = doc.Sections.Count - 1;
-            Paragraph mainPara = doc.Sections[indexOfSection].AddParagraph();
+        //    mainPara.AppendText(longText);
 
-            mainPara.AppendText(longText);
+        //    mainPara = doc.Sections[0].AddParagraph();
 
-            mainPara = doc.Sections[0].AddParagraph();
+        //    mainPara.AppendText("Ссылка на текст это полезная штука");
 
-            mainPara.AppendText("Ссылка на текст это полезная штука");
+        //    Paragraph para = doc.Sections[0].AddParagraph();
 
-            Paragraph para = doc.Sections[0].AddParagraph();
+        //    para.AppendText("Hypertext is also text. Hypertext is also text. Hypertext is also text.");
+        //    para.AppendText("Делайте ссылки на предложения");
 
-            para.AppendText("Hypertext is also text. Hypertext is also text. Hypertext is also text.");
-            para.AppendText("Делайте ссылки на предложения");
+        //    //Find the string "Hypertext"
 
-            //Find the string "Hypertext"
+        //    string word = "гипертекст";
+        //    CreateHyperlinkByWord(word);
 
-            string word = "гипертекст";
-            CreateHyperlinkByWord(word);
+        //    //Find the string "ссылки"
 
-            //Find the string "ссылки"
+        //    //text = doc.FindAllString("ссылки", false, true);
 
-            //text = doc.FindAllString("ссылки", false, true);
+        //    //foreach (TextSelection seletion in text)
+        //    //{
 
-            //foreach (TextSelection seletion in text)
-            //{
+        //    //    //Get the text range
 
-            //    //Get the text range
+        //    //    TextRange tr = seletion.GetAsOneRange();
 
-            //    TextRange tr = seletion.GetAsOneRange();
+        //    //    int index = tr.OwnerParagraph.ChildObjects.IndexOf(tr);
 
-            //    int index = tr.OwnerParagraph.ChildObjects.IndexOf(tr);
+        //    //    //Add hyperlink
 
-            //    //Add hyperlink
+        //    //    Field field = new Field(doc);
 
-            //    Field field = new Field(doc);
+        //    //    field.Code = "HYPERLINK \"" + "#Ссылка" + "\"";
 
-            //    field.Code = "HYPERLINK \"" + "#Ссылка" + "\"";
+        //    //    //field.Code = "HYPERLINK \"" + "http://www.e-iceblue.com" + "\"";
 
-            //    //field.Code = "HYPERLINK \"" + "http://www.e-iceblue.com" + "\"";
+        //    //    field.Type = FieldType.FieldHyperlink;
 
-            //    field.Type = FieldType.FieldHyperlink;
+        //    //    tr.OwnerParagraph.ChildObjects.Insert(index, field);
 
-            //    tr.OwnerParagraph.ChildObjects.Insert(index, field);
+        //    //    FieldMark fm = new FieldMark(doc, FieldMarkType.FieldSeparator);
 
-            //    FieldMark fm = new FieldMark(doc, FieldMarkType.FieldSeparator);
+        //    //    tr.OwnerParagraph.ChildObjects.Insert(index + 1, fm);
 
-            //    tr.OwnerParagraph.ChildObjects.Insert(index + 1, fm);
+        //    //    //Set character format
 
-            //    //Set character format
+        //    //    tr.CharacterFormat.TextColor = Color.Blue;
 
-            //    tr.CharacterFormat.TextColor = Color.Blue;
+        //    //    tr.CharacterFormat.UnderlineStyle = UnderlineStyle.Single;
 
-            //    tr.CharacterFormat.UnderlineStyle = UnderlineStyle.Single;
+        //    //    tr.CharacterFormat.Bold = tr.CharacterFormat.Bold;
 
-            //    tr.CharacterFormat.Bold = tr.CharacterFormat.Bold;
+        //    //    FieldMark fmend = new FieldMark(doc, FieldMarkType.FieldEnd);
 
-            //    FieldMark fmend = new FieldMark(doc, FieldMarkType.FieldEnd);
+        //    //    tr.OwnerParagraph.ChildObjects.Insert(index + 3, fmend);
 
-            //    tr.OwnerParagraph.ChildObjects.Insert(index + 3, fmend);
+        //    //    field.End = fmend;
 
-            //    field.End = fmend;
-
-            //}
+        //    //}
 
 
-            //doc.SaveToFile("result.docx", FileFormat.Docx);
-        }
+        //    //doc.SaveToFile("result.docx", FileFormat.Docx);
+        //}
 
-        public void RemoveHyperlinks()
-        {
-            Document document = new Document();
-            document.LoadFromFile("test.docx");
+        //public void RemoveHyperlinks()
+        //{
+        //    Document document = new Document();
+        //    document.LoadFromFile("test.docx");
 
-            #region Find hyperlink
-            List<Field> hyperLink = FindAllHyperlinks(document);
-            #endregion
+        //    #region Find hyperlink
+        //    List<Field> hyperLink = FindAllHyperlinks(document);
+        //    #endregion
 
-            RemoveHyperlinksFromText(hyperLink);
+        //    RemoveHyperlinksFromText(hyperLink);
 
-            document.SaveToFile("test.docx", FileFormat.Docx);
-        }
+        //    document.SaveToFile("test.docx", FileFormat.Docx);
+        //}
 
-        private void RemoveHyperlinksFromText(List<Field> hyperLink)
-        {
-            for (int i = hyperLink.Count - 1; i >= 0; i--)
-            {
-                Field field = hyperLink[i];
-                int ownerParagraphIndex = field.OwnerParagraph.OwnerTextBody.ChildObjects.IndexOf(field.OwnerParagraph);
-                int fieldIndex = field.OwnerParagraph.ChildObjects.IndexOf(field);
-                Paragraph sepOwnerParagraph = field.Separator.OwnerParagraph;
-                int sepOwnerParagraphIndex = field.Separator.OwnerParagraph.OwnerTextBody.ChildObjects.IndexOf(field.Separator.OwnerParagraph);
-                int sepIndex = field.Separator.OwnerParagraph.ChildObjects.IndexOf(field.Separator);
-                int endIndex = field.End.OwnerParagraph.ChildObjects.IndexOf(field.End);
-                int endOwnerParagraphIndex = field.End.OwnerParagraph.OwnerTextBody.ChildObjects.IndexOf(field.End.OwnerParagraph);
+        //private void RemoveHyperlinksFromText(List<Field> hyperLink)
+        //{
+        //    for (int i = hyperLink.Count - 1; i >= 0; i--)
+        //    {
+        //        Field field = hyperLink[i];
+        //        int ownerParagraphIndex = field.OwnerParagraph.OwnerTextBody.ChildObjects.IndexOf(field.OwnerParagraph);
+        //        int fieldIndex = field.OwnerParagraph.ChildObjects.IndexOf(field);
+        //        Paragraph sepOwnerParagraph = field.Separator.OwnerParagraph;
+        //        int sepOwnerParagraphIndex = field.Separator.OwnerParagraph.OwnerTextBody.ChildObjects.IndexOf(field.Separator.OwnerParagraph);
+        //        int sepIndex = field.Separator.OwnerParagraph.ChildObjects.IndexOf(field.Separator);
+        //        int endIndex = field.End.OwnerParagraph.ChildObjects.IndexOf(field.End);
+        //        int endOwnerParagraphIndex = field.End.OwnerParagraph.OwnerTextBody.ChildObjects.IndexOf(field.End.OwnerParagraph);
 
-                #region Remove font color and etc
-                FormatFieldResultText(field.Separator.OwnerParagraph.OwnerTextBody, sepOwnerParagraphIndex, endOwnerParagraphIndex, sepIndex, endIndex);
-                #endregion
+        //        #region Remove font color and etc
+        //        FormatFieldResultText(field.Separator.OwnerParagraph.OwnerTextBody, sepOwnerParagraphIndex, endOwnerParagraphIndex, sepIndex, endIndex);
+        //        #endregion
 
-                field.End.OwnerParagraph.ChildObjects.RemoveAt(endIndex);
+        //        field.End.OwnerParagraph.ChildObjects.RemoveAt(endIndex);
 
-                for (int j = sepOwnerParagraphIndex; j >= ownerParagraphIndex; j--)
-                {
-                    if (j.Equals(sepOwnerParagraphIndex) && j.Equals(ownerParagraphIndex))
-                    {
-                        for (int k = sepIndex; k >= fieldIndex; k--)
-                        {
-                            field.OwnerParagraph.ChildObjects.RemoveAt(k);
-                        }
-                    }
-                    else if (j.Equals(sepOwnerParagraphIndex))
-                    {
-                        for (int k = sepIndex; k >= 0; k--)
-                        {
-                            sepOwnerParagraph.ChildObjects.RemoveAt(k);
-                        }
-                    }
-                    else if (j.Equals(ownerParagraphIndex))
-                    {
-                        for (int k = field.OwnerParagraph.ChildObjects.Count - 1; k >= fieldIndex; k--)
-                        {
-                            field.OwnerParagraph.ChildObjects.RemoveAt(k);
-                        }
-                    }
-                    else
-                    {
-                        field.OwnerParagraph.ChildObjects.RemoveAt(j);
-                    }
-                }
-            }
-        }
+        //        for (int j = sepOwnerParagraphIndex; j >= ownerParagraphIndex; j--)
+        //        {
+        //            if (j.Equals(sepOwnerParagraphIndex) && j.Equals(ownerParagraphIndex))
+        //            {
+        //                for (int k = sepIndex; k >= fieldIndex; k--)
+        //                {
+        //                    field.OwnerParagraph.ChildObjects.RemoveAt(k);
+        //                }
+        //            }
+        //            else if (j.Equals(sepOwnerParagraphIndex))
+        //            {
+        //                for (int k = sepIndex; k >= 0; k--)
+        //                {
+        //                    sepOwnerParagraph.ChildObjects.RemoveAt(k);
+        //                }
+        //            }
+        //            else if (j.Equals(ownerParagraphIndex))
+        //            {
+        //                for (int k = field.OwnerParagraph.ChildObjects.Count - 1; k >= fieldIndex; k--)
+        //                {
+        //                    field.OwnerParagraph.ChildObjects.RemoveAt(k);
+        //                }
+        //            }
+        //            else
+        //            {
+        //                field.OwnerParagraph.ChildObjects.RemoveAt(j);
+        //            }
+        //        }
+        //    }
+        //}
 
-        private List<Field> FindAllHyperlinks(Document document)
-        {
-            var hyperLink = new List<Field>();
-            foreach (Section section in document.Sections)
-            {
-                foreach (DocumentObject sec in section.Body.ChildObjects)
-                {
-                    if (sec.DocumentObjectType == DocumentObjectType.Paragraph)
-                    {
-                        foreach (DocumentObject para in (sec as Paragraph).ChildObjects)
-                        {
-                            if (para.DocumentObjectType == DocumentObjectType.Field)
-                            {
-                                Field field = para as Field;
+        //private List<Field> FindAllHyperlinks(Document document)
+        //{
+        //    var hyperLink = new List<Field>();
+        //    foreach (Section section in document.Sections)
+        //    {
+        //        foreach (DocumentObject sec in section.Body.ChildObjects)
+        //        {
+        //            if (sec.DocumentObjectType == DocumentObjectType.Paragraph)
+        //            {
+        //                foreach (DocumentObject para in (sec as Paragraph).ChildObjects)
+        //                {
+        //                    if (para.DocumentObjectType == DocumentObjectType.Field)
+        //                    {
+        //                        Field field = para as Field;
 
-                                if (field.Type == FieldType.FieldHyperlink)
-                                {
-                                    hyperLink.Add(field);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        //                        if (field.Type == FieldType.FieldHyperlink)
+        //                        {
+        //                            hyperLink.Add(field);
+        //                        }
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
 
-            return hyperLink;
-        }
+        //    return hyperLink;
+        //}
 
-        private void FormatFieldResultText(Body ownerBody, int sepOwnerParaIndex, int endOwnerParaIndex, int sepIndex, int endIndex)
-        {
-            for (int i = sepOwnerParaIndex; i <= endOwnerParaIndex; i++)
-            {
-                Paragraph para = ownerBody.ChildObjects[i] as Paragraph;
-                if (i == sepOwnerParaIndex && i == endOwnerParaIndex)
-                {
-                    for (int j = sepIndex + 1; j < endIndex; j++)
-                    {
-                        FormatText(para.ChildObjects[j] as TextRange);
-                    }
+        //private void FormatFieldResultText(Body ownerBody, int sepOwnerParaIndex, int endOwnerParaIndex, int sepIndex, int endIndex)
+        //{
+        //    for (int i = sepOwnerParaIndex; i <= endOwnerParaIndex; i++)
+        //    {
+        //        Paragraph para = ownerBody.ChildObjects[i] as Paragraph;
+        //        if (i == sepOwnerParaIndex && i == endOwnerParaIndex)
+        //        {
+        //            for (int j = sepIndex + 1; j < endIndex; j++)
+        //            {
+        //                FormatText(para.ChildObjects[j] as TextRange);
+        //            }
 
-                }
-                else if (i == sepOwnerParaIndex)
-                {
-                    for (int j = sepIndex + 1; j < para.ChildObjects.Count; j++)
-                    {
-                        FormatText(para.ChildObjects[j] as TextRange);
-                    }
-                }
-                else if (i == endOwnerParaIndex)
-                {
-                    for (int j = 0; j < endIndex; j++)
-                    {
-                        FormatText(para.ChildObjects[j] as TextRange);
-                    }
-                }
-                else
-                {
-                    for (int j = 0; j < para.ChildObjects.Count; j++)
-                    {
-                        FormatText(para.ChildObjects[j] as TextRange);
-                    }
-                }
-            }
-        }
+        //        }
+        //        else if (i == sepOwnerParaIndex)
+        //        {
+        //            for (int j = sepIndex + 1; j < para.ChildObjects.Count; j++)
+        //            {
+        //                FormatText(para.ChildObjects[j] as TextRange);
+        //            }
+        //        }
+        //        else if (i == endOwnerParaIndex)
+        //        {
+        //            for (int j = 0; j < endIndex; j++)
+        //            {
+        //                FormatText(para.ChildObjects[j] as TextRange);
+        //            }
+        //        }
+        //        else
+        //        {
+        //            for (int j = 0; j < para.ChildObjects.Count; j++)
+        //            {
+        //                FormatText(para.ChildObjects[j] as TextRange);
+        //            }
+        //        }
+        //    }
+        //}
 
-        private void FormatText(TextRange tr)
-        {
-            if (tr != null)
-            {
-                tr.CharacterFormat.TextColor = Color.Black;
-                tr.CharacterFormat.UnderlineStyle = UnderlineStyle.None;
-            }
-        }
+        //private void FormatText(TextRange tr)
+        //{
+        //    if (tr != null)
+        //    {
+        //        tr.CharacterFormat.TextColor = Color.Black;
+        //        tr.CharacterFormat.UnderlineStyle = UnderlineStyle.None;
+        //    }
+        //} 
+        #endregion
 
         public string GetTextFromDocument()
         {
