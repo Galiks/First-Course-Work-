@@ -12,12 +12,7 @@
     </head>
 <body>
 
-    <div>
-        <a href="~/Home/TextRedactor">Text Redactor</a>
-    </div>
-
     <div class="text-center">
-
 
         <div>
             <form method="post">
@@ -28,20 +23,18 @@
 
                 <p>
                     <label for="text">Текст для сноски: </label>
-                    <input type="text" name="text" id="text" value="гипертекст блаблаблаблаблабла"/>
+                    <input type="text" name="text" id="text" value="https://ru.wikipedia.org/wiki/%D0%93%D0%B8%D0%BF%D0%B5%D1%80%D1%82%D0%B5%D0%BA%D1%81%D1%82"/>
+                </p>
+
+                <p>
+                    <label for="">Выберите тип ссылки: </label>
+                    <lable>Закладка <input type="radio" name="hyperlinkType" value="bookmark"/></lable>
+                    <label>Ссылка <input type="radio" name="hyperlinkType" value="hyperlink"/></label>
                 </p>
 
                 <button>Отправить</button>
             </form>
         </div>
-
-        <div>
-            <p>@ViewBag.Text</p>
-        </div>
-
-        @*<div>                
-            <textarea>@ViewBag.LongText</textarea>
-        </div>*@
 
         <div>
             <textarea>@ViewBag.LongText</textarea>

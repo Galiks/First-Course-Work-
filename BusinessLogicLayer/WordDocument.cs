@@ -11,59 +11,61 @@ using System.Text.RegularExpressions;
 namespace BusinessLogicLayer
 {
     public class WordDocument
-    {
-        //private const string text = " – это вид текста, который содержит в себе информацию или ссылку на место в произведении, на другую литературу или на какое-то событие в мире.";
-        private const string longText = "Гипертекст в тексте может выглядеть как гипертекст, а может как гипертекст на гипертексте, где гипертекст сам является гипертекстом.";
+    {     
         private readonly Document document;
-        //private readonly Section section;
-        //private Paragraph referParagraph;
-        //private Section referSection;
-        private string bookmark = "bookmark";
         private readonly string filename;
         private string referencesWord;
+        private readonly List<string> messages;
+        private int indexNextField = 0;
 
         public Document Document => document;
 
+        public List<string> Messages => messages;
+
+        public int IndexNextField { get => indexNextField; private set => indexNextField = value; }
 
         public WordDocument(string filename)
         {
             this.filename = filename;
             document = new Document();
             document.LoadFromFile(filename + ".docx", FileFormat.Docx);
+            messages = new List<string>();
+        }
 
-            //not use
-            //section = document.AddSection();
-            //mainParagraph = section.AddParagraph();
+        public void IncreaseOfTwoindexNextField()
+        {
+            indexNextField += 2;
         }
 
         public void SetReferencesWord(string word)
         {
-            referencesWord = word;
+            //­­­U+00AD
+            //005F
+            referencesWord = word.Replace(' ', '\u005F');
         }
 
-        public void CreateBookmarks(string word, Paragraph referParagraph)
+        public void CreateBookmarks(string word, Paragraph referParagraph, string sentence = null)
         {
             //Create bookmark objects
-            BookmarkStart start = new BookmarkStart(document, bookmark);
-            BookmarkEnd end = new BookmarkEnd(document, bookmark);
-            //BookmarkStart start = new BookmarkStart(document, "MyBk");
-            //BookmarkEnd end = new BookmarkEnd(document, "MyBk");
+            BookmarkStart start = new BookmarkStart(document, referencesWord);
+            BookmarkEnd end = new BookmarkEnd(document, referencesWord);
 
-
+            if (!string.IsNullOrWhiteSpace(sentence))
+            {
+                referParagraph.AppendText(sentence);
+            }
 
             int startIndex = 0;
+            int paraIndex = referParagraph.ChildObjects.Count;
 
-            int endIndex = referParagraph.ChildObjects.Count;
+            //referParagraph.ChildObjects.Insert(startIndex, start);
+            //referParagraph.ChildObjects.Insert(paraIndex, end);
 
-
+            //int endIndex = referParagraph.ChildObjects.Count;
 
             //Insert the bookmark for the last paragraph
-
             referParagraph.ChildObjects.Insert(startIndex, start);
-
-            referParagraph.ChildObjects.Insert(endIndex, end);
-
-
+            referParagraph.ChildObjects.Insert(paraIndex, end);
 
             //Find the keyword "Hypertext"
             TextSelection[] text = document.FindAllString(word, true, true);
@@ -78,81 +80,75 @@ namespace BusinessLogicLayer
                 return;
             }
 
-            //Get the first keyword
-
+            //Get the keywords
             for (int i = 0; i < text.Length; i++)
             {
                 TextSelection keywordOne = text[i];
 
                 //Get the textrange its locates
-
                 TextRange tr = keywordOne.GetAsOneRange();
 
                 //Set the formatting
-
                 tr.CharacterFormat.UnderlineStyle = UnderlineStyle.Single;
-
                 tr.CharacterFormat.TextColor = Color.Blue;
 
                 //Get the paragraph it locates
-
                 Paragraph paragraph = tr.OwnerParagraph;
 
-                //Get the index of the keyword in its paragraph
+                if (paragraph.Equals(referParagraph))
+                {
+                    continue;
+                }
 
+                //Get the index of the keyword in its paragraph
                 int index = paragraph.ChildObjects.IndexOf(tr);
 
+                DocumentObject child = paragraph.ChildObjects[index];
 
+                if (child.DocumentObjectType == DocumentObjectType.Field)
+                {
+                    Field textField = child as Field;
+
+                    if (textField.Type == FieldType.FieldRef)
+                    {
+                        Messages.Add($"Поле {text} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef.ToString()}");
+                        continue;
+                    }
+                    else if (textField.Type == FieldType.FieldHyperlink)
+                    {
+                        Messages.Add($"Поле {text} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink.ToString()}");
+                        continue;
+                    }
+                }
 
                 //Create a cross-reference field, and link it to bookmark                   
-
-                Field field = new Field(document);
-
-                field.Type = FieldType.FieldRef;
-
-                field.Code = $@"REF {bookmark} \p \h";
-
-
+                Field field = new Field(document)
+                {
+                    Type = FieldType.FieldRef
+                };
+                string code = $@"REF {referencesWord} \p \h";
+                field.Code = code;
 
                 //Insert field
-
                 paragraph.ChildObjects.Insert(index, field);
 
-
-
                 //Insert FieldSeparator object
-
                 FieldMark fieldSeparator = new FieldMark(document, FieldMarkType.FieldSeparator);
-
                 paragraph.ChildObjects.Insert(index + 1, fieldSeparator);
 
-
-
                 //Insert FieldEnd object to mark the end of the field
-
                 FieldMark fieldEnd = new FieldMark(document, FieldMarkType.FieldEnd);
-
                 paragraph.ChildObjects.Insert(index + 3, fieldEnd);
             }
 
+            
             SaveCurrentDicument();
         }
 
         #region Create hyperlink
-        public void CreateHyperlinks(string word)
-        {
-            //пока что заготовленный файл
-            //string filename = "hyperlink";
-            //document.LoadFromFile(filename + ".docx", FileFormat.Docx);
+        
 
-            //слово тоже заготовлено заранее
-            //string word = "Гипертекст";
-
-            CreateHyperlinkByWord(word);
-            SaveCurrentDicument();
-        }
-
-        private void CreateHyperlinkByWord(string word)
+        public void CreateHyperlinkByWord(string word, string hyperlink)
         {
             TextSelection[] text = document.FindAllPattern(new Regex(word));
 
@@ -173,13 +169,34 @@ namespace BusinessLogicLayer
 
                 TextRange tr = seletion.GetAsOneRange();
 
-                int index = tr.OwnerParagraph.ChildObjects.IndexOf(tr);
+                int index = tr.OwnerParagraph.ChildObjects.IndexOf(tr) - IndexNextField;
+
+                Paragraph paragraph = tr.OwnerParagraph;
+
+                DocumentObject child = paragraph.ChildObjects[index];
+
+                if (child.DocumentObjectType == DocumentObjectType.Field)
+                {
+                    Field textField = child as Field;
+                    
+                    if (textField.Type == FieldType.FieldRef)
+                    {
+                        Messages.Add($"Поле {text} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef.ToString()}");
+                        continue;
+                    }
+                    else if (textField.Type == FieldType.FieldHyperlink)
+                    {
+                        Messages.Add($"Поле {text} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink.ToString()}");
+                        continue;
+                    }
+                }
 
                 //Add hyperlink
 
+
                 Field field = new Field(document);
 
-                field.Code = "HYPERLINK \"" + "#" + referencesWord + "\"";
+                field.Code = "HYPERLINK \"" + hyperlink + "\"";
 
                 field.Type = FieldType.FieldHyperlink;
 
@@ -203,6 +220,10 @@ namespace BusinessLogicLayer
 
                 field.End = fmend;
             }
+
+            
+
+            SaveCurrentDicument();
         }
 
         public Tuple<Section, Paragraph> GetSectionAndParagraphByWord(string word)
@@ -518,6 +539,10 @@ namespace BusinessLogicLayer
                         {
                             Field field = child as Field;
                             if (field.Type == FieldType.FieldHyperlink & !string.IsNullOrWhiteSpace(field.FieldText))
+                            {
+                                paragraphText.Replace(field.FieldText, $"<a href='{field.Code}'>{field.FieldText}</a>");
+                            }
+                            if (field.Type == FieldType.FieldRef & !string.IsNullOrWhiteSpace(field.FieldText))
                             {
                                 paragraphText.Replace(field.FieldText, $"<strong>{field.FieldText}</strong>");
                             }
