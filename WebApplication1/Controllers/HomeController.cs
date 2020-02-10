@@ -18,11 +18,12 @@ namespace WebApplication1.Controllers
         private readonly ILogger<HomeController> _logger;
         private Paragraph referencesParagraph;
         private Section referencesSection;
-        private readonly WordDocument wordDocument = new WordDocument("hyperlink");
+        private readonly WordDocument wordDocument;
 
         public HomeController(ILogger<HomeController> logger)
         {
             _logger = logger;
+            wordDocument = new WordDocument("hyperlink");
         }
 
         public IActionResult Index(string word, string text, string hyperlinkType)
@@ -160,7 +161,7 @@ namespace WebApplication1.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        public IActionResult TextRedactor()
+        public IActionResult UsingHypertext()
         {
             return View();
         }

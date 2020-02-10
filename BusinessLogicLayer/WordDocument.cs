@@ -16,7 +16,7 @@ namespace BusinessLogicLayer
         private readonly string filename;
         private string referencesWord;
         private readonly List<string> messages;
-        private int indexNextField = 0;
+        private static int indexNextField = 0;
 
         public Document Document => document;
 
