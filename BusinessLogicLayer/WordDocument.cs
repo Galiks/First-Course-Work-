@@ -111,12 +111,12 @@ namespace BusinessLogicLayer
 
                     if (textField.Type == FieldType.FieldRef)
                     {
-                        Messages.Add($"Поле {text} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef.ToString()}");
+                        Messages.Add($"Поле {keywordOne.SelectedText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef.ToString()}");
                         continue;
                     }
                     else if (textField.Type == FieldType.FieldHyperlink)
                     {
-                        Messages.Add($"Поле {text} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink.ToString()}");
+                        Messages.Add($"Поле {keywordOne.SelectedText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink.ToString()}");
                         continue;
                     }
                 }

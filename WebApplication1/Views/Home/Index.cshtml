@@ -12,7 +12,12 @@
     </head>
 <body>
 
-    
+    <div id="messages">
+        @foreach (var item in ViewBag.Messages)
+        {
+            <p>@item</p>
+        }
+    </div>
 
     <div class="text-center">
 

@@ -145,7 +145,7 @@ namespace WebApplication1.Controllers
                 }
             }
 
-
+            ViewBag.Messages = wordDocument.Messages;
             ViewBag.LongText = wordDocument.GetTextFromDocument();
             return View();
         }
