@@ -147,11 +147,14 @@ namespace WebApplication1.Controllers
 
             ViewBag.Messages = wordDocument.Messages;
             ViewBag.LongText = wordDocument.GetTextFromDocument();
+            ViewBag.Footnotes = wordDocument.GetAllFootnotes();
             return View();
         }
 
-        public IActionResult Privacy()
+        public IActionResult EditLinks()
         {
+            Section section = wordDocument.GetSectionAndParagraphByWord("Сноски").Item1;
+            ViewBag.Links = wordDocument.FindAllBookmarkBySection(section);
             return View();
         }
 

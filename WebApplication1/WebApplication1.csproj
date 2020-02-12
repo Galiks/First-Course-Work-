@@ -15,8 +15,6 @@
 
   <ItemGroup>
     <None Include="wwwroot\css\style.css" />
-    <None Include="wwwroot\css\textRedactor.css" />
-    <None Include="wwwroot\js\script.js" />
   </ItemGroup>
 
   <ItemGroup>

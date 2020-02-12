@@ -5,13 +5,14 @@ using Spire.Doc.Fields;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
 namespace BusinessLogicLayer
 {
     public class WordDocument
-    {     
+    {
         private readonly Document document;
         private readonly string filename;
         private string referencesWord;
@@ -111,12 +112,12 @@ namespace BusinessLogicLayer
 
                     if (textField.Type == FieldType.FieldRef)
                     {
-                        Messages.Add($"Поле {keywordOne.SelectedText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef.ToString()}");
+                        Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef.ToString()}");
                         continue;
                     }
                     else if (textField.Type == FieldType.FieldHyperlink)
                     {
-                        Messages.Add($"Поле {keywordOne.SelectedText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink.ToString()}");
+                        Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink.ToString()}");
                         continue;
                     }
                 }
@@ -141,12 +142,9 @@ namespace BusinessLogicLayer
                 paragraph.ChildObjects.Insert(index + 3, fieldEnd);
             }
 
-            
+
             SaveCurrentDicument();
         }
-
-        #region Create hyperlink
-        
 
         public void CreateHyperlinkByWord(string word, string hyperlink)
         {
@@ -178,15 +176,15 @@ namespace BusinessLogicLayer
                 if (child.DocumentObjectType == DocumentObjectType.Field)
                 {
                     Field textField = child as Field;
-                    
+
                     if (textField.Type == FieldType.FieldRef)
                     {
-                        Messages.Add($"Поле {text} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef.ToString()}");
+                        Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef.ToString()}");
                         continue;
                     }
                     else if (textField.Type == FieldType.FieldHyperlink)
                     {
-                        Messages.Add($"Поле {text} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink.ToString()}");
+                        Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink.ToString()}");
                         continue;
                     }
                 }
@@ -194,11 +192,12 @@ namespace BusinessLogicLayer
                 //Add hyperlink
 
 
-                Field field = new Field(document);
+                Field field = new Field(document)
+                {
+                    Code = "HYPERLINK \"" + hyperlink + "\"",
 
-                field.Code = "HYPERLINK \"" + hyperlink + "\"";
-
-                field.Type = FieldType.FieldHyperlink;
+                    Type = FieldType.FieldHyperlink
+                };
 
                 tr.OwnerParagraph.ChildObjects.Insert(index, field);
 
@@ -221,7 +220,7 @@ namespace BusinessLogicLayer
                 field.End = fmend;
             }
 
-            
+
 
             SaveCurrentDicument();
         }
@@ -232,7 +231,6 @@ namespace BusinessLogicLayer
             for (int i = sections.Count - 1; i > -1; i--)
             {
                 Section section = sections[i];
-                int count = section.Paragraphs.Count;
                 ParagraphCollection paragraphCollection = section.Paragraphs;
                 foreach (Paragraph paragraph in paragraphCollection)
                 {
@@ -245,8 +243,7 @@ namespace BusinessLogicLayer
             }
 
             return null;
-        } 
-        #endregion
+        }
 
         #region Create Document
         //public void CreateDocument()
@@ -566,7 +563,102 @@ namespace BusinessLogicLayer
                 longText.AppendLine("</div>");
             }
 
+            //foreach (var item in GetAllFootnotes())
+            //{
+            //    longText.Append(item);
+            //}
+
             return longText.ToString();
+        }
+
+        public List<Field> FindAllLinksBySection(Section section)
+        {
+            var links = new List<Field>();
+
+            foreach (DocumentObject sec in section.Body.ChildObjects)
+            {
+                if (sec.DocumentObjectType == DocumentObjectType.Paragraph)
+                {
+                    foreach (DocumentObject para in (sec as Paragraph).ChildObjects)
+                    {
+                        if (para.DocumentObjectType == DocumentObjectType.Field)
+                        {
+                            Field field = para as Field;
+
+                            if (field.Type == FieldType.FieldHyperlink)
+                            {
+                                links.Add(field);
+                            }
+                            else if (field.Type == FieldType.FieldRef)
+                            {
+                                links.Add(field);
+                            }
+                        }
+                    }
+                }
+            }
+            return links;
+        }
+
+        public List<string> FindAllBookmarkBySection(Section section)
+        {
+            var bookmarks = new List<string>();
+
+            foreach (DocumentObject sec in section.Body.ChildObjects)
+            {
+                if (sec.DocumentObjectType == DocumentObjectType.Paragraph)
+                {
+                    foreach (DocumentObject para in (sec as Paragraph).ChildObjects)
+                    {
+                        if (para.DocumentObjectType == DocumentObjectType.TextRange)
+                        {
+                            TextRange textRange = para as TextRange;
+
+                            if (!string.IsNullOrWhiteSpace(textRange.Text))
+                            {
+                                bookmarks.Add(textRange.Text);
+                            }
+                        }
+                    }
+                }
+            }
+            return bookmarks;
+        }
+
+        public List<string> GetAllFootnotes()
+        {
+            var result = new HashSet<string>();
+
+            foreach (Section section in document.Sections)
+            {
+                foreach (Paragraph paragraph in section.Paragraphs)
+                {
+                    int index = -1;
+                    for (int i = 0, cnt = paragraph.ChildObjects.Count; i < cnt; i++)
+                    {
+                        ParagraphBase paragraphBase = paragraph.ChildObjects[i] as ParagraphBase;
+                        if (paragraphBase is Footnote)
+                        {
+                            index = i;
+                            break;
+                        }
+                    }
+
+                    if (index > -1)
+                    {
+                        var footnotes = paragraph.ChildObjects[index].Document.Footnotes;
+                        foreach (Footnote footnote in footnotes)
+                        {
+                            foreach(Paragraph item in footnote.TextBody.ChildObjects)
+                            {
+                                result.Add(item.Text);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return result.ToList();
         }
     }
 }

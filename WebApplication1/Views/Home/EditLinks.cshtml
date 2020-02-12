@@ -1,0 +1,20 @@
+﻿@using Spire.Doc.Fields;
+
+@{
+    ViewData["Title"] = "Privacy Policy";
+}
+
+<head>
+
+</head>
+<body>
+    <div>
+        <h1>Здесь вы можеет редактировать ссылки и закладки.</h1>
+        <ol>
+            @foreach (string item in ViewBag.Links)
+            {
+                <li>@item</li>
+            }
+        </ol>
+    </div>
+</body>

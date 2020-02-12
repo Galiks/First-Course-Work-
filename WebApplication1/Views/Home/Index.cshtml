@@ -6,6 +6,7 @@
 
     <head>
         <link href="~/css/style.css" rel="stylesheet" />
+        <link href="~/css/toggleButton.css" rel="stylesheet" />
         @*<script src="https://cdn.tiny.cloud/1/wrl0wkirvr9jzs3w6uca24pdnk6z8t6dvevmktjg3j9i5vh6/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>*@
         <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
         <script>tinymce.init({ selector: 'textarea' });</script>
@@ -30,32 +31,73 @@
 
                 <p>
                     <label for="text">Текст для сноски: </label>
-                    <input type="text" name="text" id="text" value="https://ru.wikipedia.org/wiki/%D0%93%D0%B8%D0%BF%D0%B5%D1%80%D1%82%D0%B5%D0%BA%D1%81%D1%82"/>
+                    <input type="text" name="text" id="text" value="https://ru.wikipedia.org/wiki/%D0%93%D0%B8%D0%BF%D0%B5%D1%80%D1%82%D0%B5%D0%BA%D1%81%D1%82" />
                 </p>
 
                 <p>
                     <label for="">Выберите тип ссылки: </label>
-                    <lable>Закладка <input type="radio" name="hyperlinkType" value="bookmark"/></lable>
-                    <label>Ссылка <input type="radio" name="hyperlinkType" value="hyperlink"/></label>
+                    <lable>Закладка <input type="radio" name="hyperlinkType" value="bookmark" /></lable>
+                    <label>Ссылка <input type="radio" name="hyperlinkType" value="hyperlink" /></label>
                 </p>
 
                 <button>Отправить</button>
             </form>
+
         </div>
+
+        @*ToggleButton недоделана*@
+        <div>
+            <h1>Кнопка, отменающая выделение текста</h1>
+            <div id="switch">
+
+                <div id="slider"></div>
+
+                <div id="circle">
+                    <div id="circle-content"></div>
+                </div>
+
+            </div>
+            <script src="~/js/toggleButton.js"></script>
+        </div>
+              
 
         <div>
             <textarea>@ViewBag.LongText</textarea>
             <script>
                 tinymce.init({
                     selector: 'textarea',
-                    plugins: 'a11ychecker advcode casechange formatpainter linkchecker lists checklist media mediaembed pageembed permanentpen powerpaste table advtable tinycomments tinydrive tinymcespellchecker',
-                    toolbar: 'a11ycheck addcomment showcomments casechange checklist code formatpainter insertfile pageembed permanentpen table',
+                    plugins: 'a11ychecker advcode casechange formatpainter linkchecker lists checklist media mediaembed pageembed permanentpen powerpaste table advtable tinycomments tinydrive tinymcespellchecker link',
+                    toolbar: 'a11ycheck addcomment showcomments casechange checklist code formatpainter insertfile pageembed permanentpen table link',
+                    toolbar_drawer: 'floating',
+                    tinycomments_mode: 'embedded',
+                    tinycomments_author: 'Author name',
+                });
+
+                //Выделение текста
+                //document.onmouseup = function () {
+                            //    var selection = window.getSelection();
+                            //    alert(selection.toString());
+                            //}
+            </script>
+        </div>
+
+        <div>
+            <textarea>
+                @foreach (var item in ViewBag.Footnotes)
+                {
+                    @item
+                }
+            </textarea>
+            <script>
+                tinymce.init({
+                    selector: 'textarea',
+                    plugins: 'a11ychecker advcode casechange formatpainter linkchecker lists checklist media mediaembed pageembed permanentpen powerpaste table advtable tinycomments tinydrive tinymcespellchecker link',
+                    toolbar: 'a11ycheck addcomment showcomments casechange checklist code formatpainter insertfile pageembed permanentpen table link',
                     toolbar_drawer: 'floating',
                     tinycomments_mode: 'embedded',
                     tinycomments_author: 'Author name',
                 });
             </script>
-
         </div>
 
     </div>
