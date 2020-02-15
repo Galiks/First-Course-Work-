@@ -1,4 +1,6 @@
-﻿using Spire.Doc;
+﻿using Cyriller;
+using Cyriller.Model;
+using Spire.Doc;
 using Spire.Doc.Collections;
 using Spire.Doc.Documents;
 using Spire.Doc.Fields;
@@ -7,7 +9,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace BusinessLogicLayer
 {
@@ -18,6 +19,8 @@ namespace BusinessLogicLayer
         private string referencesWord;
         private readonly List<string> messages;
         private static int indexNextField = 0;
+        private Paragraph referencesParagraph;
+        private Section referencesSection;
 
         public Document Document => document;
 
@@ -44,8 +47,55 @@ namespace BusinessLogicLayer
             //005F
             referencesWord = word.Replace(' ', '\u005F');
         }
+        public void CreateBookmarks(string word, string text)
+        {
+            SetReferencesWord(text);
 
-        public void CreateBookmarks(string word, Paragraph referParagraph, string sentence = null)
+            try
+            {
+                CyrNounCollection cyrNounCollection = new CyrNounCollection();
+                CyrNoun cyrNoun = cyrNounCollection.Get(word, out CasesEnum @case, out NumbersEnum numbers);
+                var nounsSet = new HashSet<string>(cyrNoun.Decline().ToList());
+                foreach (var noun in cyrNoun.DeclinePlural().ToList())
+                {
+                    nounsSet.Add(noun);
+                }
+                var nouns = nounsSet.ToList();
+                if (cyrNoun.WordType != WordTypesEnum.Surname)
+                {
+                    int nounLength = nouns.Count;
+                    for (int i = 0; i < nounLength; i++)
+                    {
+                        nouns.Add(GetWordWithFirstLetterUpper(nouns[i]));
+                    }
+                }
+
+                for (int i = 0; i < nouns.Count; i++)
+                {
+                    string noun = nouns[i];
+                    if (i == 0)
+                    {
+                        CreateBookmarkByWord(noun, text);
+                    }
+                    else
+                    {
+                        CreateBookmarkByWord(noun);
+                    }
+                }
+            }
+            catch (CyrWordNotFoundException error)
+            {
+                CreateBookmarks(word, text);
+            }
+            finally
+            {
+                if (IndexNextField.Equals(default))
+                {
+                    IncreaseOfTwoindexNextField();
+                }
+            }
+        }
+        private void CreateBookmarkByWord(string word, string sentence = null)
         {
             //Create bookmark objects
             BookmarkStart start = new BookmarkStart(document, referencesWord);
@@ -53,11 +103,12 @@ namespace BusinessLogicLayer
 
             if (!string.IsNullOrWhiteSpace(sentence))
             {
-                referParagraph.AppendText(sentence);
+                referencesParagraph = referencesSection.AddParagraph();
+                referencesParagraph.AppendText(sentence);
             }
 
             int startIndex = 0;
-            int paraIndex = referParagraph.ChildObjects.Count;
+            int paraIndex = referencesParagraph.ChildObjects.Count;
 
             //referParagraph.ChildObjects.Insert(startIndex, start);
             //referParagraph.ChildObjects.Insert(paraIndex, end);
@@ -65,8 +116,8 @@ namespace BusinessLogicLayer
             //int endIndex = referParagraph.ChildObjects.Count;
 
             //Insert the bookmark for the last paragraph
-            referParagraph.ChildObjects.Insert(startIndex, start);
-            referParagraph.ChildObjects.Insert(paraIndex, end);
+            referencesParagraph.ChildObjects.Insert(startIndex, start);
+            referencesParagraph.ChildObjects.Insert(paraIndex, end);
 
             //Find the keyword "Hypertext"
             TextSelection[] text = document.FindAllString(word, true, true);
@@ -96,7 +147,7 @@ namespace BusinessLogicLayer
                 //Get the paragraph it locates
                 Paragraph paragraph = tr.OwnerParagraph;
 
-                if (paragraph.Equals(referParagraph))
+                if (paragraph.Equals(referencesParagraph))
                 {
                     continue;
                 }
@@ -145,10 +196,48 @@ namespace BusinessLogicLayer
 
             SaveCurrentDicument();
         }
-
-        public void CreateHyperlinkByWord(string word, string hyperlink)
+        public void CreateHyperlinksForText(string word, string text)
         {
-            TextSelection[] text = document.FindAllPattern(new Regex(word));
+            try
+            {
+                CyrNounCollection cyrNounCollection = new CyrNounCollection();
+                CyrNoun cyrNoun = cyrNounCollection.Get(word, out CasesEnum @case, out NumbersEnum numbers);
+                var nounsSet = new HashSet<string>(cyrNoun.Decline().ToList());
+                foreach (var noun in cyrNoun.DeclinePlural().ToList())
+                {
+                    nounsSet.Add(noun);
+                }
+                var nouns = nounsSet.ToList();
+                if (cyrNoun.WordType != WordTypesEnum.Surname)
+                {
+                    int nounLength = nouns.Count;
+                    for (int i = 0; i < nounLength; i++)
+                    {
+                        nouns.Add(GetWordWithFirstLetterUpper(nouns[i]));
+                    }
+                }
+
+                for (int i = 0; i < nouns.Count; i++)
+                {
+                    string noun = nouns[i];
+                    CreateHyperlinkByWord(noun, text);
+                }
+            }
+            catch (CyrWordNotFoundException error)
+            {
+                CreateHyperlinkByWord(word, text);
+            }
+            finally
+            {
+                if (IndexNextField.Equals(default))
+                {
+                    IncreaseOfTwoindexNextField();
+                }
+            }
+        }
+        private void CreateHyperlinkByWord(string word, string hyperlink)
+        {
+            TextSelection[] text = document.FindAllString(word, true, true);
 
             if (text == null)
             {
@@ -224,6 +313,70 @@ namespace BusinessLogicLayer
 
             SaveCurrentDicument();
         }
+        public void CreatHyperlinkForImage()
+        {
+
+        }
+        private void CreateHyperlinkByImage(DocPicture picture, string hyperlink)
+        {
+
+            int index = picture.OwnerParagraph.ChildObjects.IndexOf(picture) - IndexNextField;
+
+            Paragraph paragraph = picture.OwnerParagraph;
+
+            DocumentObject child = paragraph.ChildObjects[index];
+
+            if (child.DocumentObjectType == DocumentObjectType.Field)
+            {
+                Field textField = child as Field;
+
+                if (textField.Type == FieldType.FieldRef)
+                {
+                    Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef.ToString()}");
+                    return;
+                }
+                else if (textField.Type == FieldType.FieldHyperlink)
+                {
+                    Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink.ToString()}");
+                    return;
+                }
+            }
+
+            //Add hyperlink
+
+
+            Field field = new Field(document)
+            {
+                Code = "HYPERLINK \"" + hyperlink + "\"",
+
+                Type = FieldType.FieldHyperlink
+            };
+
+            picture.OwnerParagraph.ChildObjects.Insert(index, field);
+
+            FieldMark fm = new FieldMark(document, FieldMarkType.FieldSeparator);
+
+            picture.OwnerParagraph.ChildObjects.Insert(index + 1, fm);
+
+            //Set character format
+
+            picture.CharacterFormat.TextColor = Color.Blue;
+
+            picture.CharacterFormat.UnderlineStyle = UnderlineStyle.Single;
+
+            picture.CharacterFormat.Bold = picture.CharacterFormat.Bold;
+
+            FieldMark fmend = new FieldMark(document, FieldMarkType.FieldEnd);
+
+            picture.OwnerParagraph.ChildObjects.Insert(index + 3, fmend);
+
+            field.End = fmend;
+
+
+
+
+            SaveCurrentDicument();
+        }
 
         public Tuple<Section, Paragraph> GetSectionAndParagraphByWord(string word)
         {
@@ -292,7 +445,7 @@ namespace BusinessLogicLayer
 
         public static string GetWordWithFirstLetterUpper(string str)
         {
-            return str.Replace(str[0].ToString(), str[0].ToString().ToUpper());
+            return str[0].ToString().ToUpper() + str.Substring(1);
         }
 
         public void SaveCurrentDicument()
@@ -539,7 +692,7 @@ namespace BusinessLogicLayer
                             {
                                 paragraphText.Replace(field.FieldText, $"<a href='{field.Code}'>{field.FieldText}</a>");
                             }
-                            if (field.Type == FieldType.FieldRef & !string.IsNullOrWhiteSpace(field.FieldText))
+                            else if (field.Type == FieldType.FieldRef & !string.IsNullOrWhiteSpace(field.FieldText))
                             {
                                 paragraphText.Replace(field.FieldText, $"<strong>{field.FieldText}</strong>");
                             }
@@ -551,6 +704,11 @@ namespace BusinessLogicLayer
                             {
                                 paragraphText.Replace("\v", $"<br>");
                             }
+                        }
+                        else if (child.DocumentObjectType == DocumentObjectType.Picture)
+                        {
+                            DocPicture picture = child as DocPicture;
+                            paragraphText.Append("<img class='user-img' src=\"data:image/jpeg;base64," + Convert.ToBase64String(picture.ImageBytes) + "\" />");
                         }
                     }
 
@@ -599,29 +757,107 @@ namespace BusinessLogicLayer
             }
             return links;
         }
-
-        public List<string> FindAllBookmarkBySection(Section section)
+        public List<Field> FindAllLinks()
         {
-            var bookmarks = new List<string>();
+            var links = new List<Field>();
 
-            foreach (DocumentObject sec in section.Body.ChildObjects)
+            foreach (Section section in document.Sections)
             {
-                if (sec.DocumentObjectType == DocumentObjectType.Paragraph)
+                foreach (DocumentObject sec in section.Body.ChildObjects)
                 {
-                    foreach (DocumentObject para in (sec as Paragraph).ChildObjects)
+                    if (sec.DocumentObjectType == DocumentObjectType.Paragraph)
                     {
-                        if (para.DocumentObjectType == DocumentObjectType.TextRange)
+                        foreach (DocumentObject para in (sec as Paragraph).ChildObjects)
                         {
-                            TextRange textRange = para as TextRange;
-
-                            if (!string.IsNullOrWhiteSpace(textRange.Text))
+                            if (para.DocumentObjectType == DocumentObjectType.Field)
                             {
-                                bookmarks.Add(textRange.Text);
+                                Field field = para as Field;
+
+                                if (field.Type == FieldType.FieldHyperlink)
+                                {
+                                    links.Add(field);
+                                }
                             }
                         }
                     }
                 }
             }
+            return links;
+        }
+
+        public List<string> FindAllBookmarkBySection(Section section)
+        {
+            var bookmarks = new List<string>();
+
+            BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(document);
+            var bookmarks1 = bookmarksNavigator.Document.Bookmarks;
+            for (int i = 1; i < bookmarks1.Count; i++)
+            {
+
+                //bookmarks1[i].BookmarkEnd.OwnerParagraph.Text = "Hypertext is awesome";
+
+                //var lastItem = bookmarks1[i].BookmarkStart.OwnerParagraph.Items.LastItem;
+                //bookmarks1[i].BookmarkStart.OwnerParagraph.Items.Remove(lastItem);
+
+
+                Section tempSection = document.AddSection();
+                string text = "Hypertext is awesome";
+                tempSection.AddParagraph().AppendText(text);
+
+                ParagraphBase paragraphBaseFirstItem = tempSection.Paragraphs[0].Items.FirstItem as ParagraphBase;
+                ParagraphBase paragraphBaseLastItem = tempSection.Paragraphs[0].Items.LastItem as ParagraphBase;
+                TextBodySelection textBodySelection = new TextBodySelection(paragraphBaseFirstItem, paragraphBaseLastItem);
+                TextBodyPart textBodyPart = new TextBodyPart(textBodySelection);
+
+                bookmarksNavigator.MoveToBookmark(bookmarks1[i].Name);
+                bookmarksNavigator.ReplaceBookmarkContent(textBodyPart, true, true);
+
+                document.Sections.Remove(tempSection);
+
+                SaveCurrentDicument();
+            }
+
+            #region find bookmark by section
+            //foreach (DocumentObject sec in section.Body.ChildObjects)
+            //{
+            //    if (sec.DocumentObjectType == DocumentObjectType.Paragraph)
+            //    {
+            //        foreach (DocumentObject para in (sec as Paragraph).ChildObjects)
+            //        {
+            //            if (para.DocumentObjectType == DocumentObjectType.BookmarkStart)
+            //            {
+            //                BookmarkStart bookmarkStart = para as BookmarkStart;
+
+            //                if (!string.IsNullOrWhiteSpace(bookmarkStart.Name))
+            //                {
+            //                    bookmarks.Add(bookmarkStart.Name);
+            //                    BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(document);
+            //                    var bookmarks1 = bookmarksNavigator.Document.Bookmarks;
+            //                    for (int i = 1; i < bookmarks1.Count; i++)
+            //                    {
+            //                        Section tempSection = document.AddSection();
+            //                        string text = "Hypertext is awesome";
+            //                        tempSection.AddParagraph().AppendText(text);
+
+            //                        ParagraphBase paragraphBaseFirstItem = tempSection.Paragraphs[0].Items.FirstItem as ParagraphBase;
+            //                        ParagraphBase paragraphBaseLastItem = tempSection.Paragraphs[0].Items.LastItem as ParagraphBase;
+            //                        TextBodySelection textBodySelection = new TextBodySelection(paragraphBaseFirstItem, paragraphBaseLastItem);
+            //                        TextBodyPart textBodyPart = new TextBodyPart(textBodySelection);
+
+            //                        bookmarksNavigator.MoveToBookmark(bookmarks1[i].Name);
+
+            //                        bookmarksNavigator.ReplaceBookmarkContent(textBodyPart);
+
+            //                        document.Sections.Remove(tempSection);
+
+            //                        SaveCurrentDicument();
+            //                    }
+            //                }
+            //            }
+            //        }
+            //    }
+            //} 
+            #endregion
             return bookmarks;
         }
 
@@ -649,7 +885,7 @@ namespace BusinessLogicLayer
                         var footnotes = paragraph.ChildObjects[index].Document.Footnotes;
                         foreach (Footnote footnote in footnotes)
                         {
-                            foreach(Paragraph item in footnote.TextBody.ChildObjects)
+                            foreach (Paragraph item in footnote.TextBody.ChildObjects)
                             {
                                 result.Add(item.Text);
                             }
@@ -659,6 +895,31 @@ namespace BusinessLogicLayer
             }
 
             return result.ToList();
+        }
+
+        public void CreateReferencesSection()
+        {
+            var sectionAndParagraph = GetSectionAndParagraphByWord("Сноски");
+            if (sectionAndParagraph == null)
+            {
+                Section sectionForReferences = document.Document.AddSection();
+                var chapterForReferences = sectionForReferences.AddParagraph();
+                chapterForReferences.AppendText("Сноски");
+                chapterForReferences.AppendBreak(BreakType.LineBreak);
+                //chapterForReferences.ApplyStyle(BuiltinStyle.Heading1);
+                //chapterForReferences.ApplyStyle(BuiltinStyle.Title);
+
+                //referencesParagraph = sectionForReferences.AddParagraph();
+                referencesParagraph = chapterForReferences;
+                referencesSection = sectionForReferences;
+            }
+            else
+            {
+                referencesParagraph = sectionAndParagraph.Item2;
+                referencesSection = sectionAndParagraph.Item1;
+            }
+
+            SaveCurrentDicument();
         }
     }
 }

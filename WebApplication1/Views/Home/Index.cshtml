@@ -21,17 +21,25 @@
     </div>
 
     <div class="text-center">
-
+        <style>
+            #text{
+                width: 80%;
+            }
+        </style>
         <div>
-            <form method="post">
+            <form asp-action="Index" asp-controller="Home" method="post" enctype="multipart/form-data">
                 <p>
                     <label for="word">Слово для гипертекста: </label>
                     <input type="text" name="word" id="word" value="гипертекст" />
                 </p>
 
                 <p>
-                    <label for="text">Текст для сноски: </label>
+                    <label for="text">Выберите текст и/или картинку для ссылки: </label>
                     <input type="text" name="text" id="text" value="https://ru.wikipedia.org/wiki/%D0%93%D0%B8%D0%BF%D0%B5%D1%80%D1%82%D0%B5%D0%BA%D1%81%D1%82" />
+                    <label for="image">
+                        Фото:
+                        <input type="file" id="image" name="image" />
+                    </label>
                 </p>
 
                 <p>
@@ -65,7 +73,7 @@
             <textarea>@ViewBag.LongText</textarea>
             <script>
                 tinymce.init({
-                    selector: 'textarea',
+                    selector: 'textareaNote',
                     plugins: 'a11ychecker advcode casechange formatpainter linkchecker lists checklist media mediaembed pageembed permanentpen powerpaste table advtable tinycomments tinydrive tinymcespellchecker link',
                     toolbar: 'a11ycheck addcomment showcomments casechange checklist code formatpainter insertfile pageembed permanentpen table link',
                     toolbar_drawer: 'floating',
@@ -81,7 +89,7 @@
             </script>
         </div>
 
-        <div>
+        @*<div>
             <textarea>
                 @foreach (var item in ViewBag.Footnotes)
                 {
@@ -98,7 +106,7 @@
                     tinycomments_author: 'Author name',
                 });
             </script>
-        </div>
+        </div>*@
 
     </div>
 </body>

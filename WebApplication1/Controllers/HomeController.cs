@@ -1,147 +1,54 @@
 ﻿using BusinessLogicLayer;
-using Cyriller;
-using Cyriller.Model;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Spire.Doc;
-using Spire.Doc.Documents;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
+using System.IO;
+using System.Threading.Tasks;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
 {
     public class HomeController : Controller
     {
-        private const string path = "Files/Hypertext.docx";
+        IWebHostEnvironment _appEnvironment;
         private readonly ILogger<HomeController> _logger;
-        private Paragraph referencesParagraph;
-        private Section referencesSection;
+        //private Paragraph referencesParagraph;
+        //private Section referencesSection;
         private readonly WordDocument wordDocument;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, IWebHostEnvironment appEnvironment)
         {
             _logger = logger;
             wordDocument = new WordDocument("hyperlink");
+            _appEnvironment = appEnvironment;
         }
 
-        public IActionResult Index(string word, string text, string hyperlinkType)
+        public async Task<IActionResult> Index(string word, string text, string hyperlinkType, IFormFile image)
         {
-            var sectionAndParagraph = wordDocument.GetSectionAndParagraphByWord("Сноски");
-            if (sectionAndParagraph == null)
-            {
-                Section sectionForReferences = wordDocument.Document.AddSection();
-                var chapterForReferences = sectionForReferences.AddParagraph();
-                chapterForReferences.AppendText("Сноски");
-                chapterForReferences.AppendBreak(BreakType.LineBreak);
-                //chapterForReferences.ApplyStyle(BuiltinStyle.Heading1);
-                //chapterForReferences.ApplyStyle(BuiltinStyle.Title);
 
-                //referencesParagraph = sectionForReferences.AddParagraph();
-                referencesParagraph = chapterForReferences;
-                referencesSection = sectionForReferences;
-            }
-            else
-            {
-                referencesParagraph = sectionAndParagraph.Item2;
-                referencesSection = sectionAndParagraph.Item1;
-            }
-
-            wordDocument.SaveCurrentDicument();
+            wordDocument.CreateReferencesSection();
 
             if (!string.IsNullOrWhiteSpace(text) & !string.IsNullOrWhiteSpace(word) & !string.IsNullOrWhiteSpace(hyperlinkType))
             {
                 if (hyperlinkType.Equals("bookmark"))
                 {
-                    wordDocument.SetReferencesWord(text);
-                    Paragraph newParagraph = referencesSection.AddParagraph();
-
-                    try
-                    {
-                        CyrNounCollection cyrNounCollection = new CyrNounCollection();
-                        CyrNoun cyrNoun = cyrNounCollection.Get(word, out CasesEnum @case, out NumbersEnum numbers);
-                        var nounsSet = new HashSet<string>(cyrNoun.Decline().ToList());
-                        foreach (var noun in cyrNoun.DeclinePlural().ToList())
-                        {
-                            nounsSet.Add(noun);
-                        }
-                        var nouns = nounsSet.ToList();
-                        if (cyrNoun.WordType != WordTypesEnum.Surname)
-                        {
-                            int nounLength = nouns.Count;
-                            for (int i = 0; i < nounLength; i++)
-                            {
-                                nouns.Add(WordDocument.GetWordWithFirstLetterUpper(nouns[i]));
-                            }
-                        }
-
-                        for (int i = 0; i < nouns.Count; i++)
-                        {
-                            string noun = nouns[i];
-                            if (i == 0)
-                            {
-                                wordDocument.CreateBookmarks(noun, newParagraph, text);
-                            }
-                            else
-                            {
-                                wordDocument.CreateBookmarks(noun, newParagraph);
-                            }
-                        }
-                    }
-                    catch (CyrWordNotFoundException error)
-                    {
-                        ViewBag.Error = error.Message;
-                        wordDocument.CreateBookmarks(word, newParagraph, text);
-                    }
-                    finally
-                    {
-                        if (wordDocument.IndexNextField.Equals(default))
-                        {
-                            wordDocument.IncreaseOfTwoindexNextField();
-                        }
-                    }
+                    wordDocument.CreateBookmarks(word, text);
                 }
-
                 if (hyperlinkType.Equals("hyperlink"))
                 {
-                    try
-                    {
-                        CyrNounCollection cyrNounCollection = new CyrNounCollection();
-                        CyrNoun cyrNoun = cyrNounCollection.Get(word, out CasesEnum @case, out NumbersEnum numbers);
-                        var nounsSet = new HashSet<string>(cyrNoun.Decline().ToList());
-                        foreach (var noun in cyrNoun.DeclinePlural().ToList())
-                        {
-                            nounsSet.Add(noun);
-                        }
-                        var nouns = nounsSet.ToList();
-                        if (cyrNoun.WordType != WordTypesEnum.Surname)
-                        {
-                            int nounLength = nouns.Count;
-                            for (int i = 0; i < nounLength; i++)
-                            {
-                                nouns.Add(WordDocument.GetWordWithFirstLetterUpper(nouns[i]));
-                            }
-                        }
+                    wordDocument.CreateHyperlinksForText(word, text);
+                }
+            }
 
-                        for (int i = 0; i < nouns.Count; i++)
-                        {
-                            string noun = nouns[i];
-                            wordDocument.CreateHyperlinkByWord(noun, text);
-                        }
-                    }
-                    catch (CyrWordNotFoundException error)
-                    {
-                        ViewBag.Error = error.Message;
-                        wordDocument.CreateHyperlinkByWord(word, text);
-                    }
-                    finally
-                    {
-                        if (wordDocument.IndexNextField.Equals(default))
-                        {
-                            wordDocument.IncreaseOfTwoindexNextField();
-                        }
-                    }
+            if (image != null)
+            {
+                string path = "/Files/" + image.FileName;
+                using (var fileStream = new FileStream(_appEnvironment.WebRootPath + path, FileMode.Create))
+                {
+                    await image.CopyToAsync(fileStream);
                 }
             }
 
@@ -151,10 +58,15 @@ namespace WebApplication1.Controllers
             return View();
         }
 
+
+
         public IActionResult EditLinks()
         {
             Section section = wordDocument.GetSectionAndParagraphByWord("Сноски").Item1;
-            ViewBag.Links = wordDocument.FindAllBookmarkBySection(section);
+            //ViewBag.Links = wordDocument.FindAllBookmarkBySection(section);
+            ViewBag.Hyperlinks = wordDocument.FindAllLinks();
+            ViewBag.Bookmarks = wordDocument.FindAllBookmarkBySection(section);
+
             return View();
         }
 
