@@ -103,7 +103,6 @@ namespace BusinessLogicLayer
 
             return nouns;
         }
-
         private void CreateBookmarkByWord(string word, string sentence = null)
         {
             //Create bookmark objects
@@ -113,7 +112,9 @@ namespace BusinessLogicLayer
             if (!string.IsNullOrWhiteSpace(sentence))
             {
                 referencesParagraph = ReferencesSection.AddParagraph();
+                referencesParagraph.AppendBookmarkStart(referencesWord);
                 referencesParagraph.AppendText(sentence);
+                referencesParagraph.AppendBookmarkEnd(referencesWord);
             }
 
             int startIndex = 0;
@@ -125,8 +126,11 @@ namespace BusinessLogicLayer
             //int endIndex = referParagraph.ChildObjects.Count;
 
             //Insert the bookmark for the last paragraph
-            referencesParagraph.ChildObjects.Insert(startIndex, start);
-            referencesParagraph.ChildObjects.Insert(paraIndex, end);
+            //referencesParagraph.ChildObjects.Insert(startIndex, start);
+            //referencesParagraph.ChildObjects.Insert(paraIndex, end);
+
+
+
 
             //Find the keyword "Hypertext"
             TextSelection[] text = document.FindAllString(word, true, true);
@@ -500,52 +504,6 @@ namespace BusinessLogicLayer
 
             return null;
         }
-
-        #region Create Document
-        //public void CreateDocument()
-        //{
-        //    Paragraph paragraph = section.AddParagraph();
-
-        //    //Set Paragraph Styles
-        //    ParagraphStyle txtStyle = new ParagraphStyle(document);
-        //    txtStyle.Name = "Style";
-        //    txtStyle.CharacterFormat.FontName = "Impact";
-        //    txtStyle.CharacterFormat.FontSize = 16;
-        //    txtStyle.CharacterFormat.TextColor = Color.RosyBrown;
-        //    document.Styles.Add(txtStyle);
-        //    //Set Hyperlink Styles
-        //    ParagraphStyle hyperlinkstyle = new ParagraphStyle(document);
-        //    hyperlinkstyle.Name = "linkStyle";
-        //    hyperlinkstyle.CharacterFormat.FontName = "Calibri";
-        //    hyperlinkstyle.CharacterFormat.FontSize = 15;
-        //    document.Styles.Add(hyperlinkstyle);
-
-        //    ///главный параграф
-        //    mainParagraph.AppendText(longText);
-        //    // ReplaceWords("гипертекст", "!!!");
-
-
-        //    ////////заготовка на гипертекст
-        //    //mainParagraph.AppendHyperlink("Гипертекст", "Гипертекст", HyperlinkType.Bookmark);
-        //    mainParagraph.ApplyStyle(hyperlinkstyle.Name);
-
-        //    for (int i = 0; i < 10; i++)
-        //    {
-        //        paragraph = section.AddParagraph();
-        //        paragraph.AppendHyperlink(mainParagraph.Text, "Гипертекст", HyperlinkType.Bookmark);
-        //        paragraph.AppendText(" поможет людям лучше понять текст.");
-        //        //Paragraph subParagraph = section.AddParagraph();
-        //        //subParagraph.AppendText("Слово употребляется в следующих параграфах: ");
-        //        //subParagraph.AppendHyperlink(mainParagraph.ToString(), mainParagraph.GetIndex(document).ToString(), HyperlinkType.Bookmark);
-        //        paragraph.ApplyStyle(hyperlinkstyle.Name);
-        //    }
-
-
-        //    SaveDocument(document, "Hyperlink");
-
-        //} 
-        #endregion
-
         public static string GetWordWithFirstLetterUpper(string str)
         {
             return str[0].ToString().ToUpper() + str.Substring(1);
@@ -555,84 +513,8 @@ namespace BusinessLogicLayer
         {
             Document.SaveToFile(filename + ".docx", FileFormat.Docx);
         }
+
         #region Unused
-        //private void SaveDocument(Document document, string filename)
-        //{
-        //    document.SaveToFile(filename + ".docx", FileFormat.Docx);
-        //}
-        //public void Result()
-        //{
-        //    Document doc = new Document();
-
-        //    doc.LoadFromFile("result.docx", FileFormat.Docx);
-        //    int indexOfSection = doc.Sections.Count - 1;
-        //    Paragraph mainPara = doc.Sections[indexOfSection].AddParagraph();
-
-        //    mainPara.AppendText(longText);
-
-        //    mainPara = doc.Sections[0].AddParagraph();
-
-        //    mainPara.AppendText("Ссылка на текст это полезная штука");
-
-        //    Paragraph para = doc.Sections[0].AddParagraph();
-
-        //    para.AppendText("Hypertext is also text. Hypertext is also text. Hypertext is also text.");
-        //    para.AppendText("Делайте ссылки на предложения");
-
-        //    //Find the string "Hypertext"
-
-        //    string word = "гипертекст";
-        //    CreateHyperlinkByWord(word);
-
-        //    //Find the string "ссылки"
-
-        //    //text = doc.FindAllString("ссылки", false, true);
-
-        //    //foreach (TextSelection seletion in text)
-        //    //{
-
-        //    //    //Get the text range
-
-        //    //    TextRange tr = seletion.GetAsOneRange();
-
-        //    //    int index = tr.OwnerParagraph.ChildObjects.IndexOf(tr);
-
-        //    //    //Add hyperlink
-
-        //    //    Field field = new Field(doc);
-
-        //    //    field.Code = "HYPERLINK \"" + "#Ссылка" + "\"";
-
-        //    //    //field.Code = "HYPERLINK \"" + "http://www.e-iceblue.com" + "\"";
-
-        //    //    field.Type = FieldType.FieldHyperlink;
-
-        //    //    tr.OwnerParagraph.ChildObjects.Insert(index, field);
-
-        //    //    FieldMark fm = new FieldMark(doc, FieldMarkType.FieldSeparator);
-
-        //    //    tr.OwnerParagraph.ChildObjects.Insert(index + 1, fm);
-
-        //    //    //Set character format
-
-        //    //    tr.CharacterFormat.TextColor = Color.Blue;
-
-        //    //    tr.CharacterFormat.UnderlineStyle = UnderlineStyle.Single;
-
-        //    //    tr.CharacterFormat.Bold = tr.CharacterFormat.Bold;
-
-        //    //    FieldMark fmend = new FieldMark(doc, FieldMarkType.FieldEnd);
-
-        //    //    tr.OwnerParagraph.ChildObjects.Insert(index + 3, fmend);
-
-        //    //    field.End = fmend;
-
-        //    //}
-
-
-        //    //doc.SaveToFile("result.docx", FileFormat.Docx);
-        //}
-
         //public void RemoveHyperlinks()
         //{
         //    Document document = new Document();
@@ -824,11 +706,6 @@ namespace BusinessLogicLayer
                 longText.AppendLine("</div>");
             }
 
-            //foreach (var item in GetAllFootnotes())
-            //{
-            //    longText.Append(item);
-            //}
-
             return longText.ToString();
         }
 
@@ -892,34 +769,6 @@ namespace BusinessLogicLayer
         {
             var bookmarks = new List<string>();
 
-            BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(document);
-            var bookmarks1 = bookmarksNavigator.Document.Bookmarks;
-            for (int i = 1; i < bookmarks1.Count; i++)
-            {
-
-                //bookmarks1[i].BookmarkEnd.OwnerParagraph.Text = "Hypertext is awesome";
-
-                //var lastItem = bookmarks1[i].BookmarkStart.OwnerParagraph.Items.LastItem;
-                //bookmarks1[i].BookmarkStart.OwnerParagraph.Items.Remove(lastItem);
-
-
-                Section tempSection = document.AddSection();
-                string text = "Hypertext is awesome";
-                tempSection.AddParagraph().AppendText(text);
-
-                ParagraphBase paragraphBaseFirstItem = tempSection.Paragraphs[0].Items.FirstItem as ParagraphBase;
-                ParagraphBase paragraphBaseLastItem = tempSection.Paragraphs[0].Items.LastItem as ParagraphBase;
-                TextBodySelection textBodySelection = new TextBodySelection(paragraphBaseFirstItem, paragraphBaseLastItem);
-                TextBodyPart textBodyPart = new TextBodyPart(textBodySelection);
-
-                bookmarksNavigator.MoveToBookmark(bookmarks1[i].Name);
-                bookmarksNavigator.ReplaceBookmarkContent(textBodyPart, true, true);
-
-                document.Sections.Remove(tempSection);
-
-                SaveCurrentDocument();
-            }
-
             #region find bookmark by section
             //foreach (DocumentObject sec in section.Body.ChildObjects)
             //{
@@ -962,6 +811,28 @@ namespace BusinessLogicLayer
             //} 
             #endregion
             return bookmarks;
+        }
+
+        public void EditTextInBookmark(string bookmarkText, string text)
+        {
+            BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(document);
+
+
+            Section tempSection = document.AddSection();
+            tempSection.AddParagraph().AppendText(text);
+
+            ParagraphBase paragraphBaseFirstItem = tempSection.Paragraphs[0].Items.FirstItem as ParagraphBase;
+            ParagraphBase paragraphBaseLastItem = tempSection.Paragraphs[tempSection.Paragraphs.Count - 1].Items.LastItem as ParagraphBase;
+            TextBodySelection textBodySelection = new TextBodySelection(paragraphBaseFirstItem, paragraphBaseLastItem);
+            TextBodyPart textBodyPart = new TextBodyPart(textBodySelection);
+
+            bookmarksNavigator.MoveToBookmark(bookmarkText);
+            bookmarksNavigator.ReplaceBookmarkContent(textBodyPart);
+
+            document.Sections.Remove(tempSection);
+
+            SaveCurrentDocument();
+
         }
 
         public List<string> GetAllFootnotes()
