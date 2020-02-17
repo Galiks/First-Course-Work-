@@ -765,9 +765,17 @@ namespace BusinessLogicLayer
             return links;
         }
 
-        public List<string> FindAllBookmarkBySection(Section section)
+        public IEnumerable<string> FindAllBookmarkBySection(Section section)
         {
-            var bookmarks = new List<string>();
+            BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(document);
+            var bookmarks = bookmarksNavigator.Document.Bookmarks;
+            foreach (Bookmark bookmark in bookmarks)
+            {
+                yield return bookmark.Name;
+            }
+
+            //var bookmarks = (bookmarksNavigator.Document.Bookmarks as IEnumerable<Bookmark>).All(b => b.Name == b.Name);
+
 
             #region find bookmark by section
             //foreach (DocumentObject sec in section.Body.ChildObjects)
@@ -810,7 +818,6 @@ namespace BusinessLogicLayer
             //    }
             //} 
             #endregion
-            return bookmarks;
         }
 
         public void EditTextInBookmark(string bookmarkText, string text)
