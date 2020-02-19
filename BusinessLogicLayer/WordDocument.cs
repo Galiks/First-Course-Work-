@@ -45,8 +45,9 @@ namespace BusinessLogicLayer
         public void SetReferencesWord(string word)
         {
             //­­­U+00AD
-            //005F
-            referencesWord = word.Replace(' ', '\u005F');
+            //005F       
+            var splitWord = word.Split("\\");
+            referencesWord = splitWord[^1].Replace(' ', '\u005F').Replace('/', '\u005F');
         }
         public void CreateBookmarksForText(string word, string text)
         {
@@ -116,20 +117,12 @@ namespace BusinessLogicLayer
                 referencesParagraph.AppendBookmarkEnd(referencesWord);
             }
 
-            int startIndex = 0;
-            int paraIndex = referencesParagraph.ChildObjects.Count;
-
-            //referParagraph.ChildObjects.Insert(startIndex, start);
-            //referParagraph.ChildObjects.Insert(paraIndex, end);
-
+            //int startIndex = 0;
+            //int paraIndex = referencesParagraph.ChildObjects.Count;
             //int endIndex = referParagraph.ChildObjects.Count;
-
             //Insert the bookmark for the last paragraph
             //referencesParagraph.ChildObjects.Insert(startIndex, start);
             //referencesParagraph.ChildObjects.Insert(paraIndex, end);
-
-
-
 
             //Find the keyword "Hypertext"
             TextSelection[] text = document.FindAllString(word, true, true);
@@ -220,13 +213,13 @@ namespace BusinessLogicLayer
                     string noun = nouns[i];
 
                     CreateBookmarkByImage(path, noun);
-                    SetBookmarkForImage(path);
+                    //SetBookmarkForImage(path);
                 }
             }
             catch (CyrWordNotFoundException error)
             {
                 CreateBookmarkByImage(path, word);
-                SetBookmarkForImage(path);
+                //SetBookmarkForImage(path);
             }
             finally
             {
@@ -237,29 +230,9 @@ namespace BusinessLogicLayer
 
             }
         }
-        public void CreateBookmarkByImage(string path, string word)
+        private void CreateBookmarkByImage(string path, string word)
         {
-            //Create bookmark objects
-            BookmarkStart start = new BookmarkStart(document, referencesWord);
-            BookmarkEnd end = new BookmarkEnd(document, referencesWord);
-
-            //if (!string.IsNullOrWhiteSpace(sentence))
-            //{
-            //    referencesParagraph = ReferencesSection.AddParagraph();
-            //    referencesParagraph.AppendText(sentence);
-            //}
-
-            int startIndex = 0;
-            int paraIndex = referencesParagraph.ChildObjects.Count;
-
-            ////referParagraph.ChildObjects.Insert(startIndex, start);
-            ////referParagraph.ChildObjects.Insert(paraIndex, end);
-
-            ////int endIndex = referParagraph.ChildObjects.Count;
-
-            //Insert the bookmark for the last paragraph
-            referencesParagraph.ChildObjects.Insert(startIndex, start);
-            referencesParagraph.ChildObjects.Insert(paraIndex, end);
+            
 
             //Find the keyword "Hypertext"
             TextSelection[] text = document.FindAllString(word, true, true);
@@ -273,6 +246,30 @@ namespace BusinessLogicLayer
             {
                 return;
             }
+
+            //Create bookmark objects
+
+            BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(document);
+            bookmarksNavigator.MoveToBookmark(referencesWord);
+
+            if (bookmarksNavigator.CurrentBookmark == null)
+            {
+                Image image = Image.FromFile(path);
+
+                SetReferencesWord(path);
+
+                var referParagraph = referencesSection.AddParagraph();
+                referParagraph.AppendBookmarkStart(referencesWord);
+                referParagraph.AppendPicture(image);
+                referParagraph.AppendBookmarkEnd(referencesWord);
+                SaveCurrentDocument();
+
+                bookmarksNavigator.MoveToBookmark(referencesWord);
+                bookmarksNavigator.InsertParagraph(referParagraph);
+
+                SaveCurrentDocument();
+            }
+
 
             //Get the keywords
             for (int i = 0; i < text.Length; i++)

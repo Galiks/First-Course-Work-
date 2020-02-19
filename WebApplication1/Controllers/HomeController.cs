@@ -47,20 +47,18 @@ namespace WebApplication1.Controllers
                 }
             }
 
-            //if (image != null)
-            //{
-            //    string path = _appEnvironment.WebRootPath + "/Files/" + image.FileName;
-            //    using (var fileStream = new FileStream(path, FileMode.Create))
-            //    {
-            //        await image.CopyToAsync(fileStream);
-            //    }
+            if (image != null)
+            {
+                string path = _appEnvironment.WebRootPath + "/Files/" + image.FileName;
+                using (var fileStream = new FileStream(path, FileMode.Create))
+                {
+                    await image.CopyToAsync(fileStream);
+                }
 
-            //    //wordDocument.CreatHyperlinkForImage(path, text);
+                //wordDocument.CreatHyperlinkForImage(path, text);
 
-            //    CreateBookmark(path);
-
-            //    //wordDocument.CreateBookmarksForImage(path, word);
-            //}
+                wordDocument.CreateBookmarksForImage(path, word);
+            }
 
             var result = wordDocument.FindAllBookmarkBySection(null);
 
