@@ -9,6 +9,7 @@ using Spire.Doc.Fields;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using WebApplication1.Models;
 
@@ -74,8 +75,11 @@ namespace WebApplication1.Controllers
         {
             Section section = wordDocument.GetSectionAndParagraphByWord("Сноски").Item1;
             //ViewBag.Links = wordDocument.FindAllBookmarkBySection(section);
-            ViewBag.Hyperlinks = wordDocument.FindAllLinks();
+            var links = wordDocument.FindAllLinks();
+            var link = links.Where(l => l.Code == "HYPERLINK \"" + "https://www.youtube.com/" + "\"").FirstOrDefault();
+            wordDocument.EditLinkInHypertext(link, "https://www.e-iceblue.com/Knowledgebase/Spire.Doc/Spire.Doc-Program-Guide/Hyperlink.html");
             ViewBag.Bookmarks = wordDocument.FindAllBookmarkBySection(section);
+            ViewBag.Hyperlinks = links;
 
             return View();
         }

@@ -81,7 +81,6 @@ namespace BusinessLogicLayer
                 }
             }
         }
-
         private List<string> GetWordsByCases(string word)
         {
             CyrNounCollection cyrNounCollection = new CyrNounCollection();
@@ -338,7 +337,6 @@ namespace BusinessLogicLayer
 
             SaveCurrentDocument();
         }
-
         private void SetBookmarkForImage(string path)
         {
             BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(document);
@@ -357,7 +355,6 @@ namespace BusinessLogicLayer
 
             SaveCurrentDocument();
         }
-
         public void CreateHyperlinksForText(string word, string text)
         {
             try
@@ -708,7 +705,6 @@ namespace BusinessLogicLayer
 
             return longText.ToString();
         }
-
         public List<Field> FindAllLinksBySection(Section section)
         {
             var links = new List<Field>();
@@ -773,51 +769,6 @@ namespace BusinessLogicLayer
             {
                 yield return bookmark.Name;
             }
-
-            //var bookmarks = (bookmarksNavigator.Document.Bookmarks as IEnumerable<Bookmark>).All(b => b.Name == b.Name);
-
-
-            #region find bookmark by section
-            //foreach (DocumentObject sec in section.Body.ChildObjects)
-            //{
-            //    if (sec.DocumentObjectType == DocumentObjectType.Paragraph)
-            //    {
-            //        foreach (DocumentObject para in (sec as Paragraph).ChildObjects)
-            //        {
-            //            if (para.DocumentObjectType == DocumentObjectType.BookmarkStart)
-            //            {
-            //                BookmarkStart bookmarkStart = para as BookmarkStart;
-
-            //                if (!string.IsNullOrWhiteSpace(bookmarkStart.Name))
-            //                {
-            //                    bookmarks.Add(bookmarkStart.Name);
-            //                    BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(document);
-            //                    var bookmarks1 = bookmarksNavigator.Document.Bookmarks;
-            //                    for (int i = 1; i < bookmarks1.Count; i++)
-            //                    {
-            //                        Section tempSection = document.AddSection();
-            //                        string text = "Hypertext is awesome";
-            //                        tempSection.AddParagraph().AppendText(text);
-
-            //                        ParagraphBase paragraphBaseFirstItem = tempSection.Paragraphs[0].Items.FirstItem as ParagraphBase;
-            //                        ParagraphBase paragraphBaseLastItem = tempSection.Paragraphs[0].Items.LastItem as ParagraphBase;
-            //                        TextBodySelection textBodySelection = new TextBodySelection(paragraphBaseFirstItem, paragraphBaseLastItem);
-            //                        TextBodyPart textBodyPart = new TextBodyPart(textBodySelection);
-
-            //                        bookmarksNavigator.MoveToBookmark(bookmarks1[i].Name);
-
-            //                        bookmarksNavigator.ReplaceBookmarkContent(textBodyPart);
-
-            //                        document.Sections.Remove(tempSection);
-
-            //                        SaveCurrentDicument();
-            //                    }
-            //                }
-            //            }
-            //        }
-            //    }
-            //} 
-            #endregion
         }
 
         public void EditTextInBookmark(string bookmarkText, string text)
@@ -840,6 +791,12 @@ namespace BusinessLogicLayer
 
             SaveCurrentDocument();
 
+        }
+        public void EditLinkInHypertext(Field field, string hyperlink)
+        {
+            field.Code = "HYPERLINK \"" + hyperlink + "\"";
+
+            SaveCurrentDocument();
         }
 
         public List<string> GetAllFootnotes()
