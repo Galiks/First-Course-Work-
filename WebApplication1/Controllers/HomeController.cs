@@ -58,6 +58,8 @@ namespace WebApplication1.Controllers
                 //wordDocument.CreatHyperlinkForImage(path, text);
 
                 wordDocument.CreateBookmarksForImage(path, word);
+
+
             }
 
             var result = wordDocument.FindAllBookmarkBySection(null);

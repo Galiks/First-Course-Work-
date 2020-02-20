@@ -232,7 +232,23 @@ namespace BusinessLogicLayer
         }
         private void CreateBookmarkByImage(string path, string word)
         {
-            
+            SetReferencesWord(path);
+            BookmarksNavigator bn = new BookmarksNavigator(document);
+            bn.MoveToBookmark(referencesWord, true, true);
+
+            if (bn.CurrentBookmark == null)
+            {
+                var para = document.AddSection().AddParagraph();
+                para.AppendBookmarkStart(referencesWord);
+                para.AppendBookmarkEnd(referencesWord);
+                bn.MoveToBookmark(referencesWord, true, true);
+                Section section0 = document.AddSection();
+                Paragraph paragraph = section0.AddParagraph();
+                Image image2 = Image.FromFile(path);
+                DocPicture picture = paragraph.AppendPicture(image2);
+                bn.InsertParagraph(paragraph);
+                document.Sections.Remove(section0); 
+            }
 
             //Find the keyword "Hypertext"
             TextSelection[] text = document.FindAllString(word, true, true);
