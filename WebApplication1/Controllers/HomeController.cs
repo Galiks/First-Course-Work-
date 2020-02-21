@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Spire.Doc;
 using Spire.Doc.Documents;
 using Spire.Doc.Fields;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -62,7 +63,7 @@ namespace WebApplication1.Controllers
 
             }
 
-            var result = wordDocument.FindAllBookmarkBySection(null);
+            var result = wordDocument.GetAllBookmarks();
 
 
             ViewBag.Messages = wordDocument.Messages;
@@ -73,13 +74,8 @@ namespace WebApplication1.Controllers
 
         public IActionResult EditLinks()
         {
-            Section section = wordDocument.GetSectionAndParagraphByWord("Сноски").Item1;
-            //ViewBag.Links = wordDocument.FindAllBookmarkBySection(section);
-            var links = wordDocument.FindAllLinks();
-            var link = links.Where(l => l.Code == "HYPERLINK \"" + "https://www.youtube.com/" + "\"").FirstOrDefault();
-            wordDocument.EditLinkInHypertext(link, "https://www.e-iceblue.com/Knowledgebase/Spire.Doc/Spire.Doc-Program-Guide/Hyperlink.html");
-            ViewBag.Bookmarks = wordDocument.FindAllBookmarkBySection(section);
-            ViewBag.Hyperlinks = links;
+            ViewBag.Hyperlinks = wordDocument.GetAllHyperlinks();
+            ViewBag.Bookmarks = wordDocument.GetAllBookmarks();
 
             return View();
         }
@@ -93,6 +89,22 @@ namespace WebApplication1.Controllers
         public IActionResult UsingHypertext()
         {
             return View();
+        }
+
+        public IActionResult UpdateHyperlink(int index, string hypertext)
+        {
+            List<Field> list = wordDocument.GetAllHyperlinks();
+            Field field = list[index];
+            wordDocument.EditLinkInHypertext(field, hypertext);
+            return Redirect("EditLinks");
+        }
+
+        public IActionResult DeleteHyperlink(int index)
+        {
+            List<Field> list = wordDocument.GetAllHyperlinks();
+            Field field = list[index];
+            this.wordDocument.DeleteHyperlink(field);
+            return Redirect("EditLinks");
         }
     }
 }

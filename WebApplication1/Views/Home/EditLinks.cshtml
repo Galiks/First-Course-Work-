@@ -21,7 +21,7 @@
             border: 1px double black;
             float: left;
             display: inline-block;
-            width: 40%;
+            /*width: 40%;*/
             height: 100%;
         }
 
@@ -29,7 +29,7 @@
             border: 1px double black;
             float: right;
             display: inline-block;
-            width: 40%;
+            /*width: 40%;*/
             height: 100%;
         }
     </style>
@@ -38,21 +38,52 @@
 
         <div id="maincontainer">
             <div id="leftcolumn">
-                <ol>
+                <table border="1">
+                    
+                    @for (int i = 0; i < ViewBag.Hyperlinks.Count; i++)
+                    {
+                        <tr>
+                            <td>@ViewBag.Hyperlinks[i].FieldText - @ViewBag.Hyperlinks[i].Code</td>
+                            <td width="40px">
+                                <form asp-action="UpdateHyperlink" asp-controller="Home" method="post">
+                                    <input type="text" name="hypertext" />
+                                    <input type="number" name="index" hidden  value=@i/>
+
+                                    <button>Редактировать</button>
+                                </form asp-action="UpdateHyperlink">
+
+                                @*@Html.ActionLink("Редактировать", "UpdateHyperlink", "Home", null, new { index = i, hypertext = "document.getElementById('myHtmlInputElementId').value;" })*@
+                            </td>
+                            <td>
+                                @Html.ActionLink("Удалить", "DeleteHyperlink", new { index = i })
+                            </td>
+                        </tr>
+                    }
+                    
+                </table>
+                @*<ol>
                     @foreach (Field item in ViewBag.Hyperlinks)
                     {
-                        <li>@item.FieldText - @item.Code</li>
+                        <li>
+                            @item.FieldText - @item.Code
+                        </li>
                     }
-                </ol>
+                </ol>*@
             </div>
 
             <div id="contentwrapper">
-                <ol>
-                    @foreach (string item in ViewBag.Bookmarks)
-                    {
-                        <li>@item</li>
-                    }
-                </ol>
+                <table border="1">
+                    <tr>
+                        <td>Данные</td>
+                        <td>Методы</td>
+                    </tr>
+                </table>
+                @*<ol>
+            @foreach (string item in ViewBag.Bookmarks)
+            {
+                <li>@item</li>
+            }
+        </ol>*@
             </div>
         </div>
         

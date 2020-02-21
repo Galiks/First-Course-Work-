@@ -14,6 +14,8 @@ namespace BusinessLogicLayer
 {
     public class WordDocument
     {
+        private const int width = 470;
+        private const int height = 340;
         private readonly Document document;
         private readonly string filename;
         private string referencesWord;
@@ -21,6 +23,7 @@ namespace BusinessLogicLayer
         private static int indexNextField = 0;
         private Paragraph referencesParagraph;
         private Section referencesSection;
+
 
         public Document Document => document;
 
@@ -238,14 +241,16 @@ namespace BusinessLogicLayer
 
             if (bn.CurrentBookmark == null)
             {
-                var para = document.AddSection().AddParagraph();
+                var para = referencesSection.AddParagraph();
                 para.AppendBookmarkStart(referencesWord);
                 para.AppendBookmarkEnd(referencesWord);
                 bn.MoveToBookmark(referencesWord, true, true);
                 Section section0 = document.AddSection();
                 Paragraph paragraph = section0.AddParagraph();
-                Image image2 = Image.FromFile(path);
-                DocPicture picture = paragraph.AppendPicture(image2);
+                Image image = Image.FromFile(path);          
+                DocPicture picture = paragraph.AppendPicture(image);
+                picture.Width = width;
+                picture.Height = height;
                 bn.InsertParagraph(paragraph);
                 document.Sections.Remove(section0); 
             }
@@ -347,24 +352,6 @@ namespace BusinessLogicLayer
                 FieldMark fieldEnd = new FieldMark(document, FieldMarkType.FieldEnd);
                 paragraph.ChildObjects.Insert(index + 3, fieldEnd);
             }
-
-            SaveCurrentDocument();
-        }
-        private void SetBookmarkForImage(string path)
-        {
-            BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(document);
-
-            bookmarksNavigator.MoveToBookmark(referencesWord);
-
-            //Add a section and named it section0
-            //Section section0 = document.AddSection();
-            //Add a paragraph for section0
-            Paragraph imageParagraph = ReferencesSection.AddParagraph();
-            Image image = Image.FromFile(path);
-            //Add a picture into paragraph
-            DocPicture picture = imageParagraph.AppendPicture(image);
-            //Add a paragraph with picture at the position of bookmark
-            bookmarksNavigator.InsertParagraph(imageParagraph);
 
             SaveCurrentDocument();
         }
@@ -518,7 +505,6 @@ namespace BusinessLogicLayer
         {
             return str[0].ToString().ToUpper() + str.Substring(1);
         }
-
         public void SaveCurrentDocument()
         {
             Document.SaveToFile(filename + ".docx", FileFormat.Docx);
@@ -558,34 +544,34 @@ namespace BusinessLogicLayer
 
         //        field.End.OwnerParagraph.ChildObjects.RemoveAt(endIndex);
 
-        //        for (int j = sepOwnerParagraphIndex; j >= ownerParagraphIndex; j--)
-        //        {
-        //            if (j.Equals(sepOwnerParagraphIndex) && j.Equals(ownerParagraphIndex))
-        //            {
-        //                for (int k = sepIndex; k >= fieldIndex; k--)
+        //                for (int j = sepOwnerParagraphIndex; j >= ownerParagraphIndex; j--)
         //                {
-        //                    field.OwnerParagraph.ChildObjects.RemoveAt(k);
+        //                    if (j.Equals(sepOwnerParagraphIndex) && j.Equals(ownerParagraphIndex))
+        //                    {
+        //                        for (int k = sepIndex; k >= fieldIndex; k--)
+        //                        {
+        //                            field.OwnerParagraph.ChildObjects.RemoveAt(k);
+        //                        }
+        //}
+        //                    else if (j.Equals(sepOwnerParagraphIndex))
+        //                    {
+        //                        for (int k = sepIndex; k >= 0; k--)
+        //                        {
+        //                            sepOwnerParagraph.ChildObjects.RemoveAt(k);
+        //                        }
+        //                    }
+        //                    else if (j.Equals(ownerParagraphIndex))
+        //                    {
+        //                        for (int k = field.OwnerParagraph.ChildObjects.Count - 1; k >= fieldIndex; k--)
+        //                        {
+        //                            field.OwnerParagraph.ChildObjects.RemoveAt(k);
+        //                        }
+        //                    }
+        //                    else
+        //                    {
+        //                        field.OwnerParagraph.ChildObjects.RemoveAt(j);
+        //                    }
         //                }
-        //            }
-        //            else if (j.Equals(sepOwnerParagraphIndex))
-        //            {
-        //                for (int k = sepIndex; k >= 0; k--)
-        //                {
-        //                    sepOwnerParagraph.ChildObjects.RemoveAt(k);
-        //                }
-        //            }
-        //            else if (j.Equals(ownerParagraphIndex))
-        //            {
-        //                for (int k = field.OwnerParagraph.ChildObjects.Count - 1; k >= fieldIndex; k--)
-        //                {
-        //                    field.OwnerParagraph.ChildObjects.RemoveAt(k);
-        //                }
-        //            }
-        //            else
-        //            {
-        //                field.OwnerParagraph.ChildObjects.RemoveAt(j);
-        //            }
-        //        }
         //    }
         //}
 
@@ -617,51 +603,7 @@ namespace BusinessLogicLayer
         //    return hyperLink;
         //}
 
-        //private void FormatFieldResultText(Body ownerBody, int sepOwnerParaIndex, int endOwnerParaIndex, int sepIndex, int endIndex)
-        //{
-        //    for (int i = sepOwnerParaIndex; i <= endOwnerParaIndex; i++)
-        //    {
-        //        Paragraph para = ownerBody.ChildObjects[i] as Paragraph;
-        //        if (i == sepOwnerParaIndex && i == endOwnerParaIndex)
-        //        {
-        //            for (int j = sepIndex + 1; j < endIndex; j++)
-        //            {
-        //                FormatText(para.ChildObjects[j] as TextRange);
-        //            }
 
-        //        }
-        //        else if (i == sepOwnerParaIndex)
-        //        {
-        //            for (int j = sepIndex + 1; j < para.ChildObjects.Count; j++)
-        //            {
-        //                FormatText(para.ChildObjects[j] as TextRange);
-        //            }
-        //        }
-        //        else if (i == endOwnerParaIndex)
-        //        {
-        //            for (int j = 0; j < endIndex; j++)
-        //            {
-        //                FormatText(para.ChildObjects[j] as TextRange);
-        //            }
-        //        }
-        //        else
-        //        {
-        //            for (int j = 0; j < para.ChildObjects.Count; j++)
-        //            {
-        //                FormatText(para.ChildObjects[j] as TextRange);
-        //            }
-        //        }
-        //    }
-        //}
-
-        //private void FormatText(TextRange tr)
-        //{
-        //    if (tr != null)
-        //    {
-        //        tr.CharacterFormat.TextColor = Color.Black;
-        //        tr.CharacterFormat.UnderlineStyle = UnderlineStyle.None;
-        //    }
-        //} 
         #endregion
 
         public string GetTextFromDocument()
@@ -746,7 +688,7 @@ namespace BusinessLogicLayer
             }
             return links;
         }
-        public List<Field> FindAllLinks()
+        public List<Field> GetAllHyperlinks()
         {
             var links = new List<Field>();
 
@@ -774,7 +716,7 @@ namespace BusinessLogicLayer
             return links;
         }
 
-        public IEnumerable<string> FindAllBookmarkBySection(Section section)
+        public IEnumerable<string> GetAllBookmarks()
         {
             BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(document);
             var bookmarks = bookmarksNavigator.Document.Bookmarks;
@@ -868,6 +810,110 @@ namespace BusinessLogicLayer
             {
                 referencesParagraph = sectionAndParagraph.Item2;
                 ReferencesSection = sectionAndParagraph.Item1;
+            }
+
+            SaveCurrentDocument();
+        }
+
+        public void DeleteHyperlink(Field field)
+        {
+            int ownerParagraphIndex = field.OwnerParagraph.OwnerTextBody.ChildObjects.IndexOf(field.OwnerParagraph);
+            int fieldIndex = field.OwnerParagraph.ChildObjects.IndexOf(field);
+            Paragraph sepOwnerParagraph = field.Separator.OwnerParagraph;
+            int sepOwnerParagraphIndex = field.Separator.OwnerParagraph.OwnerTextBody.ChildObjects.IndexOf(field.Separator.OwnerParagraph);
+            int sepIndex = field.Separator.OwnerParagraph.ChildObjects.IndexOf(field.Separator);
+            int endIndex = field.End.OwnerParagraph.ChildObjects.IndexOf(field.End);
+            int endOwnerParagraphIndex = field.End.OwnerParagraph.OwnerTextBody.ChildObjects.IndexOf(field.End.OwnerParagraph);
+
+            #region Remove font color and etc
+            FormatFieldResultText(field.Separator.OwnerParagraph.OwnerTextBody, sepOwnerParagraphIndex, endOwnerParagraphIndex, sepIndex, endIndex);
+            #endregion
+
+            field.End.OwnerParagraph.ChildObjects.RemoveAt(endIndex);
+
+            for (int j = sepOwnerParagraphIndex; j >= ownerParagraphIndex; j--)
+            {
+                if (j.Equals(sepOwnerParagraphIndex) && j.Equals(ownerParagraphIndex))
+                {
+                    for (int k = sepIndex; k >= fieldIndex; k--)
+                    {
+                        field.OwnerParagraph.ChildObjects.RemoveAt(k);
+                    }
+                }
+                else if (j.Equals(sepOwnerParagraphIndex))
+                {
+                    for (int k = sepIndex; k >= 0; k--)
+                    {
+                        sepOwnerParagraph.ChildObjects.RemoveAt(k);
+                    }
+                }
+                else if (j.Equals(ownerParagraphIndex))
+                {
+                    for (int k = field.OwnerParagraph.ChildObjects.Count - 1; k >= fieldIndex; k--)
+                    {
+                        field.OwnerParagraph.ChildObjects.RemoveAt(k);
+                    }
+                }
+                else
+                {
+                    field.OwnerParagraph.ChildObjects.RemoveAt(j);
+                }
+            }
+
+            SaveCurrentDocument();
+        }
+        private void FormatFieldResultText(Body ownerBody, int sepOwnerParaIndex, int endOwnerParaIndex, int sepIndex, int endIndex)
+        {
+            for (int i = sepOwnerParaIndex; i <= endOwnerParaIndex; i++)
+            {
+                Paragraph para = ownerBody.ChildObjects[i] as Paragraph;
+                if (i == sepOwnerParaIndex && i == endOwnerParaIndex)
+                {
+                    for (int j = sepIndex + 1; j < endIndex; j++)
+                    {
+                        FormatText(para.ChildObjects[j] as TextRange);
+                    }
+
+                }
+                else if (i == sepOwnerParaIndex)
+                {
+                    for (int j = sepIndex + 1; j < para.ChildObjects.Count; j++)
+                    {
+                        FormatText(para.ChildObjects[j] as TextRange);
+                    }
+                }
+                else if (i == endOwnerParaIndex)
+                {
+                    for (int j = 0; j < endIndex; j++)
+                    {
+                        FormatText(para.ChildObjects[j] as TextRange);
+                    }
+                }
+                else
+                {
+                    for (int j = 0; j < para.ChildObjects.Count; j++)
+                    {
+                        FormatText(para.ChildObjects[j] as TextRange);
+                    }
+                }
+            }
+        }
+        private void FormatText(TextRange tr)
+        {
+            if (tr != null)
+            {
+                tr.CharacterFormat.TextColor = Color.Black;
+                tr.CharacterFormat.UnderlineStyle = UnderlineStyle.None;
+            }
+        }
+
+        public void DeleteBookmark(string bookmark)
+        {
+            BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(document);
+            bookmarksNavigator.MoveToBookmark(bookmark);
+            if (bookmarksNavigator.CurrentBookmark != null)
+            {
+                document.Bookmarks.Remove(bookmarksNavigator.CurrentBookmark);
             }
 
             SaveCurrentDocument();
