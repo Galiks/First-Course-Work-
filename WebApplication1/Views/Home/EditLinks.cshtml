@@ -1,11 +1,12 @@
 ﻿@using Spire.Doc.Documents;
 
 @{
-    ViewData["Title"] = "Privacy Policy";
+    Layout = null;
 }
-
+<!DOCTYPE html>
+<html>
 <head>
-
+    <title>Редактирование</title>
 </head>
 <body>
     <style>
@@ -13,23 +14,28 @@
         #maincontainer {
             width: 100%;
             height: 100%;
-            text-align: center;
+            margin: 0px;
         }
 
         #leftcolumn {
             border: 1px double black;
-            float: left;
+            /*float: left;*/
             display: inline-block;
-            /*width: 40%;*/
+            /*width: 50%;*/
             height: 100%;
+            text-align:left;
         }
 
         #contentwrapper {
             border: 1px double black;
-            float: right;
+            /*float: right;*/
             display: inline-block;
-            /*width: 40%;*/
+            /*width: 50%;*/
             height: 100%;
+            text-align:right;
+        }
+        .conteiner{
+            margin:0px;
         }
     </style>
     <div>
@@ -41,21 +47,59 @@
 
                     @for (int i = 0; i < ViewBag.Hyperlinks.Count; i++)
                     {
-                        <tr>
-                            <td width="80px">@ViewBag.Hyperlinks[i].FieldText - @ViewBag.Hyperlinks[i].Code</td>
-                            <td width="40px">
-                                <form asp-action="UpdateHyperlink" asp-controller="Home" method="post">
-                                    <input type="text" name="hypertext" />
-                                    <input type="number" name="index" hidden value=@i />
+                        var image = ViewBag.Hyperlinks[i].Separator.NextSibling;
+                        if (image.DocumentObjectType == DocumentObjectType.Picture)
+                        {
+                            <tr>
+                                <td>
+                                    <img width='200px' height='200px' src='data:image/jpeg;base64,@Convert.ToBase64String(image.ImageBytes)' />
+                                    <br />
+                                    <p>@ViewBag.Hyperlinks[i].Code</p>
+                                </td>
+                                <td width="40px">
+                                    <form asp-action="UpdateHyperlink" asp-controller="Home" method="post" enctype="multipart/form-data">
+                                        <label for="image">
+                                            Фото:
+                                            <input type="file" id="image" name="image" />
+                                        </label>
+                                        <input type="number" name="index" hidden value=@i />
 
-                                    <button>Редактировать</button>
-                                </form>
+                                        <button>Редактировать картинку</button>
+                                    </form>
 
-                            </td>
-                            <td>
-                                @Html.ActionLink("Удалить", "DeleteHyperlink", new { index = i })
-                            </td>
-                        </tr>
+                                </td>
+                                <td width="40px">
+                                    <form asp-action="UpdateHyperlink" asp-controller="Home" method="post">
+                                        <input type="text" name="hypertext" />
+                                        <input type="number" name="index" hidden value=@i />
+
+                                        <button>Редактировать текст</button>
+                                    </form>
+
+                                </td>
+                                <td>
+                                    @Html.ActionLink("Удалить", "DeleteHyperlink", new { index = i })
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            <tr>
+                                <td width="80px">@ViewBag.Hyperlinks[i].FieldText - @ViewBag.Hyperlinks[i].Code</td>
+                                <td width="40px">
+                                    <form asp-action="UpdateHyperlink" asp-controller="Home" method="post">
+                                        <input type="text" name="hypertext" />
+                                        <input type="number" name="index" hidden value=@i />
+
+                                        <button>Редактировать</button>
+                                    </form>
+
+                                </td>
+                                <td>
+                                    @Html.ActionLink("Удалить", "DeleteHyperlink", new { index = i })
+                                </td>
+                            </tr>
+                        }
                     }
 
                 </table>
@@ -65,40 +109,60 @@
                 <table border="1">
                     @for (int i = 0; i < ViewBag.Bookmarks.Count; i++)
                     {
-                    <tr>
-
-                        @{
-                            var nextSibling = ViewBag.Bookmarks[i].BookmarkStart.Owner.NextSibling;
-                            if (nextSibling != null)
+                        
+                        var nextSibling = ViewBag.Bookmarks[i].BookmarkStart.Owner.NextSibling;
+                        if (nextSibling != null)
+                        {
+                            var firstChild = nextSibling.FirstChild;
+                            if (firstChild.DocumentObjectType == DocumentObjectType.Picture)
                             {
-                                var firstChild = nextSibling.FirstChild;
-                                if (firstChild.DocumentObjectType == DocumentObjectType.Picture)
-                                {
+                                <tr>
                                     <td><img width='200px' height='200px' src='data:image/jpeg;base64,@Convert.ToBase64String(firstChild.ImageBytes)' /></td>
-                                }
-                                else
-                                {
+                                    <td width="40px">
+                                        <form asp-action="UpdateBookmark" asp-controller="Home" method="post" enctype="multipart/form-data">
+                                            <label for="image">
+                                            Фото:
+                                            <input type="file" id="image" name="image" />
+                                            </label>
+                                            <input type="text" name="bookmark" hidden value="@ViewBag.Bookmarks[i].Name" />
+                                            <button>Редактировать картинку</button>
+                                        </form>
+                                    </td>
+                                    <td>
+                                        <form asp-action="UpdateBookmark" asp-controller="Home" method="post">
+                                            <input type="text" name="text" />
+                                            <input type="text" name="bookmark" hidden value="@ViewBag.Bookmarks[i].Name" />
+                                            <button>Редактировать текст</button>
+                                        </form>
+                                    </td>
+                                    <td>
+                                        @Html.ActionLink("Удалить", "DeleteBookmark", new { index = ViewBag.Bookmarks[i].Name })
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                <tr>
                                     <td>@ViewBag.Bookmarks[i].BookmarkStart.Owner.Text</td>
-                                }
+                                    <td width="40px">
+                                        <form asp-action="UpdateBookmark" asp-controller="Home" method="post">
+                                            <input type="text" name="text" />
+                                            <input type="text" name="bookmark" hidden value="@ViewBag.Bookmarks[i].Name" />
+
+                                            <button>Редактировать</button>
+                                        </form>
+                                    </td>
+                                    <td>
+                                        @Html.ActionLink("Удалить", "DeleteBookmark", new { index = ViewBag.Bookmarks[i].Name })
+                                    </td>
+                                </tr>
                             }
                         }
-
-                        <td width="40px">
-                            <form asp-action="UpdateBookmark" asp-controller="Home" method="post">
-                                <input type="text" name="text" />
-                                <input type="text" name="bookmark" hidden value="@ViewBag.Bookmarks[i].Name" />
-
-                                <button>Редактировать</button>
-                            </form>
-                        </td>
-                        <td>
-                            @Html.ActionLink("Удалить", "DeleteBookmark", new { index = ViewBag.Bookmarks[i].Name })
-                        </td>
-                    </tr>
-                  }
+                    }
                 </table>
             </div>
         </div>
 
     </div>
 </body>
+</html>

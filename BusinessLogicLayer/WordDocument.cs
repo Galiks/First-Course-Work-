@@ -24,15 +24,10 @@ namespace BusinessLogicLayer
         private static int indexNextField = 0;
         private Paragraph referencesParagraph;
         private Section referencesSection;
-
-
         public Document Document => document;
-
         public List<string> Messages => messages;
-
         public int IndexNextField { get => indexNextField; private set => indexNextField = value; }
         public Section ReferencesSection { get => referencesSection; private set => referencesSection = value; }
-
         public WordDocument(string filename)
         {
             this.filename = filename;
@@ -40,12 +35,10 @@ namespace BusinessLogicLayer
             document.LoadFromFile(filename + ".docx", FileFormat.Docx);
             messages = new List<string>();
         }
-
         public void IncreaseOfTwoindexNextField()
         {
             indexNextField += 2;
         }
-
         public void SetReferencesWord(string word)
         {
             //­­­U+00AD
@@ -56,7 +49,6 @@ namespace BusinessLogicLayer
                 referencesWord = TransformWordWithUnderline(word);
             }
         }
-
         private string TransformWordWithUnderline(string word)
         {
             if (!string.IsNullOrWhiteSpace(word))
@@ -69,7 +61,6 @@ namespace BusinessLogicLayer
                 return null;
             }
         }
-
         private string TransformWordWithoutUnderline(string word)
         {
             if (!string.IsNullOrWhiteSpace(word))
@@ -677,7 +668,6 @@ namespace BusinessLogicLayer
             //    yield return bookmark;
             //}
         }
-
         public void EditTextInBookmark(string bookmarkText, string text)
         {
             BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(document);
@@ -705,7 +695,6 @@ namespace BusinessLogicLayer
 
             SaveCurrentDocument();
         }
-
         public List<string> GetAllFootnotes()
         {
             var result = new HashSet<string>();
@@ -741,7 +730,6 @@ namespace BusinessLogicLayer
 
             return result.ToList();
         }
-
         public void CreateReferencesSection()
         {
             var sectionAndParagraph = GetSectionAndParagraphByWord("Сноски");
@@ -766,7 +754,6 @@ namespace BusinessLogicLayer
 
             SaveCurrentDocument();
         }
-
         public void DeleteHyperlink(Field field)
         {
             int ownerParagraphIndex = field.OwnerParagraph.OwnerTextBody.ChildObjects.IndexOf(field.OwnerParagraph);
@@ -858,7 +845,6 @@ namespace BusinessLogicLayer
                 tr.CharacterFormat.UnderlineStyle = UnderlineStyle.None;
             }
         }
-
         public void DeleteBookmark(string bookmarkText)
         {
             BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(document);
