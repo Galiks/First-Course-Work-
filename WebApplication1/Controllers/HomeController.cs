@@ -3,12 +3,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Spire.Doc;
-using Spire.Doc.Documents;
 using Spire.Doc.Fields;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -35,6 +32,15 @@ namespace WebApplication1.Controllers
         {
 
             wordDocument.CreateReferencesSection();
+            string path = null;
+            if (image != null)
+            {
+                path = _appEnvironment.WebRootPath + "/Files/" + image.FileName;
+                using (var fileStream = new FileStream(path, FileMode.Create))
+                {
+                    await image.CopyToAsync(fileStream);
+                }
+            }
 
             if (!string.IsNullOrWhiteSpace(text) & !string.IsNullOrWhiteSpace(word) & !string.IsNullOrWhiteSpace(hyperlinkType))
             {
@@ -47,23 +53,17 @@ namespace WebApplication1.Controllers
                     wordDocument.CreateHyperlinksForText(word, text);
                 }
             }
-
-            if (image != null)
+            else if (!string.IsNullOrWhiteSpace(path) & !string.IsNullOrWhiteSpace(word) & !string.IsNullOrWhiteSpace(hyperlinkType))
             {
-                string path = _appEnvironment.WebRootPath + "/Files/" + image.FileName;
-                using (var fileStream = new FileStream(path, FileMode.Create))
+                if (hyperlinkType.Equals("bookmark"))
                 {
-                    await image.CopyToAsync(fileStream);
+                    wordDocument.CreateBookmarksForImage(path, word);
                 }
-
-                //wordDocument.CreatHyperlinkForImage(path, text);
-
-                wordDocument.CreateBookmarksForImage(path, word);
-
-
+                if (hyperlinkType.Equals("hyperlink"))
+                {
+                    wordDocument.CreatHyperlinkForImage(path, text);
+                }
             }
-
-            var result = wordDocument.GetAllBookmarks();
 
 
             ViewBag.Messages = wordDocument.Messages;
@@ -75,7 +75,8 @@ namespace WebApplication1.Controllers
         public IActionResult EditLinks()
         {
             ViewBag.Hyperlinks = wordDocument.GetAllHyperlinks();
-            ViewBag.Bookmarks = wordDocument.GetAllBookmarks();
+            var bookmarks = wordDocument.GetAllBookmarks();
+            ViewBag.Bookmarks = bookmarks.ToList();
 
             return View();
         }
@@ -104,6 +105,18 @@ namespace WebApplication1.Controllers
             List<Field> list = wordDocument.GetAllHyperlinks();
             Field field = list[index];
             this.wordDocument.DeleteHyperlink(field);
+            return Redirect("EditLinks");
+        }
+
+        public IActionResult UpdateBookmark(string bookmark, string text)
+        {
+            wordDocument.EditTextInBookmark(bookmark, text);
+            return Redirect("EditLinks");
+        }
+
+        public IActionResult DeleteBookmark(string bookmark)
+        {
+            wordDocument.DeleteBookmark(bookmark);
             return Redirect("EditLinks");
         }
     }

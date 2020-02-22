@@ -1,4 +1,4 @@
-﻿@using Spire.Doc.Fields;
+﻿@using Spire.Doc.Documents;
 
 @{
     ViewData["Title"] = "Privacy Policy";
@@ -11,7 +11,6 @@
     <style>
 
         #maincontainer {
-
             width: 100%;
             height: 100%;
             text-align: center;
@@ -39,53 +38,67 @@
         <div id="maincontainer">
             <div id="leftcolumn">
                 <table border="1">
-                    
+
                     @for (int i = 0; i < ViewBag.Hyperlinks.Count; i++)
                     {
                         <tr>
-                            <td>@ViewBag.Hyperlinks[i].FieldText - @ViewBag.Hyperlinks[i].Code</td>
+                            <td width="80px">@ViewBag.Hyperlinks[i].FieldText - @ViewBag.Hyperlinks[i].Code</td>
                             <td width="40px">
                                 <form asp-action="UpdateHyperlink" asp-controller="Home" method="post">
                                     <input type="text" name="hypertext" />
-                                    <input type="number" name="index" hidden  value=@i/>
+                                    <input type="number" name="index" hidden value=@i />
 
                                     <button>Редактировать</button>
-                                </form asp-action="UpdateHyperlink">
+                                </form>
 
-                                @*@Html.ActionLink("Редактировать", "UpdateHyperlink", "Home", null, new { index = i, hypertext = "document.getElementById('myHtmlInputElementId').value;" })*@
                             </td>
                             <td>
                                 @Html.ActionLink("Удалить", "DeleteHyperlink", new { index = i })
                             </td>
                         </tr>
                     }
-                    
+
                 </table>
-                @*<ol>
-                    @foreach (Field item in ViewBag.Hyperlinks)
-                    {
-                        <li>
-                            @item.FieldText - @item.Code
-                        </li>
-                    }
-                </ol>*@
             </div>
 
             <div id="contentwrapper">
                 <table border="1">
+                    @for (int i = 0; i < ViewBag.Bookmarks.Count; i++)
+                    {
                     <tr>
-                        <td>Данные</td>
-                        <td>Методы</td>
+
+                        @{
+                            var nextSibling = ViewBag.Bookmarks[i].BookmarkStart.Owner.NextSibling;
+                            if (nextSibling != null)
+                            {
+                                var firstChild = nextSibling.FirstChild;
+                                if (firstChild.DocumentObjectType == DocumentObjectType.Picture)
+                                {
+                                    <td><img width='200px' height='200px' src='data:image/jpeg;base64,@Convert.ToBase64String(firstChild.ImageBytes)' /></td>
+                                }
+                                else
+                                {
+                                    <td>@ViewBag.Bookmarks[i].BookmarkStart.Owner.Text</td>
+                                }
+                            }
+                        }
+
+                        <td width="40px">
+                            <form asp-action="UpdateBookmark" asp-controller="Home" method="post">
+                                <input type="text" name="text" />
+                                <input type="text" name="bookmark" hidden value="@ViewBag.Bookmarks[i].Name" />
+
+                                <button>Редактировать</button>
+                            </form>
+                        </td>
+                        <td>
+                            @Html.ActionLink("Удалить", "DeleteBookmark", new { index = ViewBag.Bookmarks[i].Name })
+                        </td>
                     </tr>
+                  }
                 </table>
-                @*<ol>
-            @foreach (string item in ViewBag.Bookmarks)
-            {
-                <li>@item</li>
-            }
-        </ol>*@
             </div>
         </div>
-        
+
     </div>
 </body>
