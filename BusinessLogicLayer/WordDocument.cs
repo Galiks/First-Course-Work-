@@ -550,12 +550,19 @@ namespace BusinessLogicLayer
                 longText.AppendLine("<div>");
                 foreach (Paragraph paragraph in section.Paragraphs)
                 {
+                    string aligment = GetAligment(paragraph);
+                    string fontName = "";
+                    float? fontSize = default;
                     StringBuilder paragraphText = new StringBuilder(paragraph.Text);
 
                     foreach (DocumentObject child in paragraph.ChildObjects)
                     {
+                        TextRange textRange = child as TextRange;
+                        fontName = textRange?.CharacterFormat.FontName;
+                        fontSize = textRange?.CharacterFormat.FontSize;
                         if (child.DocumentObjectType == DocumentObjectType.Field)
                         {
+                            
                             Field field = child as Field;
                             if (field.Type == FieldType.FieldHyperlink & !string.IsNullOrWhiteSpace(field.FieldText))
                             {
@@ -581,7 +588,10 @@ namespace BusinessLogicLayer
                         }
                     }
 
-                    longText.AppendLine($"{paragraphText}<br>");
+                    fontName = string.IsNullOrWhiteSpace(fontName) ? "Time New Roman" : fontName;
+                    fontSize = fontSize == default ? 12 : fontSize;
+
+                    longText.AppendLine($"<p align='{aligment}'><font size='{fontSize}' face='{fontName}'>{paragraphText}</font></p>");
                 }
                 for (int i = 0; i < 5; i++)
                 {
@@ -592,6 +602,31 @@ namespace BusinessLogicLayer
 
             return longText.ToString();
         }
+
+        private string GetAligment(Paragraph paragraph)
+        {
+            if (paragraph.Format.HorizontalAlignment == HorizontalAlignment.Left)
+            {
+                return "left";
+            }
+            else if (paragraph.Format.HorizontalAlignment == HorizontalAlignment.Right)
+            {
+                return "right";
+            }
+            else if (paragraph.Format.HorizontalAlignment == HorizontalAlignment.Center)
+            {
+                return "center";
+            }
+            else if (paragraph.Format.HorizontalAlignment == HorizontalAlignment.Justify)
+            {
+                return "justify";
+            }
+            else
+            {
+                return "";
+            }
+        }
+
         public List<Field> FindAllLinksBySection(Section section)
         {
             var links = new List<Field>();
