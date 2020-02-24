@@ -18,119 +18,34 @@ namespace WebApplication1.Controllers
     {
         readonly IWebHostEnvironment _appEnvironment;
         private readonly ILogger<HomeController> _logger;
-        //private Paragraph referencesParagraph;
-        //private Section referencesSection;
-        private readonly WordDocument wordDocument;
+        private readonly List<string> formats;
 
         public HomeController(ILogger<HomeController> logger, IWebHostEnvironment appEnvironment)
         {
             _logger = logger;
-            wordDocument = new WordDocument("hyperlink");
             _appEnvironment = appEnvironment;
+            formats = new List<string>() { ".docx", ".pdf", ".doc" };
         }
 
-        public async Task<IActionResult> Index(string word, string text, string hyperlinkType, IFormFile image)
+        public async Task<IActionResult> Index(IFormFile file)
         {
-
-            wordDocument.CreateReferencesSection();
-            string path = null;
-            if (image != null)
+            if (file != null)
             {
-                path = _appEnvironment.WebRootPath + "/Files/" + image.FileName;
-                using (var fileStream = new FileStream(path, FileMode.Create))
+                var extension = Path.GetExtension(file.FileName);
+                if (formats.Contains(extension))
                 {
-                    await image.CopyToAsync(fileStream);
+                    string path = _appEnvironment.WebRootPath + "/Files/Doc/" + file.FileName;
+                    using (var fileStream = new FileStream(path, FileMode.Create))
+                    {
+                        await file.CopyToAsync(fileStream);
+                    }
+                }
+                else
+                {
+                    ViewBag.FileFormatErrorMessage = "Неверный формат файла. Должен быть DOC, PDF, DOCX";
                 }
             }
-
-            if (!string.IsNullOrWhiteSpace(text) & !string.IsNullOrWhiteSpace(word) & !string.IsNullOrWhiteSpace(hyperlinkType))
-            {
-                if (hyperlinkType.Equals("bookmark"))
-                {
-                    wordDocument.CreateBookmarksForText(word, text);
-                }
-                else if (hyperlinkType.Equals("hyperlink"))
-                {
-                    wordDocument.CreateHyperlinksForText(word, text);
-                }
-            }
-            else if (!string.IsNullOrWhiteSpace(path) & !string.IsNullOrWhiteSpace(text) & !string.IsNullOrWhiteSpace(hyperlinkType))
-            {
-                if (hyperlinkType.Equals("hyperlink"))
-                {
-                    wordDocument.CreatHyperlinkForImage(path, text);
-                }              
-            }
-            else if (!string.IsNullOrWhiteSpace(path) & !string.IsNullOrWhiteSpace(word) & !string.IsNullOrWhiteSpace(hyperlinkType))
-            {
-                if (hyperlinkType.Equals("bookmark"))
-                {
-                    wordDocument.CreateBookmarksForImage(path, word);
-                }            
-            }
-
-
-            ViewBag.Messages = wordDocument.Messages;
-            ViewBag.LongText = wordDocument.GetTextFromDocument();
-            ViewBag.Footnotes = wordDocument.GetAllFootnotes();
             return View();
-        }
-
-        public IActionResult EditLinks()
-        {
-            List<Field> hyperlinks = wordDocument.GetAllHyperlinks();
-            //foreach (Field item in hyperlinks)
-            //{
-            //    var image = item.Separator.NextSibling;
-            //    if (image.DocumentObjectType == DocumentObjectType.Picture)
-            //    {
-
-            //    }
-            //}
-            ViewBag.Hyperlinks = hyperlinks;
-            var bookmarks = wordDocument.GetAllBookmarks();
-            ViewBag.Bookmarks = bookmarks.ToList();
-
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
-
-        public IActionResult UsingHypertext()
-        {
-            return View();
-        }
-
-        public IActionResult UpdateHyperlink(int index, string hypertext, IFormFile image)
-        {
-            List<Field> list = wordDocument.GetAllHyperlinks();
-            Field field = list[index];
-            wordDocument.EditLinkInHypertext(field, hypertext);
-            return Redirect("EditLinks");
-        }
-
-        public IActionResult DeleteHyperlink(int index)
-        {
-            List<Field> list = wordDocument.GetAllHyperlinks();
-            Field field = list[index];
-            this.wordDocument.DeleteHyperlink(field);
-            return Redirect("EditLinks");
-        }
-
-        public IActionResult UpdateBookmark(string bookmark, string text, IFormFile image)
-        {
-            wordDocument.EditTextInBookmark(bookmark, text);
-            return Redirect("EditLinks");
-        }
-
-        public IActionResult DeleteBookmark(string bookmark)
-        {
-            wordDocument.DeleteBookmark(bookmark);
-            return Redirect("EditLinks");
         }
     }
 }

@@ -57,7 +57,7 @@
                                     <p>@ViewBag.Hyperlinks[i].Code</p>
                                 </td>
                                 <td width="40px">
-                                    <form asp-action="UpdateHyperlink" asp-controller="Home" method="post" enctype="multipart/form-data">
+                                    <form asp-action="UpdateHyperlink" asp-controller="Document" method="post" enctype="multipart/form-data">
                                         <label for="image">
                                             Фото:
                                             <input type="file" id="image" name="image" />
@@ -69,7 +69,7 @@
 
                                 </td>
                                 <td width="40px">
-                                    <form asp-action="UpdateHyperlink" asp-controller="Home" method="post">
+                                    <form asp-action="UpdateHyperlink" asp-controller="Document" method="post">
                                         <input type="text" name="hypertext" />
                                         <input type="number" name="index" hidden value=@i />
 
@@ -87,7 +87,7 @@
                             <tr>
                                 <td width="80px">@ViewBag.Hyperlinks[i].FieldText - @ViewBag.Hyperlinks[i].Code</td>
                                 <td width="40px">
-                                    <form asp-action="UpdateHyperlink" asp-controller="Home" method="post">
+                                    <form asp-action="UpdateHyperlink" asp-controller="Document" method="post">
                                         <input type="text" name="hypertext" />
                                         <input type="number" name="index" hidden value=@i />
 
@@ -119,7 +119,7 @@
                                 <tr>
                                     <td><img width='200px' height='200px' src='data:image/jpeg;base64,@Convert.ToBase64String(firstChild.ImageBytes)' /></td>
                                     <td width="40px">
-                                        <form asp-action="UpdateBookmark" asp-controller="Home" method="post" enctype="multipart/form-data">
+                                        <form asp-action="UpdateBookmark" asp-controller="Document" method="post" enctype="multipart/form-data">
                                             <label for="image">
                                             Фото:
                                             <input type="file" id="image" name="image" />
@@ -129,7 +129,7 @@
                                         </form>
                                     </td>
                                     <td>
-                                        <form asp-action="UpdateBookmark" asp-controller="Home" method="post">
+                                        <form asp-action="UpdateBookmark" asp-controller="Document" method="post">
                                             <input type="text" name="text" />
                                             <input type="text" name="bookmark" hidden value="@ViewBag.Bookmarks[i].Name" />
                                             <button>Редактировать текст</button>
@@ -145,7 +145,7 @@
                                 <tr>
                                     <td>@ViewBag.Bookmarks[i].BookmarkStart.Owner.Text</td>
                                     <td width="40px">
-                                        <form asp-action="UpdateBookmark" asp-controller="Home" method="post">
+                                        <form asp-action="UpdateBookmark" asp-controller="Document" method="post">
                                             <input type="text" name="text" />
                                             <input type="text" name="bookmark" hidden value="@ViewBag.Bookmarks[i].Name" />
 

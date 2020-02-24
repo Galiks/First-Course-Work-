@@ -32,7 +32,7 @@ namespace BusinessLogicLayer
         {
             this.filename = filename;
             document = new Document();
-            document.LoadFromFile(filename + ".docx", FileFormat.Docx);
+            document.LoadFromFile(filename);
             messages = new List<string>();
         }
         public void IncreaseOfTwoindexNextField()
@@ -566,7 +566,7 @@ namespace BusinessLogicLayer
                             Field field = child as Field;
                             if (field.Type == FieldType.FieldHyperlink & !string.IsNullOrWhiteSpace(field.FieldText))
                             {
-                                paragraphText.Replace(field.FieldText, $"<a href='{field.Code}'>{field.FieldText}</a>");
+                                paragraphText.Replace(field.FieldText, $"<a>{field.FieldText}</a>");
                             }
                             else if (field.Type == FieldType.FieldRef & !string.IsNullOrWhiteSpace(field.FieldText))
                             {
