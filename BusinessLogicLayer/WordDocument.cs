@@ -536,14 +536,11 @@ namespace BusinessLogicLayer
         }
         public void SaveCurrentDocument()
         {
-            Document.SaveToFile(filename + ".docx", FileFormat.Docx);
+            Document.SaveToFile(filename);
         }
         public string GetTextFromDocument()
         {
             StringBuilder longText = new StringBuilder();
-
-            Document document = new Document();
-            document.LoadFromFile(filename + ".docx", FileFormat.Docx);
 
             foreach (Section section in document.Sections)
             {
@@ -553,24 +550,27 @@ namespace BusinessLogicLayer
                     string aligment = GetAligment(paragraph);
                     string fontName = "";
                     float? fontSize = default;
-                    StringBuilder paragraphText = new StringBuilder(paragraph.Text);
+                    StringBuilder paragraphText = new StringBuilder();
 
                     foreach (DocumentObject child in paragraph.ChildObjects)
                     {
-                        TextRange textRange = child as TextRange;
-                        fontName = textRange?.CharacterFormat.FontName;
-                        fontSize = textRange?.CharacterFormat.FontSize;
-                        if (child.DocumentObjectType == DocumentObjectType.Field)
+                        if (child.DocumentObjectType == DocumentObjectType.TextRange)
                         {
-                            
+                            TextRange textRange = child as TextRange;
+                            fontName = textRange?.CharacterFormat.FontName;
+                            fontSize = textRange?.CharacterFormat.FontSize;
+                            paragraphText.Append(textRange.Text);
+                        }
+                        else if (child.DocumentObjectType == DocumentObjectType.Field)
+                        {                         
                             Field field = child as Field;
                             if (field.Type == FieldType.FieldHyperlink & !string.IsNullOrWhiteSpace(field.FieldText))
                             {
-                                paragraphText.Replace(field.FieldText, $"<a>{field.FieldText}</a>");
+                                paragraphText.Append($"<a href='{field.Code}'>{field.FieldText}</a>");
                             }
                             else if (field.Type == FieldType.FieldRef & !string.IsNullOrWhiteSpace(field.FieldText))
                             {
-                                paragraphText.Replace(field.FieldText, $"<strong>{field.FieldText}</strong>");
+                                paragraphText.Append($"<strong>{field.FieldText}</strong>");
                             }
                         }
                         else if (child.DocumentObjectType == DocumentObjectType.Break)

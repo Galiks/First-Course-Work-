@@ -26,6 +26,7 @@ namespace WebApplication1.Controllers
             _appEnvironment = appEnvironment;
             _logger = logger;
             formats = new List<string>() { ".docx", ".pdf", ".doc" };
+            wordDocument = new WordDocument(HomeController.filename);
         }
 
         public async Task<IActionResult> SetWordDocument(string filename)
@@ -36,23 +37,7 @@ namespace WebApplication1.Controllers
 
         public async Task<IActionResult> Index(string word, string text, string hyperlinkType, IFormFile image, IFormFile file)
         {
-            if (file != null)
-            {
-                var extension = Path.GetExtension(file.FileName);
-                if (formats.Contains(extension))
-                {
-                    string pathtoFile = _appEnvironment.WebRootPath + "/Files/Doc/" + file.FileName;
-                    using (var fileStream = new FileStream(pathtoFile, FileMode.Create))
-                    {
-                        await file.CopyToAsync(fileStream);
-                    }
-                    await SetWordDocument(pathtoFile);
-                }
-                else
-                {
-                    ViewBag.FileFormatErrorMessage = "Неверный формат файла. Должен быть DOC, PDF, DOCX";
-                }
-            }
+            
             wordDocument.CreateReferencesSection();
             string path = null;
             if (image != null)
