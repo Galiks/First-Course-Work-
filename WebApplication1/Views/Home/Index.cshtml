@@ -4,14 +4,23 @@
 }
 <html>
 <body>
+
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container">
+                <h1 class="h1 text-center">Приветствую Вас на сайте по добавлению гипертекста в текст!</h1>
+            </div>
+        </nav>
+    </header>
+
     <div>
 
         <div style="align-content:center; align-items:center">
-            <h1>Приветствую Вас на сайте по добавлению гипертекста в текст!</h1>
+            
 
             <h3>Пожалуйста, загрузите файл.</h3>
             <form asp-action="Index" asp-controller="Home" method="post" enctype="multipart/form-data">
-                <input type="file" name="file"/>
+                <input type="file" name="file" />
                 <button>Отправить</button>
             </form>
         </div>
