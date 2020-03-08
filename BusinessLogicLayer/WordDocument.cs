@@ -547,10 +547,36 @@ namespace BusinessLogicLayer
                 longText.AppendLine("<div>");
                 foreach (Paragraph paragraph in section.Paragraphs)
                 {
+                    bool flagForNumbered = false;
                     string aligment = GetAligment(paragraph);
                     string fontName = "";
                     float? fontSize = default;
                     StringBuilder paragraphText = new StringBuilder();
+
+                    #region нерабочий список
+                    if (paragraph.NextSibling != null)
+                    {
+                        Paragraph nextParagraph = paragraph.NextSibling as Paragraph;
+                        if (nextParagraph?.ListFormat.ListType == ListType.Numbered & !flagForNumbered)
+                        {
+                            paragraphText.Append("<ol>");
+                            flagForNumbered = true;
+                        }
+                        if (nextParagraph?.ListFormat.ListType != ListType.Numbered & flagForNumbered)
+                        {
+                            paragraphText.Append("</ol>");
+                        }
+                    }
+                    else
+                    {
+                        paragraphText.Append("</ol>");
+                    }
+
+                    if (paragraph.ListFormat.ListType == ListType.Numbered)
+                    {
+                        paragraphText.Append($"<li>");
+                    } 
+                    #endregion
 
                     foreach (DocumentObject child in paragraph.ChildObjects)
                     {
@@ -586,6 +612,11 @@ namespace BusinessLogicLayer
                             DocPicture picture = child as DocPicture;
                             paragraphText.Append($"<img width='{picture.Width}px' height='{picture.Height}px' src=\"data:image/jpeg;base64," + Convert.ToBase64String(picture.ImageBytes) + "\" />");
                         }
+                    }
+
+                    if (paragraph.ListFormat.ListType == ListType.Numbered)
+                    {
+                        paragraphText.Append($"</li>");
                     }
 
                     fontName = string.IsNullOrWhiteSpace(fontName) ? "Time New Roman" : fontName;

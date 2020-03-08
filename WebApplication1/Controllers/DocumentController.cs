@@ -17,11 +17,11 @@ namespace WebApplication1.Controllers
     public class DocumentController : Controller
     {
         readonly IWebHostEnvironment _appEnvironment;
-        private readonly ILogger<HomeController> _logger;
+        private readonly ILogger<DocumentController> _logger;
         private WordDocument wordDocument;
         private readonly List<string> formats;
 
-        public DocumentController(IWebHostEnvironment appEnvironment, ILogger<HomeController> logger)
+        public DocumentController(IWebHostEnvironment appEnvironment, ILogger<DocumentController> logger)
         {
             _appEnvironment = appEnvironment;
             _logger = logger;
