@@ -106,6 +106,11 @@ namespace BusinessLogicLayer
                 }
             }
         }
+        /// <summary>
+        /// Возвращает список слов по падежам
+        /// </summary>
+        /// <param name="word">начальное слово</param>
+        /// <returns></returns>
         private List<string> GetWordsByCases(string word)
         {
             CyrNounCollection cyrNounCollection = new CyrNounCollection();
@@ -541,13 +546,13 @@ namespace BusinessLogicLayer
         public string GetTextFromDocument()
         {
             StringBuilder longText = new StringBuilder();
-
+            GetAllFootnotes();
             foreach (Section section in document.Sections)
             {
+                bool flagForNumbered = false;
                 longText.AppendLine("<div>");
                 foreach (Paragraph paragraph in section.Paragraphs)
                 {
-                    bool flagForNumbered = false;
                     string aligment = GetAligment(paragraph);
                     string fontName = "";
                     float? fontSize = default;
@@ -557,14 +562,15 @@ namespace BusinessLogicLayer
                     if (paragraph.NextSibling != null)
                     {
                         Paragraph nextParagraph = paragraph.NextSibling as Paragraph;
-                        if (nextParagraph?.ListFormat.ListType == ListType.Numbered & !flagForNumbered)
+                        if (nextParagraph?.ListFormat.ListType == ListType.Numbered & flagForNumbered == false)
                         {
                             paragraphText.Append("<ol>");
                             flagForNumbered = true;
                         }
-                        if (nextParagraph?.ListFormat.ListType != ListType.Numbered & flagForNumbered)
+                        else if (nextParagraph?.ListFormat.ListType != ListType.Numbered & flagForNumbered)
                         {
                             paragraphText.Append("</ol>");
+                            flagForNumbered = false;
                         }
                     }
                     else
@@ -575,7 +581,7 @@ namespace BusinessLogicLayer
                     if (paragraph.ListFormat.ListType == ListType.Numbered)
                     {
                         paragraphText.Append($"<li>");
-                    } 
+                    }
                     #endregion
 
                     foreach (DocumentObject child in paragraph.ChildObjects)
@@ -588,7 +594,7 @@ namespace BusinessLogicLayer
                             paragraphText.Append(textRange.Text);
                         }
                         else if (child.DocumentObjectType == DocumentObjectType.Field)
-                        {                         
+                        {
                             Field field = child as Field;
                             if (field.Type == FieldType.FieldHyperlink & !string.IsNullOrWhiteSpace(field.FieldText))
                             {
@@ -761,9 +767,9 @@ namespace BusinessLogicLayer
 
             SaveCurrentDocument();
         }
-        public List<string> GetAllFootnotes()
+        public List<Tuple<string, string>> GetAllFootnotes()
         {
-            var result = new HashSet<string>();
+            var result = new HashSet<Tuple<string,string>>();
 
             foreach (Section section in document.Sections)
             {
@@ -785,10 +791,13 @@ namespace BusinessLogicLayer
                         var footnotes = paragraph.ChildObjects[index].Document.Footnotes;
                         foreach (Footnote footnote in footnotes)
                         {
+                            StringBuilder innerText = new StringBuilder();
                             foreach (Paragraph item in footnote.TextBody.ChildObjects)
                             {
-                                result.Add(item.Text);
+                                innerText.Append(item.Text);
                             }
+
+                            result.Add(new Tuple<string, string>(footnote.OwnerParagraph.Text, innerText.ToString()));
                         }
                     }
                 }

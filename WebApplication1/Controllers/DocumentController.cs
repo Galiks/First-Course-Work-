@@ -18,22 +18,20 @@ namespace WebApplication1.Controllers
     {
         readonly IWebHostEnvironment _appEnvironment;
         private readonly ILogger<DocumentController> _logger;
-        private WordDocument wordDocument;
-        private readonly List<string> formats;
+        private readonly WordDocument wordDocument;
 
         public DocumentController(IWebHostEnvironment appEnvironment, ILogger<DocumentController> logger)
         {
             _appEnvironment = appEnvironment;
             _logger = logger;
-            formats = new List<string>() { ".docx", ".pdf", ".doc" };
             wordDocument = new WordDocument(HomeController.filename);
         }
 
-        public async Task<IActionResult> SetWordDocument(string filename)
-        {
-            wordDocument = new WordDocument(filename);
-            return View("Index");
-        }
+        //public async Task<IActionResult> SetWordDocument(string filename)
+        //{ 
+        //    wordDocument = new WordDocument(filename);
+        //    return View("Index");
+        //}
 
         public async Task<IActionResult> Index(string word, string text, string hyperlinkType, IFormFile image, IFormFile file)
         {

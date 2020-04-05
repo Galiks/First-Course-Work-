@@ -1,16 +1,10 @@
-﻿using BusinessLogicLayer;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Spire.Doc.Documents;
-using Spire.Doc.Fields;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
-using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
 {
@@ -36,6 +30,7 @@ namespace WebApplication1.Controllers
                 if (formats.Contains(extension))
                 {
                     string path = _appEnvironment.WebRootPath + "/Files/Doc/" + file.FileName;
+                    TempData["Path"] = path;
                     filename = path;
                     using (var fileStream = new FileStream(path, FileMode.Create))
                     {
