@@ -13,7 +13,8 @@ namespace WebApplication1.Controllers
         readonly IWebHostEnvironment _appEnvironment;
         private readonly ILogger<HomeController> _logger;
         private readonly List<string> formats;
-        public static string filename;
+        public static string FileName;
+        public static string pathToFile;
 
         public HomeController(ILogger<HomeController> logger, IWebHostEnvironment appEnvironment)
         {
@@ -29,13 +30,10 @@ namespace WebApplication1.Controllers
                 var extension = Path.GetExtension(file.FileName);
                 if (formats.Contains(extension))
                 {
-                    string path = _appEnvironment.WebRootPath + "/Files/Doc/" + file.FileName;
-                    TempData["Path"] = path;
-                    filename = path;
-                    using (var fileStream = new FileStream(path, FileMode.Create))
-                    {
-                        await file.CopyToAsync(fileStream);
-                    }
+                    string path = _appEnvironment.WebRootPath + @"\Files\Doc\" + file.FileName;
+                    pathToFile = path;
+                    //FileMode.Append
+                    await SaveFile(file, file.FileName, path);
                     return Redirect("Document/Index");
                 }
                 else
@@ -45,6 +43,26 @@ namespace WebApplication1.Controllers
                 }
             }
             return View();
+        }
+
+        private async Task SaveFile(IFormFile file, string filename, string path)
+        {
+            try
+            {
+                FileName = filename;
+                using (var fileStream = new FileStream(path, FileMode.CreateNew))
+                {
+                    await file.CopyToAsync(fileStream);
+                }
+            }
+            catch (IOException)
+            {
+                filename = "NEW_" + filename;
+                path = _appEnvironment.WebRootPath + @"\Files\Doc\" + filename;
+                pathToFile = path;
+                FileName = filename;
+                await SaveFile(file, filename, path);
+            }
         }
     }
 }

@@ -49,13 +49,29 @@
                     <label>Ссылка <input type="radio" name="hyperlinkType" value="hyperlink" /></label>
                 </p>
 
+                <p>
+                    <label>Выделение текста</label>
+                    <input id="marking" name="marking" type="checkbox" value="true" />
+                    <input name="marking" type="hidden" value="false" />
+                </p>
+
                 <button>Отправить</button>
             </form>
 
         </div>
 
-        @*ToggleButton недоделана*@
         <div>
+            <h3>Скачать файл: </h3>
+            <div>
+                @using (Html.BeginForm("Download", "Document"))
+                {
+                    <button >Скачать</button>
+                }
+            </div>
+        </div>
+
+        @*ToggleButton недоделана*@
+        @*<div>
             <h1>Кнопка, отменающая выделение текста</h1>
             <div id="switch">
 
@@ -67,7 +83,7 @@
 
             </div>
             <script src="~/js/toggleButton.js"></script>
-        </div>
+        </div>*@
               
 
         <div>

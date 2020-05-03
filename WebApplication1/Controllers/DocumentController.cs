@@ -24,7 +24,7 @@ namespace WebApplication1.Controllers
         {
             _appEnvironment = appEnvironment;
             _logger = logger;
-            wordDocument = new WordDocument(HomeController.filename);
+            wordDocument = new WordDocument(HomeController.pathToFile);
         }
 
         //public async Task<IActionResult> SetWordDocument(string filename)
@@ -33,7 +33,7 @@ namespace WebApplication1.Controllers
         //    return View("Index");
         //}
 
-        public async Task<IActionResult> Index(string word, string text, string hyperlinkType, IFormFile image, IFormFile file)
+        public async Task<IActionResult> Index(string word, string text, string hyperlinkType, IFormFile image, IFormFile file, bool marking)
         {
             
             wordDocument.CreateReferencesSection();
@@ -77,7 +77,7 @@ namespace WebApplication1.Controllers
 
 
             ViewBag.Messages = wordDocument.Messages;
-            ViewBag.LongText = wordDocument.GetTextFromDocument();
+            ViewBag.LongText = wordDocument.GetTextFromDocument(marking);
             ViewBag.Footnotes = wordDocument.GetAllFootnotes();
             return View();
         }
@@ -129,6 +129,13 @@ namespace WebApplication1.Controllers
         {
             wordDocument.DeleteBookmark(bookmark);
             return Redirect("EditLinks");
+        }
+
+        public IActionResult Download()
+        {
+            string file_type = "application/docx";
+            string path = _appEnvironment.WebRootPath + @"\Files\Doc\" + HomeController.FileName;
+            return File(path, file_type, HomeController.FileName);
         }
     }
 }

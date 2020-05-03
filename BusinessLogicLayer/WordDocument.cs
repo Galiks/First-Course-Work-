@@ -32,6 +32,7 @@ namespace BusinessLogicLayer
         {
             this.filename = filename;
             document = new Document();
+            //проблема с дублями файла
             document.LoadFromFile(filename);
             messages = new List<string>();
         }
@@ -146,14 +147,6 @@ namespace BusinessLogicLayer
                 referencesParagraph.AppendBookmarkEnd(referencesWord);
             }
 
-            //int startIndex = 0;
-            //int paraIndex = referencesParagraph.ChildObjects.Count;
-            //int endIndex = referParagraph.ChildObjects.Count;
-            //Insert the bookmark for the last paragraph
-            //referencesParagraph.ChildObjects.Insert(startIndex, start);
-            //referencesParagraph.ChildObjects.Insert(paraIndex, end);
-
-            //Find the keyword "Hypertext"
             TextSelection[] text = document.FindAllString(word, true, true);
 
             if (text == null)
@@ -543,7 +536,7 @@ namespace BusinessLogicLayer
         {
             Document.SaveToFile(filename);
         }
-        public string GetTextFromDocument()
+        public string GetTextFromDocument(bool marking)
         {
             StringBuilder longText = new StringBuilder();
             GetAllFootnotes();
@@ -598,11 +591,26 @@ namespace BusinessLogicLayer
                             Field field = child as Field;
                             if (field.Type == FieldType.FieldHyperlink & !string.IsNullOrWhiteSpace(field.FieldText))
                             {
-                                paragraphText.Append($"<a href='{field.Code}'>{field.FieldText}</a>");
+                                if (marking)
+                                {
+                                    paragraphText.Append($"<a href='{field.Code}'>{field.FieldText}</a>");
+                                }
+                                else
+                                {
+                                    paragraphText.Append($"{field.FieldText}");
+                                }
                             }
                             else if (field.Type == FieldType.FieldRef & !string.IsNullOrWhiteSpace(field.FieldText))
                             {
-                                paragraphText.Append($"<strong>{field.FieldText}</strong>");
+                                if (marking)
+                                {
+                                    paragraphText.Append($"<strong>{field.FieldText}</strong>");
+                                }
+                                else
+                                {
+                                    paragraphText.Append($"{field.FieldText}");
+                                }
+                                
                             }
                         }
                         else if (child.DocumentObjectType == DocumentObjectType.Break)
@@ -735,10 +743,6 @@ namespace BusinessLogicLayer
                     continue;
                 }
             }
-            //foreach (Bookmark bookmark in bookmarks)
-            //{
-            //    yield return bookmark;
-            //}
         }
         public void EditTextInBookmark(string bookmarkText, string text)
         {
@@ -769,7 +773,7 @@ namespace BusinessLogicLayer
         }
         public List<Tuple<string, string>> GetAllFootnotes()
         {
-            var result = new HashSet<Tuple<string,string>>();
+            var result = new List<Tuple<string,string>>();
 
             foreach (Section section in document.Sections)
             {
@@ -789,6 +793,31 @@ namespace BusinessLogicLayer
                     if (index > -1)
                     {
                         var footnotes = paragraph.ChildObjects[index].Document.Footnotes;
+                        //int countChildObjects = footnote.OwnerParagraph.ChildObjects.Count;
+                        //while (countChildObjects % 2 != 0)
+                        //{
+                        //    countChildObjects--;
+                        //}
+                        //for (int i = 0; i < countChildObjects; i++)
+                        //{
+                        //    DocumentObject child = footnote.OwnerParagraph.ChildObjects[i];
+                        //    if (child.DocumentObjectType is DocumentObjectType.TextRange)
+                        //    {
+                        //        TextRange textRange = child as TextRange;
+                        //        //string[] splitTextRange = textRange.
+                        //    }
+                        //    else
+                        //    {
+                        //        continue;
+                        //    }
+                        //    StringBuilder innerText = new StringBuilder();
+                        //    foreach (Paragraph item in footnote.TextBody.ChildObjects)
+                        //    {
+                        //        innerText.Append(item.Text);
+                        //    }
+
+                        //    result.Add(new Tuple<string, string>(footnote.OwnerParagraph.Text, innerText.ToString()));
+                        //}
                         foreach (Footnote footnote in footnotes)
                         {
                             StringBuilder innerText = new StringBuilder();
@@ -803,7 +832,17 @@ namespace BusinessLogicLayer
                 }
             }
 
-            return result.ToList();
+            return result;
+        }
+        private string GetWordFromFootnoteForHyperlink(Paragraph footnote)
+        {
+            int countChildObjects = footnote.ChildObjects.Count;
+            while (countChildObjects % 2 != 0)
+            {
+                countChildObjects--;
+            }
+
+            return null;
         }
         public void CreateReferencesSection()
         {
