@@ -20,12 +20,12 @@ namespace BusinessLogicLayer
         private readonly Document document;
         private readonly string filename;
         private string referencesWord;
-        private readonly List<string> messages;
+        private readonly HashSet<string> messages;
         private static int indexNextField = 0;
         private Paragraph referencesParagraph;
         private Section referencesSection;
         public Document Document => document;
-        public List<string> Messages => messages;
+        public HashSet<string> Messages => messages;
         public int IndexNextField { get => indexNextField; private set => indexNextField = value; }
         public Section ReferencesSection { get => referencesSection; private set => referencesSection = value; }
         public WordDocument(string filename)
@@ -34,7 +34,7 @@ namespace BusinessLogicLayer
             document = new Document();
             //проблема с дублями файла
             document.LoadFromFile(filename);
-            messages = new List<string>();
+            messages = new HashSet<string>();
         }
         public void IncreaseOfTwoindexNextField()
         {
@@ -647,7 +647,6 @@ namespace BusinessLogicLayer
 
             return longText.ToString();
         }
-
         private string GetAligment(Paragraph paragraph)
         {
             if (paragraph.Format.HorizontalAlignment == HorizontalAlignment.Left)
@@ -671,7 +670,6 @@ namespace BusinessLogicLayer
                 return "";
             }
         }
-
         public List<Field> FindAllLinksBySection(Section section)
         {
             var links = new List<Field>();
@@ -700,7 +698,7 @@ namespace BusinessLogicLayer
             }
             return links;
         }
-        public List<Field> GetAllHyperlinks()
+        public IEnumerable<Field> GetAllHyperlinks()
         {
             var links = new List<Field>();
 
@@ -718,14 +716,13 @@ namespace BusinessLogicLayer
 
                                 if (field.Type == FieldType.FieldHyperlink)
                                 {
-                                    links.Add(field);
+                                    yield return field;
                                 }
                             }
                         }
                     }
                 }
             }
-            return links;
         }
         public IEnumerable<Bookmark> GetAllBookmarks()
         {

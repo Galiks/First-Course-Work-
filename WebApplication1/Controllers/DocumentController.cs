@@ -84,7 +84,7 @@ namespace WebApplication1.Controllers
 
         public IActionResult EditLinks()
         {
-            List<Field> hyperlinks = wordDocument.GetAllHyperlinks();
+            var hyperlinks = wordDocument.GetAllHyperlinks().ToList();
             ViewBag.Hyperlinks = hyperlinks;
             var bookmarks = wordDocument.GetAllBookmarks();
             ViewBag.Bookmarks = bookmarks.ToList();
@@ -105,7 +105,7 @@ namespace WebApplication1.Controllers
 
         public IActionResult UpdateHyperlink(int index, string hypertext, IFormFile image)
         {
-            List<Field> list = wordDocument.GetAllHyperlinks();
+            var list = wordDocument.GetAllHyperlinks().ToList();
             Field field = list[index];
             wordDocument.EditLinkInHypertext(field, hypertext);
             return Redirect("EditLinks");
@@ -113,7 +113,7 @@ namespace WebApplication1.Controllers
 
         public IActionResult DeleteHyperlink(int index)
         {
-            List<Field> list = wordDocument.GetAllHyperlinks();
+            var list = wordDocument.GetAllHyperlinks().ToList();
             Field field = list[index];
             this.wordDocument.DeleteHyperlink(field);
             return Redirect("EditLinks");
@@ -131,11 +131,12 @@ namespace WebApplication1.Controllers
             return Redirect("EditLinks");
         }
 
-        public IActionResult Download()
+        public FileResult Download()
         {
-            string file_type = "application/docx";
-            string path = _appEnvironment.WebRootPath + @"\Files\Doc\" + HomeController.FileName;
-            return File(path, file_type, HomeController.FileName);
+            var file = new DirectoryInfo(_appEnvironment.WebRootPath + @"\Files\Doc").GetFiles().Where(f => f.Name == HomeController.FileName).FirstOrDefault();
+            var doc = new byte[0];
+            doc = System.IO.File.ReadAllBytes(file.FullName);
+            return File(doc, "application/" + file.Extension, file.Name);
         }
     }
 }

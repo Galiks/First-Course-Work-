@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Document Page";
 }
 
 @model string
@@ -11,119 +11,139 @@
         <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
         <script>tinymce.init({ selector: 'textarea' });</script>
     </head>
-<body>
-
-    <div id="messages">
-        @foreach (var item in ViewBag.Messages)
-        {
-            <p>@item</p>
-        }
-    </div>
-
-    <div class="text-center">
-        <style>
-            #text{
-                width: 80%;
-            }
-        </style>
-        <div>
-            <form asp-action="Index" asp-controller="Document" method="post" enctype="multipart/form-data">
-                <p>
-                    <label for="word">Слово для гипертекста: </label>
-                    <input type="text" name="word" id="word" value="текст" />
-                </p>
-
-                <p>
-                    <label for="text">Выберите текст и/или картинку для ссылки: </label>
-                    <input type="text" name="text" id="text" value="la lal la lal al al al" />
-                    @* https://ru.wikipedia.org/wiki/%D0%93%D0%B8%D0%BF%D0%B5%D1%80%D1%82%D0%B5%D0%BA%D1%81%D1%82 *@
-                    <label for="image">
-                        Фото:
-                        <input type="file" id="image" name="image" />
-                    </label>
-                </p>
-
-                <p>
-                    <label for="">Выберите тип ссылки: </label>
-                    <lable>Закладка <input type="radio" name="hyperlinkType" value="bookmark" /></lable>
-                    <label>Ссылка <input type="radio" name="hyperlinkType" value="hyperlink" /></label>
-                </p>
-
-                <p>
-                    <label>Выделение текста</label>
-                    <input id="marking" name="marking" type="checkbox" value="true" />
-                    <input name="marking" type="hidden" value="false" />
-                </p>
-
-                <button>Отправить</button>
-            </form>
-
-        </div>
-
-        <div>
-            <h3>Скачать файл: </h3>
-            <div>
-                @using (Html.BeginForm("Download", "Document"))
-                {
-                    <button >Скачать</button>
-                }
-            </div>
-        </div>
-
-        @*ToggleButton недоделана*@
-        @*<div>
-            <h1>Кнопка, отменающая выделение текста</h1>
-            <div id="switch">
-
-                <div id="slider"></div>
-
-                <div id="circle">
-                    <div id="circle-content"></div>
+    <body>
+        <header>
+            <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+                <div class="container">
+                    @*<a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">WebApplication1</a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                            aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>*@
+                    <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
+                        <ul class="navbar-nav flex-grow-1">
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Document" asp-action="EditLinks">Редактировать ссылки и закладки</a>
+                            </li>
+                            <li>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Document" asp-action="UsingHypertext">Использование гипертекста</a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-
-            </div>
-            <script src="~/js/toggleButton.js"></script>
-        </div>*@
-              
-
-        <div>
-            <textarea>@ViewBag.LongText</textarea>
-            <script>
-                tinymce.init({
-                    selector: 'textareaNote',
-                    plugins: 'a11ychecker advcode casechange formatpainter linkchecker lists checklist media mediaembed pageembed permanentpen powerpaste table advtable tinycomments tinydrive tinymcespellchecker link',
-                    toolbar: 'a11ycheck addcomment showcomments casechange checklist code formatpainter insertfile pageembed permanentpen table link',
-                    toolbar_drawer: 'floating',
-                    tinycomments_mode: 'embedded',
-                    tinycomments_author: 'Author name',
-                });
-
-                //Выделение текста
-                //document.onmouseup = function () {
-                            //    var selection = window.getSelection();
-                            //    alert(selection.toString());
-                            //}
-            </script>
+            </nav>
+        </header>
+        <div id="messages">
+            @foreach (var item in ViewBag.Messages)
+            {
+                <p>@item</p>
+            }
         </div>
 
-        @*<div>
-            <textarea>
-                @foreach (var item in ViewBag.Footnotes)
-                {
-                    @item
+        <div class="text-center">
+            <style>
+                #text {
+                    width: 80%;
                 }
-            </textarea>
-            <script>
-                tinymce.init({
-                    selector: 'textarea',
-                    plugins: 'a11ychecker advcode casechange formatpainter linkchecker lists checklist media mediaembed pageembed permanentpen powerpaste table advtable tinycomments tinydrive tinymcespellchecker link',
-                    toolbar: 'a11ycheck addcomment showcomments casechange checklist code formatpainter insertfile pageembed permanentpen table link',
-                    toolbar_drawer: 'floating',
-                    tinycomments_mode: 'embedded',
-                    tinycomments_author: 'Author name',
-                });
-            </script>
-        </div>*@
+            </style>
+            <div>
+                <form asp-action="Index" asp-controller="Document" method="post" enctype="multipart/form-data">
+                    <p>
+                        <label for="word">Слово для гипертекста: </label>
+                        <input type="text" name="word" id="word" value="текст" />
+                    </p>
 
-    </div>
-</body>
+                    <p>
+                        <label for="text">Выберите текст и/или картинку для ссылки: </label>
+                        <input type="text" name="text" id="text" value="la lal la lal al al al" />
+                        @* https://ru.wikipedia.org/wiki/%D0%93%D0%B8%D0%BF%D0%B5%D1%80%D1%82%D0%B5%D0%BA%D1%81%D1%82 *@
+                        <label for="image">
+                            Фото:
+                            <input type="file" id="image" name="image" />
+                        </label>
+                    </p>
+
+                    <p>
+                        <label for="">Выберите тип ссылки: </label>
+                        <lable>Закладка <input type="radio" name="hyperlinkType" value="bookmark" /></lable>
+                        <label>Ссылка <input type="radio" name="hyperlinkType" value="hyperlink" /></label>
+                    </p>
+
+                    <p>
+                        <label>Выделение текста</label>
+                        <input id="marking" name="marking" type="checkbox" value="true" />
+                        <input name="marking" type="hidden" value="false" />
+                    </p>
+
+                    <button>Отправить</button>
+                </form>
+
+            </div>
+
+            <div>
+                <h3>Скачать файл: </h3>
+                <div>
+                    @using (Html.BeginForm("Download", "Document"))
+                    {
+                        <button>Скачать</button>
+                    }
+                </div>
+            </div>
+
+            @*ToggleButton недоделана*@
+            @*<div>
+                <h1>Кнопка, отменающая выделение текста</h1>
+                <div id="switch">
+
+                    <div id="slider"></div>
+
+                    <div id="circle">
+                        <div id="circle-content"></div>
+                    </div>
+
+                </div>
+                <script src="~/js/toggleButton.js"></script>
+            </div>*@
+
+
+            <div>
+                <textarea>@ViewBag.LongText</textarea>
+                <script>
+                    tinymce.init({
+                        selector: 'textareaNote',
+                        plugins: 'a11ychecker advcode casechange formatpainter linkchecker lists checklist media mediaembed pageembed permanentpen powerpaste table advtable tinycomments tinydrive tinymcespellchecker link',
+                        toolbar: 'a11ycheck addcomment showcomments casechange checklist code formatpainter insertfile pageembed permanentpen table link',
+                        toolbar_drawer: 'floating',
+                        tinycomments_mode: 'embedded',
+                        tinycomments_author: 'Author name',
+                    });
+
+                                //Выделение текста
+                                //document.onmouseup = function () {
+                                            //    var selection = window.getSelection();
+                                            //    alert(selection.toString());
+                                            //}
+                </script>
+            </div>
+
+            @*<div>
+                <textarea>
+                    @foreach (var item in ViewBag.Footnotes)
+                    {
+                        @item
+                    }
+                </textarea>
+                <script>
+                    tinymce.init({
+                        selector: 'textarea',
+                        plugins: 'a11ychecker advcode casechange formatpainter linkchecker lists checklist media mediaembed pageembed permanentpen powerpaste table advtable tinycomments tinydrive tinymcespellchecker link',
+                        toolbar: 'a11ycheck addcomment showcomments casechange checklist code formatpainter insertfile pageembed permanentpen table link',
+                        toolbar_drawer: 'floating',
+                        tinycomments_mode: 'embedded',
+                        tinycomments_author: 'Author name',
+                    });
+                </script>
+            </div>*@
+
+        </div>
+    </body>

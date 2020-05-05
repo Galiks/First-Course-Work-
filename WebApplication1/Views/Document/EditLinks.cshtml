@@ -114,7 +114,7 @@
                         if (nextSibling != null)
                         {
                             var firstChild = nextSibling.FirstChild;
-                            if (firstChild.DocumentObjectType == DocumentObjectType.Picture)
+                            if (firstChild != null && firstChild.DocumentObjectType == DocumentObjectType.Picture)
                             {
                                 <tr>
                                     <td><img width='200px' height='200px' src='data:image/jpeg;base64,@Convert.ToBase64String(firstChild.ImageBytes)' /></td>
