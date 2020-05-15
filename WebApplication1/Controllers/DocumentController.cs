@@ -136,7 +136,15 @@ namespace WebApplication1.Controllers
             var file = new DirectoryInfo(_appEnvironment.WebRootPath + @"\Files\Doc").GetFiles().Where(f => f.Name == HomeController.FileName).FirstOrDefault();
             var doc = new byte[0];
             doc = System.IO.File.ReadAllBytes(file.FullName);
-            return File(doc, "application/" + file.Extension, file.Name);
+            string fileExtension = file.Extension;
+            string filename = file.Name;
+            DeleteFile(file);
+            return File(doc, "application/" + fileExtension, filename);
+        }
+
+        private void DeleteFile(FileInfo file)
+        {
+            file.Delete();
         }
     }
 }

@@ -41,6 +41,9 @@
     <div>
         <h1>Здесь вы можеет редактировать ссылки и закладки.</h1>
 
+
+
+        <h2>Гиперссылки</h2>
         <div id="maincontainer">
             <div id="leftcolumn">
                 <table border="1">
@@ -104,7 +107,12 @@
 
                 </table>
             </div>
+            @for (int i = 0; i < 10; i++)
+            {
+                <br />
+            }
 
+            <h2>Закладки</h2>
             <div id="contentwrapper">
                 <table border="1">
                     @for (int i = 0; i < ViewBag.Bookmarks.Count; i++)
@@ -129,13 +137,6 @@
                                         </form>
                                     </td>
                                     <td>
-                                        <form asp-action="UpdateBookmark" asp-controller="Document" method="post">
-                                            <input type="text" name="text" />
-                                            <input type="text" name="bookmark" hidden value="@ViewBag.Bookmarks[i].Name" />
-                                            <button>Редактировать текст</button>
-                                        </form>
-                                    </td>
-                                    <td>
                                         @Html.ActionLink("Удалить", "DeleteBookmark", new { index = ViewBag.Bookmarks[i].Name })
                                     </td>
                                 </tr>
@@ -153,7 +154,7 @@
                                         </form>
                                     </td>
                                     <td>
-                                        @Html.ActionLink("Удалить", "DeleteBookmark", new { index = ViewBag.Bookmarks[i].Name })
+                                        @Html.ActionLink("Удалить", "DeleteBookmark", new { bookmark = ViewBag.Bookmarks[i].Name })
                                     </td>
                                 </tr>
                             }

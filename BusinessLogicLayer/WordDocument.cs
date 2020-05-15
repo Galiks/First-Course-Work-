@@ -23,11 +23,11 @@ namespace BusinessLogicLayer
         private readonly HashSet<string> messages;
         private static int indexNextField = 0;
         private Paragraph referencesParagraph;
-        private Section referencesSection;
+        private static Section referencesSection;
         public Document Document => document;
         public HashSet<string> Messages => messages;
         public int IndexNextField { get => indexNextField; private set => indexNextField = value; }
-        public Section ReferencesSection { get => referencesSection; private set => referencesSection = value; }
+        public static Section ReferencesSection { get => referencesSection; private set => referencesSection = value; }
         public WordDocument(string filename)
         {
             this.filename = filename;
@@ -577,8 +577,11 @@ namespace BusinessLogicLayer
                     }
                     #endregion
 
-                    foreach (DocumentObject child in paragraph.ChildObjects)
+                    var children = paragraph.ChildObjects;
+
+                    for (int i = 0; i < children.Count; i++)
                     {
+                        DocumentObject child = children[i];
                         if (child.DocumentObjectType == DocumentObjectType.TextRange)
                         {
                             TextRange textRange = child as TextRange;
@@ -594,10 +597,14 @@ namespace BusinessLogicLayer
                                 if (marking)
                                 {
                                     paragraphText.Append($"<a href='{field.Code}'>{field.FieldText}</a>");
+                                    i += 2;
+                                    continue;
                                 }
                                 else
                                 {
                                     paragraphText.Append($"{field.FieldText}");
+                                    i += 2;
+                                    continue;
                                 }
                             }
                             else if (field.Type == FieldType.FieldRef & !string.IsNullOrWhiteSpace(field.FieldText))
@@ -605,12 +612,16 @@ namespace BusinessLogicLayer
                                 if (marking)
                                 {
                                     paragraphText.Append($"<strong>{field.FieldText}</strong>");
+                                    i += 2;
+                                    continue;
                                 }
                                 else
                                 {
                                     paragraphText.Append($"{field.FieldText}");
+                                    i += 2;
+                                    continue;
                                 }
-                                
+
                             }
                         }
                         else if (child.DocumentObjectType == DocumentObjectType.Break)
@@ -770,7 +781,7 @@ namespace BusinessLogicLayer
         }
         public List<Tuple<string, string>> GetAllFootnotes()
         {
-            var result = new List<Tuple<string,string>>();
+            var result = new List<Tuple<string, string>>();
 
             foreach (Section section in document.Sections)
             {
@@ -960,10 +971,30 @@ namespace BusinessLogicLayer
         {
             BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(document);
             bookmarksNavigator.MoveToBookmark(TransformWordWithUnderline(bookmarkText));
+
             if (bookmarksNavigator.CurrentBookmark != null)
             {
+                Spire.Doc.Interface.IDocumentObject textRangeOfBookmark = bookmarksNavigator.CurrentBookmark.BookmarkStart.NextSibling;
+                FormatText(textRangeOfBookmark as TextRange);
+                Paragraph bookmarkParagraph = textRangeOfBookmark.Owner as Paragraph;
+
+
+                for (int i = 0; i < ReferencesSection.Paragraphs.Count; i++)
+                {
+                    var tempParagraph = ReferencesSection.Paragraphs[i];
+                    if (bookmarkParagraph.Text == tempParagraph.Text)
+                    {
+                        ReferencesSection.Paragraphs.RemoveAt(i);
+                        break;
+                    }
+                }
+
+                
+
                 document.Bookmarks.Remove(bookmarksNavigator.CurrentBookmark);
             }
+
+            
 
             SaveCurrentDocument();
         }

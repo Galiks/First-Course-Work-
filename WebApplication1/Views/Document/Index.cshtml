@@ -50,13 +50,12 @@
                 <form asp-action="Index" asp-controller="Document" method="post" enctype="multipart/form-data">
                     <p>
                         <label for="word">Слово для гипертекста: </label>
-                        <input type="text" name="word" id="word" value="текст" />
+                        <input type="text" name="word" id="word" />
                     </p>
 
                     <p>
                         <label for="text">Выберите текст и/или картинку для ссылки: </label>
-                        <input type="text" name="text" id="text" value="la lal la lal al al al" />
-                        @* https://ru.wikipedia.org/wiki/%D0%93%D0%B8%D0%BF%D0%B5%D1%80%D1%82%D0%B5%D0%BA%D1%81%D1%82 *@
+                        <input type="text" name="text" id="text"  />
                         <label for="image">
                             Фото:
                             <input type="file" id="image" name="image" />
