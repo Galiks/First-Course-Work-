@@ -28,6 +28,9 @@ namespace BusinessLogicLayer
         public HashSet<string> Messages => messages;
         public int IndexNextField { get => indexNextField; private set => indexNextField = value; }
         public static Section ReferencesSection { get => referencesSection; private set => referencesSection = value; }
+        public static int IndexReferencesSection { get => indexReferencesSection; set => indexReferencesSection = value; }
+
+        private static int indexReferencesSection;
         public WordDocument(string filename)
         {
             this.filename = filename;
@@ -867,11 +870,13 @@ namespace BusinessLogicLayer
                 //referencesParagraph = sectionForReferences.AddParagraph();
                 referencesParagraph = chapterForReferences;
                 ReferencesSection = sectionForReferences;
+                IndexReferencesSection = Document.GetIndex(sectionForReferences);
             }
             else
             {
                 referencesParagraph = sectionAndParagraph.Item2;
                 ReferencesSection = sectionAndParagraph.Item1;
+                IndexReferencesSection = Document.GetIndex(sectionAndParagraph.Item1);
             }
 
             SaveCurrentDocument();
@@ -974,28 +979,18 @@ namespace BusinessLogicLayer
 
             if (bookmarksNavigator.CurrentBookmark != null)
             {
-                Spire.Doc.Interface.IDocumentObject textRangeOfBookmark = bookmarksNavigator.CurrentBookmark.BookmarkStart.NextSibling;
-                FormatText(textRangeOfBookmark as TextRange);
-                Paragraph bookmarkParagraph = textRangeOfBookmark.Owner as Paragraph;
-
-
-                for (int i = 0; i < ReferencesSection.Paragraphs.Count; i++)
+                var paragraphs = Document.Sections[IndexReferencesSection].Paragraphs;
+                foreach (var paragraph in from Paragraph paragraph in paragraphs
+                                          where paragraph.FirstChild is BookmarkStart & paragraph.LastChild is BookmarkEnd
+                                          let paragraphFirstChild = paragraph.FirstChild as BookmarkStart
+                                          let paragraphLastChild = paragraph.LastChild as BookmarkEnd
+                                          where paragraphFirstChild.Name == bookmarkText & paragraphLastChild.Name == bookmarkText
+                                          select paragraph)
                 {
-                    var tempParagraph = ReferencesSection.Paragraphs[i];
-                    if (bookmarkParagraph.Text == tempParagraph.Text)
-                    {
-                        ReferencesSection.Paragraphs.RemoveAt(i);
-                        break;
-                    }
+                    paragraphs.Remove(paragraph);
                 }
-
-                
-
                 document.Bookmarks.Remove(bookmarksNavigator.CurrentBookmark);
             }
-
-            
-
             SaveCurrentDocument();
         }
     }
