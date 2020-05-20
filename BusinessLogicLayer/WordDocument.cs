@@ -991,6 +991,35 @@ namespace BusinessLogicLayer
                 }
                 document.Bookmarks.Remove(bookmarksNavigator.CurrentBookmark);
             }
+
+            foreach (Section section in Document.Sections)
+            {
+                foreach (Paragraph paragraph in section.Paragraphs)
+                {
+                    foreach (DocumentObject child in paragraph.ChildObjects)
+                    {
+                        if (child.DocumentObjectType is DocumentObjectType.Field)
+                        {
+                            Field field = child as Field;
+
+                            if (field.Code == $"REF {bookmarkText} \\p \\h")
+                            {
+                                var textRange = field.NextSibling.NextSibling as TextRange;
+                                var nextFieldMark = textRange.NextSibling as FieldMark;
+                                var previousFieldMark = textRange.PreviousSibling as FieldMark;
+                                textRange.CharacterFormat.TextColor = Color.Black;
+                                textRange.CharacterFormat.UnderlineStyle = UnderlineStyle.None;
+
+                                paragraph.ChildObjects.Remove(nextFieldMark);
+                                paragraph.ChildObjects.Remove(previousFieldMark);
+                                paragraph.ChildObjects.Remove(child);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
             SaveCurrentDocument();
         }
     }
