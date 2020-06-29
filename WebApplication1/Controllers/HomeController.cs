@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Spire.Doc;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -57,12 +59,23 @@ namespace WebApplication1.Controllers
             }
             catch (IOException)
             {
+
                 filename = "NEW_" + filename;
                 path = _appEnvironment.WebRootPath + @"\Files\Doc\" + filename;
                 pathToFile = path;
                 FileName = filename;
                 await SaveFile(file, filename, path);
             }
+        }
+
+        public async Task<IActionResult> LogIn()
+        {
+            return View();
+        }
+
+        public async Task<IActionResult> Registration()
+        {
+            return View();
         }
     }
 }

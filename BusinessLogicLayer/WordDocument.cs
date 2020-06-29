@@ -541,125 +541,131 @@ namespace BusinessLogicLayer
         }
         public string GetTextFromDocument(bool marking)
         {
-            StringBuilder longText = new StringBuilder();
-            GetAllFootnotes();
-            foreach (Section section in document.Sections)
-            {
-                bool flagForNumbered = false;
-                longText.AppendLine("<div>");
-                foreach (Paragraph paragraph in section.Paragraphs)
-                {
-                    string aligment = GetAligment(paragraph);
-                    string fontName = "";
-                    float? fontSize = default;
-                    StringBuilder paragraphText = new StringBuilder();
+            string filename = DateTime.Now.ToString("dd.MM.yyyy_hh.mm.ss") + "_file.html";
+            document.SaveToFile(filename, FileFormat.Html);
+            
 
-                    #region нерабочий список
-                    if (paragraph.NextSibling != null)
-                    {
-                        Paragraph nextParagraph = paragraph.NextSibling as Paragraph;
-                        if (nextParagraph?.ListFormat.ListType == ListType.Numbered & flagForNumbered == false)
-                        {
-                            paragraphText.Append("<ol>");
-                            flagForNumbered = true;
-                        }
-                        else if (nextParagraph?.ListFormat.ListType != ListType.Numbered & flagForNumbered)
-                        {
-                            paragraphText.Append("</ol>");
-                            flagForNumbered = false;
-                        }
-                    }
-                    else
-                    {
-                        paragraphText.Append("</ol>");
-                    }
+            return null;
 
-                    if (paragraph.ListFormat.ListType == ListType.Numbered)
-                    {
-                        paragraphText.Append($"<li>");
-                    }
-                    #endregion
+            //StringBuilder longText = new StringBuilder();
+            //GetAllFootnotes();
+            //foreach (Section section in document.Sections)
+            //{
+            //    bool flagForNumbered = false;
+            //    longText.AppendLine(" < div>");
+            //    foreach (Paragraph paragraph in section.Paragraphs)
+            //    {
+            //        string aligment = GetAligment(paragraph);
+            //        string fontName = "";
+            //        float? fontSize = default;
+            //        StringBuilder paragraphText = new StringBuilder();
 
-                    var children = paragraph.ChildObjects;
+            //        #region нерабочий список
+            //        if (paragraph.NextSibling != null)
+            //        {
+            //            Paragraph nextParagraph = paragraph.NextSibling as Paragraph;
+            //            if (nextParagraph?.ListFormat.ListType == ListType.Numbered & flagForNumbered == false)
+            //            {
+            //                paragraphText.Append("<ol>");
+            //                flagForNumbered = true;
+            //            }
+            //            else if (nextParagraph?.ListFormat.ListType != ListType.Numbered & flagForNumbered)
+            //            {
+            //                paragraphText.Append("</ol>");
+            //                flagForNumbered = false;
+            //            }
+            //        }
+            //        else
+            //        {
+            //            paragraphText.Append("</ol>");
+            //        }
 
-                    for (int i = 0; i < children.Count; i++)
-                    {
-                        DocumentObject child = children[i];
-                        if (child.DocumentObjectType == DocumentObjectType.TextRange)
-                        {
-                            TextRange textRange = child as TextRange;
-                            fontName = textRange?.CharacterFormat.FontName;
-                            fontSize = textRange?.CharacterFormat.FontSize;
-                            paragraphText.Append(textRange.Text);
-                        }
-                        else if (child.DocumentObjectType == DocumentObjectType.Field)
-                        {
-                            Field field = child as Field;
-                            if (field.Type == FieldType.FieldHyperlink & !string.IsNullOrWhiteSpace(field.FieldText))
-                            {
-                                if (marking)
-                                {
-                                    paragraphText.Append($"<a href='{field.Code}'>{field.FieldText}</a>");
-                                    i += 2;
-                                    continue;
-                                }
-                                else
-                                {
-                                    paragraphText.Append($"{field.FieldText}");
-                                    i += 2;
-                                    continue;
-                                }
-                            }
-                            else if (field.Type == FieldType.FieldRef & !string.IsNullOrWhiteSpace(field.FieldText))
-                            {
-                                if (marking)
-                                {
-                                    paragraphText.Append($"<strong>{field.FieldText}</strong>");
-                                    i += 2;
-                                    continue;
-                                }
-                                else
-                                {
-                                    paragraphText.Append($"{field.FieldText}");
-                                    i += 2;
-                                    continue;
-                                }
+            //        if (paragraph.ListFormat.ListType == ListType.Numbered)
+            //        {
+            //            paragraphText.Append($"<li>");
+            //        }
+            //        #endregion
 
-                            }
-                        }
-                        else if (child.DocumentObjectType == DocumentObjectType.Break)
-                        {
-                            Break @break = child as Break;
-                            if (@break.BreakType == BreakType.LineBreak)
-                            {
-                                paragraphText.Replace("\v", $"<br>");
-                            }
-                        }
-                        else if (child.DocumentObjectType == DocumentObjectType.Picture)
-                        {
-                            DocPicture picture = child as DocPicture;
-                            paragraphText.Append($"<img width='{picture.Width}px' height='{picture.Height}px' src=\"data:image/jpeg;base64," + Convert.ToBase64String(picture.ImageBytes) + "\" />");
-                        }
-                    }
+            //        var children = paragraph.ChildObjects;
 
-                    if (paragraph.ListFormat.ListType == ListType.Numbered)
-                    {
-                        paragraphText.Append($"</li>");
-                    }
+            //        for (int i = 0; i < children.Count; i++)
+            //        {
+            //            DocumentObject child = children[i];
+            //            if (child.DocumentObjectType == DocumentObjectType.TextRange)
+            //            {
+            //                TextRange textRange = child as TextRange;
+            //                fontName = textRange?.CharacterFormat.FontName;
+            //                fontSize = textRange?.CharacterFormat.FontSize;
+            //                paragraphText.Append(textRange.Text);
+            //            }
+            //            else if (child.DocumentObjectType == DocumentObjectType.Field)
+            //            {
+            //                Field field = child as Field;
+            //                if (field.Type == FieldType.FieldHyperlink & !string.IsNullOrWhiteSpace(field.FieldText))
+            //                {
+            //                    if (marking)
+            //                    {
+            //                        paragraphText.Append($"<a href='{field.Code}'>{field.FieldText}</a>");
+            //                        i += 2;
+            //                        continue;
+            //                    }
+            //                    else
+            //                    {
+            //                        paragraphText.Append($"{field.FieldText}");
+            //                        i += 2;
+            //                        continue;
+            //                    }
+            //                }
+            //                else if (field.Type == FieldType.FieldRef & !string.IsNullOrWhiteSpace(field.FieldText))
+            //                {
+            //                    if (marking)
+            //                    {
+            //                        paragraphText.Append($"<strong>{field.FieldText}</strong>");
+            //                        i += 2;
+            //                        continue;
+            //                    }
+            //                    else
+            //                    {
+            //                        paragraphText.Append($"{field.FieldText}");
+            //                        i += 2;
+            //                        continue;
+            //                    }
 
-                    fontName = string.IsNullOrWhiteSpace(fontName) ? "Time New Roman" : fontName;
-                    fontSize = fontSize == default ? 12 : fontSize;
+            //                }
+            //            }
+            //            else if (child.DocumentObjectType == DocumentObjectType.Break)
+            //            {
+            //                Break @break = child as Break;
+            //                if (@break.BreakType == BreakType.LineBreak)
+            //                {
+            //                    paragraphText.Replace("\v", $"<br>");
+            //                }
+            //            }
+            //            else if (child.DocumentObjectType == DocumentObjectType.Picture)
+            //            {
+            //                DocPicture picture = child as DocPicture;
+            //                paragraphText.Append($"<img width='{picture.Width}px' height='{picture.Height}px' src=\"data:image/jpeg;base64," + Convert.ToBase64String(picture.ImageBytes) + "\" />");
+            //            }
+            //        }
 
-                    longText.AppendLine($"<p align='{aligment}'><font size='{fontSize}' face='{fontName}'>{paragraphText}</font></p>");
-                }
-                for (int i = 0; i < 5; i++)
-                {
-                    longText.AppendLine("<br>");
-                }
-                longText.AppendLine("</div>");
-            }
+            //        if (paragraph.ListFormat.ListType == ListType.Numbered)
+            //        {
+            //            paragraphText.Append($"</li>");
+            //        }
 
-            return longText.ToString();
+            //        fontName = string.IsNullOrWhiteSpace(fontName) ? "Time New Roman" : fontName;
+            //        fontSize = fontSize == default ? 12 : fontSize;
+
+            //        longText.AppendLine($"<p align='{aligment}'><font size='{fontSize}' face='{fontName}'>{paragraphText}</font></p>");
+            //    }
+            //    for (int i = 0; i < 5; i++)
+            //    {
+            //        longText.AppendLine("<br>");
+            //    }
+            //    longText.AppendLine("</div>");
+            //}
+
+            //return longText.ToString();
         }
         private string GetAligment(Paragraph paragraph)
         {
