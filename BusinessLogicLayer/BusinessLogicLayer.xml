@@ -4,6 +4,24 @@
         <name>BusinessLogicLayer</name>
     </assembly>
     <members>
+        <member name="M:BusinessLogicLayer.FolderWork.CreateFolder(System.String,System.String,System.String,System.String)">
+            <summary>
+            
+            </summary>
+            <param name="firstname"></param>
+            <param name="lastname"></param>
+            <param name="patronymic"></param>
+            <param name="path"></param>
+        </member>
+        <member name="M:BusinessLogicLayer.FolderWork.GetFolderName(System.String,System.String,System.String)">
+            <summary>
+            
+            </summary>
+            <param name="firstname"></param>
+            <param name="lastname"></param>
+            <param name="patronymic"></param>
+            <returns></returns>
+        </member>
         <member name="M:BusinessLogicLayer.WordDocument.GetWordsByCases(System.String)">
             <summary>
             Возвращает список слов по падежам

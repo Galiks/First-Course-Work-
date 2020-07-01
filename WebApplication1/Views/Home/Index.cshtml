@@ -5,6 +5,15 @@
 <html>
 <body>
 
+    @if (string.IsNullOrWhiteSpace(WebApplication1.Controllers.HomeController.userFolder))
+    {
+        <div>
+            <h1>ВЫ НЕ БЫЛИ ОПОЗНАНЫ!</h1>
+            <h1>Перейдите на вкладку с <a asp-action="Login" asp-controller="Home">авторизацией</a></h1>
+        </div>
+    }
+    else
+    {
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
@@ -31,9 +40,10 @@
         }
 
     </div>
+    }
 
-    
-    <iframe height="600px" width="90%" src="~/Files/Html/29.06.2020_01.45.48_file.html"></iframe>
+
+    @*<iframe height="600px" width="90%" src="~/Files/Html/29.06.2020_01.45.48_file.html"></iframe>*@
     
 </body>
 </html>

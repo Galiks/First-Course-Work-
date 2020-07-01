@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using BusinessLogicLayer;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -12,16 +13,19 @@ namespace WebApplication1.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly string absolutPath;
         readonly IWebHostEnvironment _appEnvironment;
         private readonly ILogger<HomeController> _logger;
         private readonly List<string> formats;
         public static string FileName;
         public static string pathToFile;
+        public static string userFolder;
 
         public HomeController(ILogger<HomeController> logger, IWebHostEnvironment appEnvironment)
         {
             _logger = logger;
             _appEnvironment = appEnvironment;
+            absolutPath = _appEnvironment.WebRootPath + @"\Files";
             formats = new List<string>() { ".docx", ".pdf", ".doc" };
         }
 
@@ -32,7 +36,7 @@ namespace WebApplication1.Controllers
                 var extension = Path.GetExtension(file.FileName);
                 if (formats.Contains(extension))
                 {
-                    string path = _appEnvironment.WebRootPath + @"\Files\Doc\" + file.FileName;
+                    string path = userFolder + file.FileName;
                     pathToFile = path;
                     //FileMode.Append
                     await SaveFile(file, file.FileName, path);
@@ -52,30 +56,63 @@ namespace WebApplication1.Controllers
             try
             {
                 FileName = filename;
-                using (var fileStream = new FileStream(path, FileMode.CreateNew))
-                {
-                    await file.CopyToAsync(fileStream);
-                }
+                using var fileStream = new FileStream(path, FileMode.CreateNew);
+                await file.CopyToAsync(fileStream);
             }
             catch (IOException)
             {
 
                 filename = "NEW_" + filename;
-                path = _appEnvironment.WebRootPath + @"\Files\Doc\" + filename;
+                path = userFolder + filename;
                 pathToFile = path;
                 FileName = filename;
                 await SaveFile(file, filename, path);
             }
         }
 
-        public async Task<IActionResult> LogIn()
+        public IActionResult LogIn(string lastName, string firstName, string patronymic)
         {
-            return View();
+            if (string.IsNullOrWhiteSpace(lastName) || string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(patronymic))
+            {
+                return View();
+            }
+            else
+            {
+                //Directory.SetCurrentDirectory(absolutPath);
+                string initials = FolderWork.GetFolderName(firstName, lastName, patronymic);
+                var list = Directory.GetDirectories(absolutPath);
+                foreach (var item in Directory.GetDirectories(absolutPath))
+                {
+                    if (item.Contains(initials))
+                    {
+                        userFolder = item;
+                    }
+                }
+
+
+                if (!string.IsNullOrWhiteSpace(userFolder))
+                {
+                    return RedirectToAction("Index"); 
+                }
+                else
+                {
+                    return View();
+                }
+            }
+
         }
 
-        public async Task<IActionResult> Registration()
+        public IActionResult Registration(string lastName, string firstName, string patronymic, string password)
         {
-            return View();
+            if (string.IsNullOrWhiteSpace(lastName) || string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(patronymic))
+            {
+                return View();
+            }
+            else
+            {
+                userFolder = FolderWork.CreateFolder(firstName, lastName, patronymic, _appEnvironment.WebRootPath + @"\Files");
+                return RedirectToAction("Index");
+            }
         }
     }
 }
