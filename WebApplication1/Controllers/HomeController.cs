@@ -20,6 +20,7 @@ namespace WebApplication1.Controllers
         public static string FileName;
         public static string pathToFile;
         public static string userFolder;
+        public static string test = @"~//2019.11.docx.html";
 
         public HomeController(ILogger<HomeController> logger, IWebHostEnvironment appEnvironment)
         {
@@ -27,6 +28,7 @@ namespace WebApplication1.Controllers
             _appEnvironment = appEnvironment;
             absolutPath = _appEnvironment.WebRootPath + @"\Files";
             formats = new List<string>() { ".docx", ".pdf", ".doc" };
+            //ViewData["Test"] = @"~//2019.11.docx.html";
         }
 
         public async Task<IActionResult> Index(IFormFile file)
@@ -40,7 +42,7 @@ namespace WebApplication1.Controllers
                     pathToFile = path;
                     //FileMode.Append
                     await SaveFile(file, file.FileName, path);
-                    return Redirect("Document/Index");
+                    return RedirectToAction("Index", "Document");
                 }
                 else
                 {
@@ -63,7 +65,7 @@ namespace WebApplication1.Controllers
             {
 
                 filename = "NEW_" + filename;
-                path = userFolder + filename;
+                path = userFolder + @"\" + filename;
                 pathToFile = path;
                 FileName = filename;
                 await SaveFile(file, filename, path);
@@ -85,7 +87,7 @@ namespace WebApplication1.Controllers
                 {
                     if (item.Contains(initials))
                     {
-                        userFolder = item;
+                        userFolder = item + @"\";
                     }
                 }
 
@@ -110,7 +112,7 @@ namespace WebApplication1.Controllers
             }
             else
             {
-                userFolder = FolderWork.CreateFolder(firstName, lastName, patronymic, _appEnvironment.WebRootPath + @"\Files");
+                userFolder = FolderWork.CreateFolder(firstName, lastName, patronymic, _appEnvironment.WebRootPath + @"\Files") + @"\";
                 return RedirectToAction("Index");
             }
         }

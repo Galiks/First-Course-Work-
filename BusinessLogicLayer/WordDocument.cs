@@ -7,6 +7,7 @@ using Spire.Doc.Fields;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -30,12 +31,15 @@ namespace BusinessLogicLayer
         public static Section ReferencesSection { get => referencesSection; private set => referencesSection = value; }
         public static int IndexReferencesSection { get => indexReferencesSection; set => indexReferencesSection = value; }
 
+        private readonly string filepath;
+
         private static int indexReferencesSection;
         public WordDocument(string filename)
         {
             this.filename = filename;
             document = new Document();
             //проблема с дублями файла
+            filepath = filename;
             document.LoadFromFile(filename);
             messages = new HashSet<string>();
         }
@@ -541,11 +545,29 @@ namespace BusinessLogicLayer
         }
         public string GetTextFromDocument(bool marking)
         {
-            string filename = DateTime.Now.ToString("dd.MM.yyyy_hh.mm.ss") + "_file.html";
+            string filename = filepath + ".html";
             document.SaveToFile(filename, FileFormat.Html);
-            
 
-            return null;
+            string[] splitFilename = filename.Split("\\");
+            string rightFilename = null;
+
+            for (int i = 0; i < splitFilename.Length; i++)
+            {
+                if (splitFilename[i].Equals("wwwroot"))
+                {
+                    rightFilename = @"~\" + string.Join(@"\", splitFilename, i + 1, splitFilename.Length - i - 1);
+                    //return splitFilename.Join("\\", splitFilename, i, splitFilename.Length - 1);
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(rightFilename))
+            {
+                return "error";
+            }
+            else
+            {
+                return rightFilename;
+            }
 
             //StringBuilder longText = new StringBuilder();
             //GetAllFootnotes();

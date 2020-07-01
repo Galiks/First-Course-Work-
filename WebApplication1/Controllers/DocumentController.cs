@@ -24,7 +24,7 @@ namespace WebApplication1.Controllers
         {
             _appEnvironment = appEnvironment;
             _logger = logger;
-            wordDocument = new WordDocument(HomeController.pathToFile);
+            wordDocument = new WordDocument(HomeController.userFolder + HomeController.FileName);
         }
 
         //public async Task<IActionResult> SetWordDocument(string filename)
@@ -40,7 +40,7 @@ namespace WebApplication1.Controllers
             string path = null;
             if (image != null)
             {
-                path = _appEnvironment.WebRootPath + "/Files/Images/" + image.FileName;
+                path = _appEnvironment.WebRootPath + "/Images/" + image.FileName;
                 using (var fileStream = new FileStream(path, FileMode.Create))
                 {
                     await image.CopyToAsync(fileStream);
@@ -133,7 +133,7 @@ namespace WebApplication1.Controllers
 
         public FileResult Download()
         {
-            var file = new DirectoryInfo(_appEnvironment.WebRootPath + @"\Files\Doc").GetFiles().Where(f => f.Name == HomeController.FileName).FirstOrDefault();
+            var file = new DirectoryInfo(HomeController.userFolder).GetFiles().Where(f => f.Name == HomeController.FileName).FirstOrDefault();
             var doc = new byte[0];
             doc = System.IO.File.ReadAllBytes(file.FullName);
             string fileExtension = file.Extension;

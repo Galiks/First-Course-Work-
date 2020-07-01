@@ -14,36 +14,41 @@
     }
     else
     {
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container">
-                <h1 class="h1 text-center">Приветствую Вас на сайте по добавлению гипертекста в текст!</h1>
+        <header>
+            <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+                <div class="container">
+                    <h1 class="h1 text-center">Приветствую Вас на сайте по добавлению гипертекста в текст!</h1>
+                </div>
+            </nav>
+        </header>
+
+        <div>
+
+            <div style="align-content:center; align-items:center">
+
+
+                <h3>Пожалуйста, загрузите файл.</h3>
+                <form asp-action="Index" asp-controller="Home" method="post" enctype="multipart/form-data">
+                    <input type="file" name="file" />
+                    <button>Отправить</button>
+                </form>
             </div>
-        </nav>
-    </header>
 
-    <div>
+            @if (!string.IsNullOrWhiteSpace(ViewBag.FileFormatErrorMessage))
+            {
+                <p>@ViewBag.FileFormatErrorMessage</p>
+            }
 
-        <div style="align-content:center; align-items:center">
-            
-
-            <h3>Пожалуйста, загрузите файл.</h3>
-            <form asp-action="Index" asp-controller="Home" method="post" enctype="multipart/form-data">
-                <input type="file" name="file" />
-                <button>Отправить</button>
-            </form>
         </div>
-
-        @if (!string.IsNullOrWhiteSpace(ViewBag.FileFormatErrorMessage))
-        {
-            <p>@ViewBag.FileFormatErrorMessage</p>
-        }
-
-    </div>
     }
 
 
-    @*<iframe height="600px" width="90%" src="~/Files/Html/29.06.2020_01.45.48_file.html"></iframe>*@
-    
+
+    @*<iframe height="600px" width="90%" src="~/2019.11.docx.html"></iframe>*@
+
+    <h1>@WebApplication1.Controllers.HomeController.test</h1>
+
+    <iframe height="600px" width="90%" src='@WebApplication1.Controllers.HomeController.test'></iframe>
+
 </body>
 </html>
