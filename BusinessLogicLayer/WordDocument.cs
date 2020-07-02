@@ -555,7 +555,7 @@ namespace BusinessLogicLayer
             {
                 if (splitFilename[i].Equals("wwwroot"))
                 {
-                    rightFilename = @"~\" + string.Join(@"\", splitFilename, i + 1, splitFilename.Length - i - 1);
+                    rightFilename = @"\" + string.Join(@"\", splitFilename, i + 1, splitFilename.Length - i - 1);
                     //return splitFilename.Join("\\", splitFilename, i, splitFilename.Length - 1);
                 }
             }

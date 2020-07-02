@@ -1,4 +1,5 @@
 ﻿using BusinessLogicLayer;
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +21,6 @@ namespace WebApplication1.Controllers
         public static string FileName;
         public static string pathToFile;
         public static string userFolder;
-        public static string test = @"~//2019.11.docx.html";
 
         public HomeController(ILogger<HomeController> logger, IWebHostEnvironment appEnvironment)
         {
@@ -28,7 +28,7 @@ namespace WebApplication1.Controllers
             _appEnvironment = appEnvironment;
             absolutPath = _appEnvironment.WebRootPath + @"\Files";
             formats = new List<string>() { ".docx", ".pdf", ".doc" };
-            //ViewData["Test"] = @"~//2019.11.docx.html";
+            
         }
 
         public async Task<IActionResult> Index(IFormFile file)
