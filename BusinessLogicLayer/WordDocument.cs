@@ -1,5 +1,6 @@
 ﻿using Cyriller;
 using Cyriller.Model;
+using NLog;
 using Spire.Doc;
 using Spire.Doc.Collections;
 using Spire.Doc.Documents;
@@ -15,6 +16,8 @@ namespace BusinessLogicLayer
 {
     public class WordDocument
     {
+        private static readonly Logger loggerException = LogManager.GetLogger("exception");
+
         private const string badBookmark = "_GoBack";
         private const int width = 470;
         private const int height = 340;
@@ -36,6 +39,10 @@ namespace BusinessLogicLayer
         private static int indexReferencesSection;
         public WordDocument(string filename)
         {
+
+
+            loggerException.Info("HELLO!");
+
             this.filename = filename;
             document = new Document();
             //проблема с дублями файла

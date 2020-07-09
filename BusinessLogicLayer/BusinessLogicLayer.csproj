@@ -10,8 +10,16 @@
 
   <ItemGroup>
     <PackageReference Include="Miyconst.Cyriller" Version="0.1.0" />
+    <PackageReference Include="NLog" Version="4.7.2" />
+    <PackageReference Include="NLog.Config" Version="4.7.2" />
     <PackageReference Include="Open-XML-SDK" Version="2.9.1" />
     <PackageReference Include="Spire.Doc" Version="8.2.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="nlog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

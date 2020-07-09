@@ -1,11 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using System.Diagnostics;
+using System.IO;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using System;
 using Microsoft.Extensions.Logging;
+using NLog.Web;
 
 namespace WebApplication1
 {
@@ -13,7 +13,36 @@ namespace WebApplication1
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            //var pathToExe = Process.GetCurrentProcess().MainModule.FileName;
+
+            //var pathToContentRoot = Path.GetDirectoryName(pathToExe);
+
+            //var host = Host.CreateDefaultBuilder(args)
+            //    .UseContentRoot(pathToContentRoot)
+            //    .ConfigureWebHostDefaults(webBuilder =>
+            //    {
+            //        webBuilder.UseStartup<Startup>();
+            //    })
+            //    .Build();
+
+            //host.Run();
+
+            var logger = NLog.Web.NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
+
+            try
+            {
+                logger.Info("Init main.");
+                CreateHostBuilder(args).Build().Run();
+            }
+            catch (Exception e)
+            {
+                logger.Error(e, "Program was stoped.");
+                throw;
+            }
+            finally
+            {
+                NLog.LogManager.Shutdown();
+            }
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -21,6 +50,12 @@ namespace WebApplication1
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                });
+                })
+                .ConfigureLogging(logging =>
+                {
+                    logging.ClearProviders();
+                    logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
+                })
+                .UseNLog();
     }
 }

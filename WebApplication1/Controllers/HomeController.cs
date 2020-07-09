@@ -25,9 +25,10 @@ namespace WebApplication1.Controllers
         public HomeController(ILogger<HomeController> logger, IWebHostEnvironment appEnvironment)
         {
             _logger = logger;
+            _logger.LogDebug(1, "NLog injected into HomeController");
             _appEnvironment = appEnvironment;
             absolutPath = _appEnvironment.WebRootPath + @"\Files";
-            formats = new List<string>() { ".docx", ".pdf", ".doc" };
+            formats = new List<string>() { ".docx", ".doc" };
             
         }
 
@@ -46,6 +47,7 @@ namespace WebApplication1.Controllers
                 }
                 else
                 {
+                    _logger.LogInformation("Введён не тот формат.");
                     ViewBag.FileFormatErrorMessage = "Неверный формат файла. Должен быть DOC, PDF, DOCX";
                     return View();
                 }
@@ -82,7 +84,6 @@ namespace WebApplication1.Controllers
             {
                 //Directory.SetCurrentDirectory(absolutPath);
                 string initials = FolderWork.GetFolderName(firstName, lastName, patronymic);
-                var list = Directory.GetDirectories(absolutPath);
                 foreach (var item in Directory.GetDirectories(absolutPath))
                 {
                     if (item.Contains(initials))
