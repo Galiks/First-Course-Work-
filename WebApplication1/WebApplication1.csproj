@@ -14,13 +14,13 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="3.1.5" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.1.5" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.3" />
-    <PackageReference Include="Miyconst.Cyriller" Version="0.1.0" />
+    <PackageReference Include="Miyconst.Cyriller" Version="0.1.1" />
     <PackageReference Include="NLog" Version="4.7.2" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="4.9.2" />
     <PackageReference Include="Open-XML-SDK" Version="2.9.1" />
-    <PackageReference Include="Spire.Doc" Version="8.2.9" />
+    <PackageReference Include="Spire.Doc" Version="8.6.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -39,7 +39,7 @@
     </Content>
   </ItemGroup>
 
-  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" properties_4launchsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
 
 
 

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using System;
 using Microsoft.Extensions.Logging;
 using NLog.Web;
+using Microsoft.AspNetCore;
 
 namespace WebApplication1
 {
@@ -32,7 +33,8 @@ namespace WebApplication1
             try
             {
                 logger.Info("Init main.");
-                CreateHostBuilder(args).Build().Run();
+                BuildWebHost(args).Run();
+                //CreateHostBuilder(args).Build().Run();
             }
             catch (Exception e)
             {
@@ -45,17 +47,25 @@ namespace WebApplication1
             }
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                })
-                .ConfigureLogging(logging =>
-                {
-                    logging.ClearProviders();
-                    logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
-                })
-                .UseNLog();
+        public static IWebHost BuildWebHost(string[] args) =>     
+            WebHost.CreateDefaultBuilder(args)
+                .UseStartup<Startup>()
+                .UseUrls(urls: "http://localhost:8080")
+                .UseNLog()
+                .Build();
+        
+
+        //public static IHostBuilder CreateHostBuilder(string[] args) =>
+        //    Host.CreateDefaultBuilder(args)
+        //        .ConfigureWebHostDefaults(webBuilder =>
+        //        {
+        //            webBuilder.UseStartup<Startup>();
+        //        })
+        //        .ConfigureLogging(logging =>
+        //        {
+        //            logging.ClearProviders();
+        //            logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
+        //        })
+        //        .UseNLog();
     }
 }

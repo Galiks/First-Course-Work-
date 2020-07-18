@@ -61,25 +61,25 @@
                                     <div class="form-group row">
                                         <label for="last_name" class="col-md-4 col-form-label text-md-right">Фамилия</label>
                                         <div class="col-md-6">
-                                            <input type="text" id="last_name" class="form-control" name="lastName" required>
+                                            <input type="text" id="last_name" class="form-control" name="lastName" required onchange="setUpperFirstLetter(this.value, 'last_name')">
                                         </div>
                                     </div>
 
                                     <div class="form-group row">
                                         <label for="first_name" class="col-md-4 col-form-label text-md-right">Имя</label>
                                         <div class="col-md-6">
-                                            <input type="text" id="first_name" class="form-control" name="firstName" required>
+                                            <input type="text" id="first_name" class="form-control" name="firstName" required onchange="setUpperFirstLetter(this.value, 'first_name')">
                                         </div>
                                     </div>
 
                                     <div class="form-group row">
                                         <label for="patronymic" class="col-md-4 col-form-label text-md-right">Отчество</label>
                                         <div class="col-md-6">
-                                            <input type="text" id="patronymic" class="form-control" name="patronymic">
+                                            <input type="text" id="patronymic" class="form-control" name="patronymic" onchange="setUpperFirstLetter(this.value, 'patronymic')">
                                         </div>
                                     </div>
 
-                                    <div class="form-group row">
+                                    @*<div class="form-group row">
                                         <label for="password" class="col-md-4 col-form-label text-md-right">Пароль</label>
                                         <div class="col-md-6">
                                             <input type="password" id="password" class="form-control" name="password" required>
@@ -89,10 +89,9 @@
                                     <div class="form-group row">
                                         <label for="confirm-password" class="col-md-4 col-form-label text-md-right">Повторите пароль</label>
                                         <div class="col-md-6">
-                                            <input type="password" id="confirm-password" class="form-control" name="confirm-password" required
-                                                   onchange="isEqual(this.value)" value="" />
+                                            <input type="password" id="confirm-password" class="form-control" name="confirm-password" required value="" />
                                         </div>
-                                    </div>
+                                    </div>*@
 
                                     <div id="check-password" class="text-md-center">
 
@@ -117,18 +116,23 @@
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
 
         <script>
-            function isEqual(event) {
-                var helper = document.getElementById("check-password-helper");
-                if (helper !== null) {
-                    helper.remove();
-                }
-                var password = document.getElementById("password").value;
-                if (event !== password) {
-                    document.getElementById("confirm-password").value = "";
-                    var p = document.createElement('p');
-                    p.innerHTML = "<strong id='check-password-helper'>Пароли не совпадают!</strong>";
-                    document.getElementById("check-password").appendChild(p);
-                }
+            //function isEqual(event) {
+            //    var helper = document.getElementById("check-password-helper");
+            //    if (helper !== null) {
+            //        helper.remove();
+            //    }
+            //    var password = document.getElementById("password").value;
+            //    if (event !== password) {
+            //        document.getElementById("confirm-password").value = "";
+            //        var p = document.createElement('p');
+            //        p.innerHTML = "<strong id='check-password-helper'>Пароли не совпадают!</strong>";
+            //        document.getElementById("check-password").appendChild(p);
+            //    }
+            //}
+
+            function setUpperFirstLetter(event, id) {
+                document.getElementById(id).value = event[0].toUpperCase() + event.slice(1);
+                
             }
         </script>
 </body>

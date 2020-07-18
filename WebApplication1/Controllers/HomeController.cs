@@ -105,9 +105,9 @@ namespace WebApplication1.Controllers
 
         }
 
-        public IActionResult Registration(string lastName, string firstName, string patronymic, string password)
+        public IActionResult Registration(string lastName, string firstName, string patronymic)
         {
-            if (string.IsNullOrWhiteSpace(lastName) || string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(patronymic))
+            if (string.IsNullOrWhiteSpace(lastName) || string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(patronymic))
             {
                 return View();
             }
