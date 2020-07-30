@@ -1,14 +1,30 @@
 ﻿@using Spire.Doc.Documents;
 
 @{
-    Layout = null;
+    ViewData["Title"] = "Document Page";
 }
-<!DOCTYPE html>
-<html>
+
 <head>
-    <title>Редактирование</title>
+    <link href="~/css/style.css" rel="stylesheet" />
+    <link href="~/css/toggleButton.css" rel="stylesheet" />
 </head>
 <body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container">
+                <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Document" asp-action="Index">Добавление ссылки и закладки</a>
+                        </li>
+                        <li>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Document" asp-action="UsingHypertext">Использование гипертекста</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
     <style>
 
         #maincontainer {
@@ -23,7 +39,7 @@
             display: inline-block;
             /*width: 50%;*/
             height: 100%;
-            text-align:left;
+            text-align: left;
         }
 
         #contentwrapper {
@@ -32,17 +48,14 @@
             display: inline-block;
             /*width: 50%;*/
             height: 100%;
-            text-align:right;
+            text-align: right;
         }
-        .conteiner{
-            margin:0px;
+
+        .conteiner {
+            margin: 0px;
         }
     </style>
     <div>
-        <h1>Здесь вы можеет редактировать ссылки и закладки.</h1>
-
-
-
         <h2>Гиперссылки</h2>
         <div id="maincontainer">
             <div id="leftcolumn">
@@ -117,7 +130,7 @@
                 <table border="1">
                     @for (int i = 0; i < ViewBag.Bookmarks.Count; i++)
                     {
-                        
+
                         var nextSibling = ViewBag.Bookmarks[i].BookmarkStart.Owner.NextSibling;
                         if (nextSibling != null)
                         {
@@ -129,8 +142,8 @@
                                     <td width="40px">
                                         <form asp-action="UpdateBookmark" asp-controller="Document" method="post" enctype="multipart/form-data">
                                             <label for="image">
-                                            Фото:
-                                            <input type="file" id="image" name="image" />
+                                                Фото:
+                                                <input type="file" id="image" name="image" />
                                             </label>
                                             <input type="text" name="bookmark" hidden value="@ViewBag.Bookmarks[i].Name" />
                                             <button>Редактировать картинку</button>
@@ -165,5 +178,6 @@
         </div>
 
     </div>
+
+
 </body>
-</html>

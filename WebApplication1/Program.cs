@@ -14,27 +14,13 @@ namespace WebApplication1
     {
         public static void Main(string[] args)
         {
-            //var pathToExe = Process.GetCurrentProcess().MainModule.FileName;
-
-            //var pathToContentRoot = Path.GetDirectoryName(pathToExe);
-
-            //var host = Host.CreateDefaultBuilder(args)
-            //    .UseContentRoot(pathToContentRoot)
-            //    .ConfigureWebHostDefaults(webBuilder =>
-            //    {
-            //        webBuilder.UseStartup<Startup>();
-            //    })
-            //    .Build();
-
-            //host.Run();
-
             var logger = NLog.Web.NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
 
             try
             {
                 logger.Info("Init main.");
-                BuildWebHost(args).Run();
-                //CreateHostBuilder(args).Build().Run();
+                //BuildWebHost(args).Run();
+                CreateHostBuilder(args).Build().Run();
             }
             catch (Exception e)
             {
@@ -51,21 +37,27 @@ namespace WebApplication1
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
                 .UseUrls(urls: "http://localhost:8080")
+                .ConfigureLogging(logging =>
+                {
+                    logging.ClearProviders();
+                    logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
+                })
                 .UseNLog()
                 .Build();
-        
 
-        //public static IHostBuilder CreateHostBuilder(string[] args) =>
-        //    Host.CreateDefaultBuilder(args)
-        //        .ConfigureWebHostDefaults(webBuilder =>
-        //        {
-        //            webBuilder.UseStartup<Startup>();
-        //        })
-        //        .ConfigureLogging(logging =>
-        //        {
-        //            logging.ClearProviders();
-        //            logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
-        //        })
-        //        .UseNLog();
+
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                    webBuilder.UseUrls(urls: "http://localhost:8080");
+                })
+                .ConfigureLogging(logging =>
+                {
+                    logging.ClearProviders();
+                    logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information);
+                })
+                .UseNLog();
     }
 }

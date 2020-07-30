@@ -30,7 +30,7 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
 
-    <title>Laravel</title>
+    <title>Регистрация</title>
 </head>
 <body>
         <nav class="navbar navbar-expand-lg navbar-light navbar-laravel">
@@ -61,21 +61,24 @@
                                     <div class="form-group row">
                                         <label for="last_name" class="col-md-4 col-form-label text-md-right">Фамилия</label>
                                         <div class="col-md-6">
-                                            <input type="text" id="last_name" class="form-control" name="lastName" required onchange="setUpperFirstLetter(this.value, 'last_name')">
+                                            @*@Html.TextBox("lastName", "Фамилия")*@
+                                            <input type="text" id="last_name" class="form-control" name="lastName" required placeholder="Фамилия" onchange="setUpperFirstLetter(this.value, 'last_name')">
                                         </div>
                                     </div>
 
                                     <div class="form-group row">
                                         <label for="first_name" class="col-md-4 col-form-label text-md-right">Имя</label>
                                         <div class="col-md-6">
-                                            <input type="text" id="first_name" class="form-control" name="firstName" required onchange="setUpperFirstLetter(this.value, 'first_name')">
+                                            @*@Html.TextBox("firstName", "Имя")*@
+                                            <input type="text" id="first_name" class="form-control" name="firstName" required placeholder="Имя" onchange="setUpperFirstLetter(this.value, 'first_name')">
                                         </div>
                                     </div>
 
                                     <div class="form-group row">
                                         <label for="patronymic" class="col-md-4 col-form-label text-md-right">Отчество</label>
                                         <div class="col-md-6">
-                                            <input type="text" id="patronymic" class="form-control" name="patronymic" onchange="setUpperFirstLetter(this.value, 'patronymic')">
+                                            @*@Html.TextBox("patronymic", "Отчество")*@
+                                            <input type="text" id="patronymic" class="form-control" name="patronymic" placeholder="Отчество" onchange="setUpperFirstLetter(this.value, 'patronymic')">
                                         </div>
                                     </div>
 

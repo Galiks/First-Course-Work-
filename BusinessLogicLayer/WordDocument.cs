@@ -14,9 +14,13 @@ using System.Text;
 
 namespace BusinessLogicLayer
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class WordDocument
     {
         private static readonly Logger loggerException = LogManager.GetLogger("exception");
+        private static readonly Logger loggerUser = LogManager.GetLogger("user");
 
         private const string badBookmark = "_GoBack";
         private const int width = 470;
@@ -28,21 +32,37 @@ namespace BusinessLogicLayer
         private static int indexNextField = 0;
         private Paragraph referencesParagraph;
         private static Section referencesSection;
+        /// <summary>
+        /// 
+        /// </summary>
         public Document Document => document;
+        /// <summary>
+        /// 
+        /// </summary>
         public HashSet<string> Messages => messages;
+        /// <summary>
+        /// 
+        /// </summary>
         public int IndexNextField { get => indexNextField; private set => indexNextField = value; }
+        /// <summary>
+        /// 
+        /// </summary>
         public static Section ReferencesSection { get => referencesSection; private set => referencesSection = value; }
+        /// <summary>
+        /// 
+        /// </summary>
         public static int IndexReferencesSection { get => indexReferencesSection; set => indexReferencesSection = value; }
 
         private readonly string filepath;
 
         private static int indexReferencesSection;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="filename"></param>
         public WordDocument(string filename)
         {
-
-
-            loggerException.Info("HELLO!");
-
+            loggerUser.Info($"Начата работа с файлом: {filename}");
             this.filename = filename;
             document = new Document();
             //проблема с дублями файла
@@ -50,10 +70,17 @@ namespace BusinessLogicLayer
             document.LoadFromFile(filename);
             messages = new HashSet<string>();
         }
+        /// <summary>
+        /// 
+        /// </summary>
         public void IncreaseOfTwoindexNextField()
         {
             indexNextField += 2;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="word"></param>
         public void SetReferencesWord(string word)
         {
             //­­­U+00AD
@@ -76,19 +103,14 @@ namespace BusinessLogicLayer
                 return null;
             }
         }
-        private string TransformWordWithoutUnderline(string word)
-        {
-            if (!string.IsNullOrWhiteSpace(word))
-            {
-                var splitWord = word.Split("\\");
-                return splitWord[^1].Replace('\u005F', ' ');
-            }
-            else
-            {
-                return null;
-            }
-        }
-        public void CreateBookmarksForText(string word, string text)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="word"></param>
+        /// <param name="text"></param>
+        /// <param name="count"></param>
+        public void CreateBookmarksForText(string word, string text, int count = default)
         {
             SetReferencesWord(text);
 
@@ -101,17 +123,18 @@ namespace BusinessLogicLayer
                     string noun = nouns[i];
                     if (i == 0)
                     {
-                        CreateBookmarkByWord(noun, text);
+                        CreateBookmarkByWord(noun, text, count: count);
                     }
                     else
                     {
-                        CreateBookmarkByWord(noun);
+                        CreateBookmarkByWord(noun, count: count);
                     }
                 }
             }
-            catch (CyrWordNotFoundException)
+            catch (CyrWordNotFoundException error)
             {
-                CreateBookmarkByWord(word, text);
+                loggerException.Error(error.Message);
+                CreateBookmarkByWord(word, text, count);
             }
             finally
             {
@@ -147,7 +170,7 @@ namespace BusinessLogicLayer
 
             return nouns;
         }
-        private void CreateBookmarkByWord(string word, string sentence = null)
+        private void CreateBookmarkByWord(string word, string sentence = null, int count = default)
         {
             //Create bookmark objects
             BookmarkStart start = new BookmarkStart(document, referencesWord);
@@ -173,8 +196,10 @@ namespace BusinessLogicLayer
                 return;
             }
 
+            int findLength = count == default ? text.Length : count;
+
             //Get the keywords
-            for (int i = 0; i < text.Length; i++)
+            for (int i = 0; i < findLength; i++)
             {
                 TextSelection keywordOne = text[i];
 
@@ -237,7 +262,13 @@ namespace BusinessLogicLayer
 
             SaveCurrentDocument();
         }
-        public void CreateBookmarksForImage(string path, string word)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="word"></param>
+        /// <param name="count"></param>
+        public void CreateBookmarksForImage(string path, string word, int count = default)
         {
             SetReferencesWord(path);
             try
@@ -248,13 +279,13 @@ namespace BusinessLogicLayer
                 {
                     string noun = nouns[i];
 
-                    CreateBookmarkByImage(path, noun);
+                    CreateBookmarkByImage(path, noun, count);
                     //SetBookmarkForImage(path);
                 }
             }
             catch (CyrWordNotFoundException)
             {
-                CreateBookmarkByImage(path, word);
+                CreateBookmarkByImage(path, word, count);
                 //SetBookmarkForImage(path);
             }
             finally
@@ -266,7 +297,7 @@ namespace BusinessLogicLayer
 
             }
         }
-        private void CreateBookmarkByImage(string path, string word)
+        private void CreateBookmarkByImage(string path, string word, int count)
         {
             SetReferencesWord(path);
             BookmarksNavigator bn = new BookmarksNavigator(document);
@@ -324,9 +355,10 @@ namespace BusinessLogicLayer
                 SaveCurrentDocument();
             }
 
+            int findLength = count == default ? text.Length : count;
 
             //Get the keywords
-            for (int i = 0; i < text.Length; i++)
+            for (int i = 0; i < findLength; i++)
             {
                 TextSelection keywordOne = text[i];
 
@@ -388,7 +420,13 @@ namespace BusinessLogicLayer
 
             SaveCurrentDocument();
         }
-        public void CreateHyperlinksForText(string word, string text)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="word"></param>
+        /// <param name="text"></param>
+        /// <param name="count"></param>
+        public void CreateHyperlinksForText(string word, string text, int count = default)
         {
             try
             {
@@ -412,12 +450,12 @@ namespace BusinessLogicLayer
                 for (int i = 0; i < nouns.Count; i++)
                 {
                     string noun = nouns[i];
-                    CreateHyperlinkByWord(noun, text);
+                    CreateHyperlinkByWord(noun, text, count);
                 }
             }
             catch (CyrWordNotFoundException)
             {
-                CreateHyperlinkByWord(word, text);
+                CreateHyperlinkByWord(word, text, count);
             }
             finally
             {
@@ -427,7 +465,7 @@ namespace BusinessLogicLayer
                 }
             }
         }
-        private void CreateHyperlinkByWord(string word, string hyperlink)
+        private void CreateHyperlinkByWord(string word, string hyperlink, int count)
         {
             TextSelection[] text = document.FindAllString(word, true, true);
 
@@ -441,8 +479,11 @@ namespace BusinessLogicLayer
                 return;
             }
 
-            foreach (TextSelection seletion in text)
+            int findLength = count == default ? text.Length : count;
+
+            for (int i = 0; i < findLength; i++)
             {
+                TextSelection seletion = text[i];
 
                 //Get the text range
 
@@ -513,7 +554,13 @@ namespace BusinessLogicLayer
 
             SaveCurrentDocument();
         }
-        public void CreatHyperlinkForImage(string path, string hyperlink)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="hyperlink"></param>
+        /// <param name="count"></param>
+        public void CreatHyperlinkForImage(string path, string hyperlink, int count = default)
         {
             DocPicture picture = new DocPicture(Document);
             picture.LoadImage(path);
@@ -523,6 +570,11 @@ namespace BusinessLogicLayer
             ReferencesSection.AddParagraph().AppendHyperlink(hyperlink, picture, HyperlinkType.WebLink);
             SaveCurrentDocument();
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="word"></param>
+        /// <returns></returns>
         public Tuple<Section, Paragraph> GetSectionAndParagraphByWord(string word)
         {
             var sections = Document.Sections;
@@ -542,15 +594,28 @@ namespace BusinessLogicLayer
 
             return null;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
         public static string GetWordWithFirstLetterUpper(string str)
         {
             return str[0].ToString().ToUpper() + str.Substring(1);
         }
+        /// <summary>
+        /// 
+        /// </summary>
         public void SaveCurrentDocument()
         {
             Document.SaveToFile(filename);
         }
-        public string GetTextFromDocument(bool marking)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="marking"></param>
+        /// <returns></returns>
+        public string GetTextFromDocument(bool marking = true)
         {
             string filename = filepath + ".html";
             document.SaveToFile(filename, FileFormat.Html);
@@ -576,6 +641,7 @@ namespace BusinessLogicLayer
                 return rightFilename;
             }
 
+            #region old version
             //StringBuilder longText = new StringBuilder();
             //GetAllFootnotes();
             //foreach (Section section in document.Sections)
@@ -694,31 +760,39 @@ namespace BusinessLogicLayer
             //    longText.AppendLine("</div>");
             //}
 
-            //return longText.ToString();
+            //return longText.ToString(); 
+            #endregion
         }
-        private string GetAligment(Paragraph paragraph)
-        {
-            if (paragraph.Format.HorizontalAlignment == HorizontalAlignment.Left)
-            {
-                return "left";
-            }
-            else if (paragraph.Format.HorizontalAlignment == HorizontalAlignment.Right)
-            {
-                return "right";
-            }
-            else if (paragraph.Format.HorizontalAlignment == HorizontalAlignment.Center)
-            {
-                return "center";
-            }
-            else if (paragraph.Format.HorizontalAlignment == HorizontalAlignment.Justify)
-            {
-                return "justify";
-            }
-            else
-            {
-                return "";
-            }
-        }
+        #region old method
+        //private string GetAligment(Paragraph paragraph)
+        //{
+        //    if (paragraph.Format.HorizontalAlignment == HorizontalAlignment.Left)
+        //    {
+        //        return "left";
+        //    }
+        //    else if (paragraph.Format.HorizontalAlignment == HorizontalAlignment.Right)
+        //    {
+        //        return "right";
+        //    }
+        //    else if (paragraph.Format.HorizontalAlignment == HorizontalAlignment.Center)
+        //    {
+        //        return "center";
+        //    }
+        //    else if (paragraph.Format.HorizontalAlignment == HorizontalAlignment.Justify)
+        //    {
+        //        return "justify";
+        //    }
+        //    else
+        //    {
+        //        return "";
+        //    }
+        //} 
+        #endregion
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="section"></param>
+        /// <returns></returns>
         public List<Field> FindAllLinksBySection(Section section)
         {
             var links = new List<Field>();
@@ -747,9 +821,13 @@ namespace BusinessLogicLayer
             }
             return links;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public IEnumerable<Field> GetAllHyperlinks()
         {
-            var links = new List<Field>();
+            var links = new HashSet<Field>();
 
             foreach (Section section in document.Sections)
             {
@@ -765,16 +843,23 @@ namespace BusinessLogicLayer
 
                                 if (field.Type == FieldType.FieldHyperlink)
                                 {
-                                    yield return field;
+                                    links.Add(field);
                                 }
                             }
                         }
                     }
                 }
             }
+
+            return links.ToList();
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public IEnumerable<Bookmark> GetAllBookmarks()
         {
+            HashSet<Bookmark> hashSetBookmarks = new HashSet<Bookmark>();
             BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(document);
             var bookmarks = bookmarksNavigator.Document.Bookmarks;
             for (int i = 0; i < bookmarks.Count; i++)
@@ -782,14 +867,21 @@ namespace BusinessLogicLayer
                 Bookmark bookmark = bookmarks[i];
                 if (bookmark.Name != badBookmark)
                 {
-                    yield return bookmark;
+                    hashSetBookmarks.Add(bookmark);
                 }
                 else
                 {
                     continue;
                 }
             }
+
+            return hashSetBookmarks.ToList();
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="bookmarkText"></param>
+        /// <param name="text"></param>
         public void EditTextInBookmark(string bookmarkText, string text)
         {
             BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(document);
@@ -811,12 +903,21 @@ namespace BusinessLogicLayer
             SaveCurrentDocument();
 
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="field"></param>
+        /// <param name="hyperlink"></param>
         public void EditLinkInHypertext(Field field, string hyperlink)
         {
             field.Code = "HYPERLINK \"" + hyperlink + "\"";
 
             SaveCurrentDocument();
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public List<Tuple<string, string>> GetAllFootnotes()
         {
             var result = new List<Tuple<string, string>>();
@@ -880,16 +981,19 @@ namespace BusinessLogicLayer
 
             return result;
         }
-        private string GetWordFromFootnoteForHyperlink(Paragraph footnote)
-        {
-            int countChildObjects = footnote.ChildObjects.Count;
-            while (countChildObjects % 2 != 0)
-            {
-                countChildObjects--;
-            }
+        //private string GetWordFromFootnoteForHyperlink(Paragraph footnote)
+        //{
+        //    int countChildObjects = footnote.ChildObjects.Count;
+        //    while (countChildObjects % 2 != 0)
+        //    {
+        //        countChildObjects--;
+        //    }
 
-            return null;
-        }
+        //    return null;
+        //}
+        /// <summary>
+        /// 
+        /// </summary>
         public void CreateReferencesSection()
         {
             var sectionAndParagraph = GetSectionAndParagraphByWord("Сноски");
@@ -916,6 +1020,10 @@ namespace BusinessLogicLayer
 
             SaveCurrentDocument();
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="field"></param>
         public void DeleteHyperlink(Field field)
         {
             int ownerParagraphIndex = field.OwnerParagraph.OwnerTextBody.ChildObjects.IndexOf(field.OwnerParagraph);
@@ -1007,6 +1115,10 @@ namespace BusinessLogicLayer
                 tr.CharacterFormat.UnderlineStyle = UnderlineStyle.None;
             }
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="bookmarkText"></param>
         public void DeleteBookmark(string bookmarkText)
         {
             BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(document);

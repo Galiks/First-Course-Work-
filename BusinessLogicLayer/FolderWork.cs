@@ -2,7 +2,9 @@
 
 namespace BusinessLogicLayer
 {
-
+    /// <summary>
+    /// 
+    /// </summary>
     public class FolderWork
     {
         /// <summary>

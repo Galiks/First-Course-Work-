@@ -4,6 +4,11 @@
         <name>BusinessLogicLayer</name>
     </assembly>
     <members>
+        <member name="T:BusinessLogicLayer.FolderWork">
+            <summary>
+            
+            </summary>
+        </member>
         <member name="M:BusinessLogicLayer.FolderWork.CreateFolder(System.String,System.String,System.String,System.String)">
             <summary>
             
@@ -22,12 +27,173 @@
             <param name="patronymic"></param>
             <returns></returns>
         </member>
+        <member name="T:BusinessLogicLayer.WordDocument">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:BusinessLogicLayer.WordDocument.Document">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:BusinessLogicLayer.WordDocument.Messages">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:BusinessLogicLayer.WordDocument.IndexNextField">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:BusinessLogicLayer.WordDocument.ReferencesSection">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:BusinessLogicLayer.WordDocument.IndexReferencesSection">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:BusinessLogicLayer.WordDocument.#ctor(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="filename"></param>
+        </member>
+        <member name="M:BusinessLogicLayer.WordDocument.IncreaseOfTwoindexNextField">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:BusinessLogicLayer.WordDocument.SetReferencesWord(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="word"></param>
+        </member>
+        <member name="M:BusinessLogicLayer.WordDocument.CreateBookmarksForText(System.String,System.String,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="word"></param>
+            <param name="text"></param>
+            <param name="count"></param>
+        </member>
         <member name="M:BusinessLogicLayer.WordDocument.GetWordsByCases(System.String)">
             <summary>
             Возвращает список слов по падежам
             </summary>
             <param name="word">начальное слово</param>
             <returns></returns>
+        </member>
+        <member name="M:BusinessLogicLayer.WordDocument.CreateBookmarksForImage(System.String,System.String,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="path"></param>
+            <param name="word"></param>
+            <param name="count"></param>
+        </member>
+        <member name="M:BusinessLogicLayer.WordDocument.CreateHyperlinksForText(System.String,System.String,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="word"></param>
+            <param name="text"></param>
+            <param name="count"></param>
+        </member>
+        <member name="M:BusinessLogicLayer.WordDocument.CreatHyperlinkForImage(System.String,System.String,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="path"></param>
+            <param name="hyperlink"></param>
+            <param name="count"></param>
+        </member>
+        <member name="M:BusinessLogicLayer.WordDocument.GetSectionAndParagraphByWord(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="word"></param>
+            <returns></returns>
+        </member>
+        <member name="M:BusinessLogicLayer.WordDocument.GetWordWithFirstLetterUpper(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="str"></param>
+            <returns></returns>
+        </member>
+        <member name="M:BusinessLogicLayer.WordDocument.SaveCurrentDocument">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:BusinessLogicLayer.WordDocument.GetTextFromDocument(System.Boolean)">
+            <summary>
+            
+            </summary>
+            <param name="marking"></param>
+            <returns></returns>
+        </member>
+        <member name="M:BusinessLogicLayer.WordDocument.FindAllLinksBySection(Spire.Doc.Section)">
+            <summary>
+            
+            </summary>
+            <param name="section"></param>
+            <returns></returns>
+        </member>
+        <member name="M:BusinessLogicLayer.WordDocument.GetAllHyperlinks">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:BusinessLogicLayer.WordDocument.GetAllBookmarks">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:BusinessLogicLayer.WordDocument.EditTextInBookmark(System.String,System.String)">
+            <summary>
+            
+            </summary>
+            <param name="bookmarkText"></param>
+            <param name="text"></param>
+        </member>
+        <member name="M:BusinessLogicLayer.WordDocument.EditLinkInHypertext(Spire.Doc.Fields.Field,System.String)">
+            <summary>
+            
+            </summary>
+            <param name="field"></param>
+            <param name="hyperlink"></param>
+        </member>
+        <member name="M:BusinessLogicLayer.WordDocument.GetAllFootnotes">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:BusinessLogicLayer.WordDocument.CreateReferencesSection">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:BusinessLogicLayer.WordDocument.DeleteHyperlink(Spire.Doc.Fields.Field)">
+            <summary>
+            
+            </summary>
+            <param name="field"></param>
+        </member>
+        <member name="M:BusinessLogicLayer.WordDocument.DeleteBookmark(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="bookmarkText"></param>
         </member>
     </members>
 </doc>

@@ -2,24 +2,15 @@
     ViewData["Title"] = "Document Page";
 }
 
-@model string
-
     <head>
         <link href="~/css/style.css" rel="stylesheet" />
         <link href="~/css/toggleButton.css" rel="stylesheet" />
-        @*<script src="https://cdn.tiny.cloud/1/wrl0wkirvr9jzs3w6uca24pdnk6z8t6dvevmktjg3j9i5vh6/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>*@
-        <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
-        <script>tinymce.init({ selector: 'textarea' });</script>
     </head>
     <body>
         <header>
             <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
                 <div class="container">
-                    @*<a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">WebApplication1</a>
-                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                            aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>*@
+
                     <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
                         <ul class="navbar-nav flex-grow-1">
                             <li class="nav-item">
@@ -69,10 +60,15 @@
                     </p>
 
                     <p>
+                        <label>Количество ссылок/закладок</label>
+                        <input id="count" name="count" type="number" min="1"/>
+                    </p>
+
+                    @*<p>
                         <label>Выделение текста</label>
                         <input id="marking" name="marking" type="checkbox" value="true" />
                         <input name="marking" type="hidden" value="false" />
-                    </p>
+                    </p>*@
 
                     <button>Отправить</button>
                 </form>
@@ -90,48 +86,10 @@
             </div>
 
             
-        <div>
-            <iframe height="600px" width="120%" src='@ViewBag.LongText'></iframe>
-        </div>
-
-            @*<div>
-                <textarea>@ViewBag.LongText</textarea>
-                <script>
-                    tinymce.init({
-                        selector: 'textareaNote',
-                        plugins: 'a11ychecker advcode casechange formatpainter linkchecker lists checklist media mediaembed pageembed permanentpen powerpaste table advtable tinycomments tinydrive tinymcespellchecker link',
-                        toolbar: 'a11ycheck addcomment showcomments casechange checklist code formatpainter insertfile pageembed permanentpen table link',
-                        toolbar_drawer: 'floating',
-                        tinycomments_mode: 'embedded',
-                        tinycomments_author: 'Author name',
-                    });
-
-                                //Выделение текста
-                                //document.onmouseup = function () {
-                                            //    var selection = window.getSelection();
-                                            //    alert(selection.toString());
-                                            //}
-                </script>
-            </div>*@
-
-            @*<div>
-                <textarea>
-                    @foreach (var item in ViewBag.Footnotes)
-                    {
-                        @item
-                    }
-                </textarea>
-                <script>
-                    tinymce.init({
-                        selector: 'textarea',
-                        plugins: 'a11ychecker advcode casechange formatpainter linkchecker lists checklist media mediaembed pageembed permanentpen powerpaste table advtable tinycomments tinydrive tinymcespellchecker link',
-                        toolbar: 'a11ycheck addcomment showcomments casechange checklist code formatpainter insertfile pageembed permanentpen table link',
-                        toolbar_drawer: 'floating',
-                        tinycomments_mode: 'embedded',
-                        tinycomments_author: 'Author name',
-                    });
-                </script>
-            </div>*@
+            <div>
+                <iframe height="600px" width="120%" src='@ViewBag.LongText'></iframe>
+            </div>
 
         </div>
+
     </body>
