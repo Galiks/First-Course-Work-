@@ -8,9 +8,9 @@ using Spire.Doc.Fields;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace BusinessLogicLayer
 {
@@ -87,7 +87,6 @@ namespace BusinessLogicLayer
             //005F       
             if (!string.IsNullOrWhiteSpace(word))
             {
-
                 referencesWord = TransformWordWithUnderline(word);
             }
         }
@@ -118,7 +117,7 @@ namespace BusinessLogicLayer
             {
                 List<string> nouns = GetWordsByCases(word);
 
-                for (int i = 0; i < nouns.Count; i++)
+                Parallel.For(0, nouns.Count, i =>
                 {
                     string noun = nouns[i];
                     if (i == 0)
@@ -129,7 +128,20 @@ namespace BusinessLogicLayer
                     {
                         CreateBookmarkByWord(noun, count: count);
                     }
-                }
+                });
+
+                //for (int i = 0; i < nouns.Count; i++)
+                //{
+                //string noun = nouns[i];
+                //if (i == 0)
+                //{
+                //    CreateBookmarkByWord(noun, text, count: count);
+                //}
+                //else
+                //{
+                //    CreateBookmarkByWord(noun, count: count);
+                //}
+                //}
             }
             catch (CyrWordNotFoundException error)
             {
@@ -154,18 +166,26 @@ namespace BusinessLogicLayer
             CyrNounCollection cyrNounCollection = new CyrNounCollection();
             CyrNoun cyrNoun = cyrNounCollection.Get(word, out CasesEnum @case, out NumbersEnum numbers);
             var nounsSet = new HashSet<string>(cyrNoun.Decline().ToList());
-            foreach (var noun in cyrNoun.DeclinePlural().ToList())
+            Parallel.ForEach(cyrNoun.DeclinePlural().ToList(), noun =>
             {
                 nounsSet.Add(noun);
-            }
+            });
+            //foreach (var noun in cyrNoun.DeclinePlural().ToList())
+            //{
+            //    nounsSet.Add(noun);
+            //}
             var nouns = nounsSet.ToList();
             if (cyrNoun.WordType != WordTypesEnum.Surname)
             {
                 int nounLength = nouns.Count;
-                for (int i = 0; i < nounLength; i++)
+                Parallel.For(0, nounLength, i =>
                 {
                     nouns.Add(GetWordWithFirstLetterUpper(nouns[i]));
-                }
+                });
+                //for (int i = 0; i < nounLength; i++)
+                //{
+                //    nouns.Add(GetWordWithFirstLetterUpper(nouns[i]));
+                //}
             }
 
             return nouns;
@@ -173,8 +193,8 @@ namespace BusinessLogicLayer
         private void CreateBookmarkByWord(string word, string sentence = null, int count = default)
         {
             //Create bookmark objects
-            BookmarkStart start = new BookmarkStart(document, referencesWord);
-            BookmarkEnd end = new BookmarkEnd(document, referencesWord);
+            //BookmarkStart start = new BookmarkStart(document, referencesWord);
+            //BookmarkEnd end = new BookmarkEnd(document, referencesWord);
 
             if (!string.IsNullOrWhiteSpace(sentence))
             {
@@ -199,7 +219,8 @@ namespace BusinessLogicLayer
             int findLength = count == default ? text.Length : count;
 
             //Get the keywords
-            for (int i = 0; i < findLength; i++)
+            //for (int i = 0; i < findLength; i++)
+            Parallel.For(0, findLength, i =>
             {
                 TextSelection keywordOne = text[i];
 
@@ -215,7 +236,7 @@ namespace BusinessLogicLayer
 
                 if (paragraph.Equals(referencesParagraph))
                 {
-                    continue;
+                    return;
                 }
 
                 //Get the index of the keyword in its paragraph
@@ -230,12 +251,12 @@ namespace BusinessLogicLayer
                     if (textField.Type == FieldType.FieldRef)
                     {
                         Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef.ToString()}");
-                        continue;
+                        return;
                     }
                     else if (textField.Type == FieldType.FieldHyperlink)
                     {
                         Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink.ToString()}");
-                        continue;
+                        return;
                     }
                 }
 
@@ -257,7 +278,7 @@ namespace BusinessLogicLayer
                 //Insert FieldEnd object to mark the end of the field
                 FieldMark fieldEnd = new FieldMark(document, FieldMarkType.FieldEnd);
                 paragraph.ChildObjects.Insert(index + 3, fieldEnd);
-            }
+            });
 
 
             SaveCurrentDocument();
@@ -358,7 +379,8 @@ namespace BusinessLogicLayer
             int findLength = count == default ? text.Length : count;
 
             //Get the keywords
-            for (int i = 0; i < findLength; i++)
+            //for (int i = 0; i < findLength; i++)
+            Parallel.For(0, findLength, i =>
             {
                 TextSelection keywordOne = text[i];
 
@@ -374,7 +396,7 @@ namespace BusinessLogicLayer
 
                 if (paragraph.Equals(referencesParagraph))
                 {
-                    continue;
+                    return;
                 }
 
                 //Get the index of the keyword in its paragraph
@@ -389,12 +411,12 @@ namespace BusinessLogicLayer
                     if (textField.Type == FieldType.FieldRef)
                     {
                         Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef.ToString()}");
-                        continue;
+                        return;
                     }
                     else if (textField.Type == FieldType.FieldHyperlink)
                     {
                         Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink.ToString()}");
-                        continue;
+                        return;
                     }
                 }
 
@@ -416,7 +438,7 @@ namespace BusinessLogicLayer
                 //Insert FieldEnd object to mark the end of the field
                 FieldMark fieldEnd = new FieldMark(document, FieldMarkType.FieldEnd);
                 paragraph.ChildObjects.Insert(index + 3, fieldEnd);
-            }
+            });
 
             SaveCurrentDocument();
         }
@@ -433,18 +455,20 @@ namespace BusinessLogicLayer
                 CyrNounCollection cyrNounCollection = new CyrNounCollection();
                 CyrNoun cyrNoun = cyrNounCollection.Get(word, out CasesEnum @case, out NumbersEnum numbers);
                 var nounsSet = new HashSet<string>(cyrNoun.Decline().ToList());
-                foreach (var noun in cyrNoun.DeclinePlural().ToList())
+                //foreach (var noun in cyrNoun.DeclinePlural().ToList())
+                Parallel.ForEach(cyrNoun.DeclinePlural().ToList(), noun =>
                 {
                     nounsSet.Add(noun);
-                }
+                });
                 var nouns = nounsSet.ToList();
                 if (cyrNoun.WordType != WordTypesEnum.Surname)
                 {
                     int nounLength = nouns.Count;
-                    for (int i = 0; i < nounLength; i++)
+                    //for (int i = 0; i < nounLength; i++)
+                    Parallel.For(0, nounLength, i =>
                     {
                         nouns.Add(GetWordWithFirstLetterUpper(nouns[i]));
-                    }
+                    });
                 }
 
                 for (int i = 0; i < nouns.Count; i++)
@@ -481,7 +505,8 @@ namespace BusinessLogicLayer
 
             int findLength = count == default ? text.Length : count;
 
-            for (int i = 0; i < findLength; i++)
+            //for (int i = 0; i < findLength; i++)
+            Parallel.For(0, findLength, i =>
             {
                 TextSelection seletion = text[i];
 
@@ -510,12 +535,12 @@ namespace BusinessLogicLayer
                     if (textField.Type == FieldType.FieldRef)
                     {
                         Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef.ToString()}");
-                        continue;
+                        return;
                     }
                     else if (textField.Type == FieldType.FieldHyperlink)
                     {
                         Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink.ToString()}");
-                        continue;
+                        return;
                     }
                 }
 
@@ -548,7 +573,7 @@ namespace BusinessLogicLayer
                 tr.OwnerParagraph.ChildObjects.Insert(index + 3, fmend);
 
                 field.End = fmend;
-            }
+            });
 
 
 
@@ -623,14 +648,15 @@ namespace BusinessLogicLayer
             string[] splitFilename = filename.Split("\\");
             string rightFilename = null;
 
-            for (int i = 0; i < splitFilename.Length; i++)
+            //for (int i = 0; i < splitFilename.Length; i++)
+            Parallel.For(0, splitFilename.Length, i =>
             {
                 if (splitFilename[i].Equals("wwwroot"))
                 {
                     rightFilename = @"\" + string.Join(@"\", splitFilename, i + 1, splitFilename.Length - i - 1);
                     //return splitFilename.Join("\\", splitFilename, i, splitFilename.Length - 1);
                 }
-            }
+            });
 
             if (string.IsNullOrWhiteSpace(rightFilename))
             {
@@ -798,6 +824,7 @@ namespace BusinessLogicLayer
             var links = new List<Field>();
 
             foreach (DocumentObject sec in section.Body.ChildObjects)
+            //Parallel.ForEach<DocumentObjectCollection>(section.Body.ChildObjects, sec =>
             {
                 if (sec.DocumentObjectType == DocumentObjectType.Paragraph)
                 {
@@ -819,6 +846,7 @@ namespace BusinessLogicLayer
                     }
                 }
             }
+            //);
             return links;
         }
         /// <summary>
