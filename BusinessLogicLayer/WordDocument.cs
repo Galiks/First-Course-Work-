@@ -5,6 +5,7 @@ using Spire.Doc;
 using Spire.Doc.Collections;
 using Spire.Doc.Documents;
 using Spire.Doc.Fields;
+using Spire.Doc.Formatting;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -32,6 +33,7 @@ namespace BusinessLogicLayer
         private static int indexNextField = 0;
         private Paragraph referencesParagraph;
         private static Section referencesSection;
+        private const string styleName = "MyReferences"; 
         /// <summary>
         /// 
         /// </summary>
@@ -222,67 +224,81 @@ namespace BusinessLogicLayer
             //for (int i = 0; i < findLength; i++)
             Parallel.For(0, findLength, i =>
             {
-                TextSelection keywordOne = text[i];
-
-                //Get the textrange its locates
-                TextRange tr = keywordOne.GetAsOneRange();
-
-                //Set the formatting
-                tr.CharacterFormat.UnderlineStyle = UnderlineStyle.Single;
-                tr.CharacterFormat.TextColor = Color.Blue;
-
-                //Get the paragraph it locates
-                Paragraph paragraph = tr.OwnerParagraph;
-
-                if (paragraph.Equals(referencesParagraph))
-                {
-                    return;
-                }
-
-                //Get the index of the keyword in its paragraph
-                int index = paragraph.ChildObjects.IndexOf(tr);
-
-                DocumentObject child = paragraph.ChildObjects[index];
-
-                if (child.DocumentObjectType == DocumentObjectType.Field)
-                {
-                    Field textField = child as Field;
-
-                    if (textField.Type == FieldType.FieldRef)
-                    {
-                        Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef.ToString()}");
-                        return;
-                    }
-                    else if (textField.Type == FieldType.FieldHyperlink)
-                    {
-                        Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink.ToString()}");
-                        return;
-                    }
-                }
-
-                //Create a cross-reference field, and link it to bookmark                   
-                Field field = new Field(document)
-                {
-                    Type = FieldType.FieldRef
-                };
-                string code = $@"REF {referencesWord} \p \h";
-                field.Code = code;
-
-                //Insert field
-                paragraph.ChildObjects.Insert(index, field);
-
-                //Insert FieldSeparator object
-                FieldMark fieldSeparator = new FieldMark(document, FieldMarkType.FieldSeparator);
-                paragraph.ChildObjects.Insert(index + 1, fieldSeparator);
-
-                //Insert FieldEnd object to mark the end of the field
-                FieldMark fieldEnd = new FieldMark(document, FieldMarkType.FieldEnd);
-                paragraph.ChildObjects.Insert(index + 3, fieldEnd);
+                CreateBookmarkByWordHandler(i, text);
             });
 
 
             SaveCurrentDocument();
         }
+
+        private void CreateBookmarkByWordHandler(int i, TextSelection[] text)
+        {
+            TextSelection keywordOne = text[i];
+            TextRange tr = null;
+
+            //Get the textrange its locates
+            try
+            {
+                tr = keywordOne.GetAsOneRange();
+            }
+            catch (Exception)
+            {
+                CreateBookmarkByWordHandler(i, text);
+            }
+
+            //Set the formatting
+            tr.CharacterFormat.UnderlineStyle = UnderlineStyle.Single;
+            tr.CharacterFormat.TextColor = Color.Blue;
+
+            //Get the paragraph it locates
+            Paragraph paragraph = tr.OwnerParagraph;
+
+            if (paragraph.Equals(referencesParagraph))
+            {
+                return;
+            }
+
+            //Get the index of the keyword in its paragraph
+            int index = paragraph.ChildObjects.IndexOf(tr);
+
+            DocumentObject child = paragraph.ChildObjects[index];
+
+            if (child.DocumentObjectType == DocumentObjectType.Field)
+            {
+                Field textField = child as Field;
+
+                if (textField.Type == FieldType.FieldRef)
+                {
+                    Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef.ToString()}");
+                    return;
+                }
+                else if (textField.Type == FieldType.FieldHyperlink)
+                {
+                    Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink.ToString()}");
+                    return;
+                }
+            }
+
+            //Create a cross-reference field, and link it to bookmark                   
+            Field field = new Field(document)
+            {
+                Type = FieldType.FieldRef
+            };
+            string code = $@"REF {referencesWord} \p \h";
+            field.Code = code;
+
+            //Insert field
+            paragraph.ChildObjects.Insert(index, field);
+
+            //Insert FieldSeparator object
+            FieldMark fieldSeparator = new FieldMark(document, FieldMarkType.FieldSeparator);
+            paragraph.ChildObjects.Insert(index + 1, fieldSeparator);
+
+            //Insert FieldEnd object to mark the end of the field
+            FieldMark fieldEnd = new FieldMark(document, FieldMarkType.FieldEnd);
+            paragraph.ChildObjects.Insert(index + 3, fieldEnd);
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -598,9 +614,9 @@ namespace BusinessLogicLayer
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="word"></param>
+        /// <param name="style"></param>
         /// <returns></returns>
-        public Tuple<Section, Paragraph> GetSectionAndParagraphByWord(string word)
+        public Tuple<Section, Paragraph> GetSectionAndParagraphByStyleName(string style)
         {
             var sections = Document.Sections;
             for (int i = sections.Count - 1; i > -1; i--)
@@ -609,7 +625,7 @@ namespace BusinessLogicLayer
                 ParagraphCollection paragraphCollection = section.Paragraphs;
                 foreach (Paragraph paragraph in paragraphCollection)
                 {
-                    if (paragraph.Text.Contains(word))
+                    if (paragraph.StyleName == style)
                     {
                         //referParagraph = paragraph;
                         return new Tuple<Section, Paragraph>(section, paragraph);
@@ -857,14 +873,22 @@ namespace BusinessLogicLayer
         {
             var links = new HashSet<Field>();
 
-            foreach (Section section in document.Sections)
+            //foreach (Section section in document.Sections)
+            Parallel.For(0, document.Sections.Count, i =>
             {
-                foreach (DocumentObject sec in section.Body.ChildObjects)
+                Section section = document.Sections[i];
+                var childObjects = section.Body.ChildObjects;
+                //foreach (DocumentObject sec in section.Body.ChildObjects)
+                Parallel.For(0, childObjects.Count, i =>
                 {
-                    if (sec.DocumentObjectType == DocumentObjectType.Paragraph)
+                    DocumentObject documentObject = childObjects[i];
+                    if (documentObject.DocumentObjectType == DocumentObjectType.Paragraph)
                     {
-                        foreach (DocumentObject para in (sec as Paragraph).ChildObjects)
+                        var paragraphs = (documentObject as Paragraph).ChildObjects;
+                        //foreach (DocumentObject para in (sec as Paragraph).ChildObjects)
+                        Parallel.For(0, paragraphs.Count, i =>
                         {
+                            DocumentObject para = paragraphs[i];
                             if (para.DocumentObjectType == DocumentObjectType.Field)
                             {
                                 Field field = para as Field;
@@ -874,10 +898,10 @@ namespace BusinessLogicLayer
                                     links.Add(field);
                                 }
                             }
-                        }
+                        });
                     }
-                }
-            }
+                });
+            });
 
             return links.ToList();
         }
@@ -890,7 +914,9 @@ namespace BusinessLogicLayer
             HashSet<Bookmark> hashSetBookmarks = new HashSet<Bookmark>();
             BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(document);
             var bookmarks = bookmarksNavigator.Document.Bookmarks;
-            for (int i = 0; i < bookmarks.Count; i++)
+
+            //for (int i = 0; i < bookmarks.Count; i++)
+            Parallel.For(0, bookmarks.Count, i =>
             {
                 Bookmark bookmark = bookmarks[i];
                 if (bookmark.Name != badBookmark)
@@ -899,9 +925,9 @@ namespace BusinessLogicLayer
                 }
                 else
                 {
-                    continue;
+                    return;
                 }
-            }
+            });
 
             return hashSetBookmarks.ToList();
         }
@@ -1024,18 +1050,21 @@ namespace BusinessLogicLayer
         /// </summary>
         public void CreateReferencesSection()
         {
-            var sectionAndParagraph = GetSectionAndParagraphByWord("Сноски");
+            var sectionAndParagraph = GetSectionAndParagraphByStyleName(styleName);
             if (sectionAndParagraph == null)
             {
                 Section sectionForReferences = document.Document.AddSection();
-                var chapterForReferences = sectionForReferences.AddParagraph();
-                chapterForReferences.AppendText("Сноски");
-                chapterForReferences.AppendBreak(BreakType.LineBreak);
+                var paragraphForReferences = sectionForReferences.AddParagraph();
+
+                AddParagraphStyle(paragraphForReferences);
+
+                paragraphForReferences.AppendText("Сноски");
+                paragraphForReferences.AppendBreak(BreakType.LineBreak);
                 //chapterForReferences.ApplyStyle(BuiltinStyle.Heading1);
                 //chapterForReferences.ApplyStyle(BuiltinStyle.Title);
 
                 //referencesParagraph = sectionForReferences.AddParagraph();
-                referencesParagraph = chapterForReferences;
+                referencesParagraph = paragraphForReferences;
                 ReferencesSection = sectionForReferences;
                 IndexReferencesSection = Document.GetIndex(sectionForReferences);
             }
@@ -1048,6 +1077,23 @@ namespace BusinessLogicLayer
 
             SaveCurrentDocument();
         }
+
+        private void AddParagraphStyle(Paragraph paragraphForReferences)
+        {
+            ParagraphStyle referenceParagraphStyle = new ParagraphStyle(document)
+            {
+                Name = styleName
+            };
+
+            referenceParagraphStyle.CharacterFormat.Bold = true;
+            referenceParagraphStyle.CharacterFormat.FontSize = 20;
+            referenceParagraphStyle.CharacterFormat.FontName = "Calibri";
+
+            document.Styles.Add(referenceParagraphStyle);
+
+            paragraphForReferences.ApplyStyle(referenceParagraphStyle.Name);
+        }
+
         /// <summary>
         /// 
         /// </summary>

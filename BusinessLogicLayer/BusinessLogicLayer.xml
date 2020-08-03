@@ -113,11 +113,11 @@
             <param name="hyperlink"></param>
             <param name="count"></param>
         </member>
-        <member name="M:BusinessLogicLayer.WordDocument.GetSectionAndParagraphByWord(System.String)">
+        <member name="M:BusinessLogicLayer.WordDocument.GetSectionAndParagraphByStyleName(System.String)">
             <summary>
             
             </summary>
-            <param name="word"></param>
+            <param name="style"></param>
             <returns></returns>
         </member>
         <member name="M:BusinessLogicLayer.WordDocument.GetWordWithFirstLetterUpper(System.String)">
