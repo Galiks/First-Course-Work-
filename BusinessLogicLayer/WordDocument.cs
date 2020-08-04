@@ -918,7 +918,14 @@ namespace BusinessLogicLayer
                 Bookmark bookmark = bookmarks[i];
                 if (bookmark.Name != badBookmark)
                 {
-                    hashSetBookmarks.Add(bookmark);
+                    try
+                    {
+                        hashSetBookmarks.Add(bookmark);
+                    }
+                    catch (IndexOutOfRangeException e)
+                    {
+                        loggerException.Error($"При поиске закладки была ошибка: {e.Message}");
+                    }
                 }
                 else
                 {
@@ -926,7 +933,7 @@ namespace BusinessLogicLayer
                 }
             });
 
-            return hashSetBookmarks.ToList();
+            return hashSetBookmarks.Where(b => b != null).ToList();
         }
         /// <summary>
         /// 
@@ -1240,5 +1247,29 @@ namespace BusinessLogicLayer
 
             SaveCurrentDocument();
         }
-    }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<DocPicture> GetImages()
+        {          
+            foreach (Section section in document.Sections)
+            {
+                //Get Each Paragraph of Section
+                foreach (Paragraph paragraph in section.Paragraphs)
+                {
+                    //Get Each Document Object of Paragraph Items
+                    foreach (DocumentObject docObject in paragraph.ChildObjects)
+                    {
+                        //If Type of Document Object is Picture, Extract.
+                        if (docObject.DocumentObjectType == DocumentObjectType.Picture)
+                        {
+                            yield return docObject as DocPicture;                          
+                        }
+                    }
+                }
+            }
+        }
+    } 
 }

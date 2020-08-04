@@ -19,8 +19,7 @@ namespace WebApplication1
             try
             {
                 logger.Info("Init main.");
-                //BuildWebHost(args).Run();
-                CreateHostBuilder(args).Build().Run();
+                CreateHostBuilderBy8080(args).Build().Run();
             }
             catch (Exception e)
             {
@@ -46,12 +45,26 @@ namespace WebApplication1
                 .Build();
 
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
+        public static IHostBuilder CreateHostBuilderBy8080(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
                     webBuilder.UseUrls(urls: "http://localhost:8080");
+                })
+                .ConfigureLogging(logging =>
+                {
+                    logging.ClearProviders();
+                    logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information);
+                })
+                .UseNLog();
+
+        public static IHostBuilder CreateHostBuilderBy80(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                    webBuilder.UseUrls(urls: "http://localhost:80");
                 })
                 .ConfigureLogging(logging =>
                 {

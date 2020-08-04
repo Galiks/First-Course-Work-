@@ -105,13 +105,12 @@
             <param name="text"></param>
             <param name="count"></param>
         </member>
-        <member name="M:BusinessLogicLayer.WordDocument.CreatHyperlinkForImage(System.String,System.String,System.Int32)">
+        <member name="M:BusinessLogicLayer.WordDocument.CreatHyperlinkForImage(System.String,System.String)">
             <summary>
             
             </summary>
             <param name="path"></param>
             <param name="hyperlink"></param>
-            <param name="count"></param>
         </member>
         <member name="M:BusinessLogicLayer.WordDocument.GetSectionAndParagraphByStyleName(System.String)">
             <summary>
@@ -132,11 +131,10 @@
             
             </summary>
         </member>
-        <member name="M:BusinessLogicLayer.WordDocument.GetTextFromDocument(System.Boolean)">
+        <member name="M:BusinessLogicLayer.WordDocument.GetTextFromDocument">
             <summary>
             
             </summary>
-            <param name="marking"></param>
             <returns></returns>
         </member>
         <member name="M:BusinessLogicLayer.WordDocument.FindAllLinksBySection(Spire.Doc.Section)">
@@ -194,6 +192,12 @@
             
             </summary>
             <param name="bookmarkText"></param>
+        </member>
+        <member name="M:BusinessLogicLayer.WordDocument.GetImages">
+            <summary>
+            
+            </summary>
+            <returns></returns>
         </member>
     </members>
 </doc>

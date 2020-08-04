@@ -28,8 +28,7 @@ namespace WebApplication1.Controllers
             _logger.LogDebug(1, "NLog injected into HomeController");
             _appEnvironment = appEnvironment;
             absolutPath = _appEnvironment.WebRootPath + @"\Files";
-            formats = new List<string>() { ".docx", ".doc" };
-            
+            formats = new List<string>() { ".docx", ".doc" };      
         }
 
         public async Task<IActionResult> Index(IFormFile file)

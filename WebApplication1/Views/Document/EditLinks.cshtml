@@ -1,7 +1,7 @@
 ﻿@using Spire.Doc.Documents;
 
 @{
-    ViewData["Title"] = "Document Page";
+    ViewData["Title"] = "Edit Link";
 }
 
 <head>
@@ -131,7 +131,7 @@
                     @for (int i = 0; i < ViewBag.Bookmarks.Count; i++)
                     {
 
-                        var nextSibling = ViewBag.Bookmarks[i].BookmarkStart.Owner.NextSibling;
+                        var nextSibling = ViewBag?.Bookmarks[i].BookmarkStart.Owner.NextSibling;
                         if (nextSibling != null)
                         {
                             var firstChild = nextSibling.FirstChild;
@@ -172,6 +172,20 @@
                                 </tr>
                             }
                         }
+                    }
+                </table>
+            </div>
+
+
+
+
+            <div id="contentwrapper">
+                <table border="1">
+                    @for (int i = 0; i < ViewBag.Images.Count; i++)
+                    {                  
+                      <tr>
+                       <td><img width='200px' height='200px' src='data:image/jpeg;base64,@Convert.ToBase64String(ViewBag.Images[i].ImageBytes)' /></td>
+                      </tr>                   
                     }
                 </table>
             </div>

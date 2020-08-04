@@ -35,7 +35,10 @@ namespace WebApplication1.Controllers
 
         public async Task<IActionResult> Index(string word, string text, string hyperlinkType, IFormFile image, int count = default)
         {
-            
+
+           
+
+
             wordDocument.CreateReferencesSection();
             string path = null;
             if (image != null)
@@ -43,7 +46,6 @@ namespace WebApplication1.Controllers
                 path = _appEnvironment.WebRootPath + "/Images/" + image.FileName;
                 using var fileStream = new FileStream(path, FileMode.Create);
                 await image.CopyToAsync(fileStream);
-
             }
 
             if (!string.IsNullOrWhiteSpace(text) & !string.IsNullOrWhiteSpace(word) & !string.IsNullOrWhiteSpace(hyperlinkType))
@@ -61,7 +63,7 @@ namespace WebApplication1.Controllers
             {
                 if (hyperlinkType.Equals("hyperlink"))
                 {
-                    wordDocument.CreatHyperlinkForImage(path, text, count);
+                    wordDocument.CreatHyperlinkForImage(path, text);
                 }
             }
             else if (!string.IsNullOrWhiteSpace(path) & !string.IsNullOrWhiteSpace(word) & !string.IsNullOrWhiteSpace(hyperlinkType))
@@ -85,6 +87,8 @@ namespace WebApplication1.Controllers
             ViewBag.Hyperlinks = hyperlinks;
             var bookmarks = wordDocument.GetAllBookmarks().ToList();
             ViewBag.Bookmarks = bookmarks;
+            var images = wordDocument.GetImages().ToList();
+            ViewBag.Images = images;
 
             return View();
         }
@@ -100,7 +104,7 @@ namespace WebApplication1.Controllers
             return View();
         }
 
-        public IActionResult UpdateHyperlink(int index, string hypertext, IFormFile image)
+        public IActionResult UpdateHyperlink(int index, string hypertext)
         {
             var list = wordDocument.GetAllHyperlinks().ToList();
             Field field = list[index];
@@ -116,7 +120,7 @@ namespace WebApplication1.Controllers
             return Redirect("EditLinks");
         }
 
-        public IActionResult UpdateBookmark(string bookmark, string text, IFormFile image)
+        public IActionResult UpdateBookmark(string bookmark, string text)
         {
             wordDocument.EditTextInBookmark(bookmark, text);
             return Redirect("EditLinks");
