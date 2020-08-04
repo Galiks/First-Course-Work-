@@ -5,7 +5,6 @@ using Spire.Doc;
 using Spire.Doc.Collections;
 using Spire.Doc.Documents;
 using Spire.Doc.Fields;
-using Spire.Doc.Formatting;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -33,7 +32,7 @@ namespace BusinessLogicLayer
         private static int indexNextField = 0;
         private Paragraph referencesParagraph;
         private static Section referencesSection;
-        private const string styleName = "MyReferences"; 
+        private const string styleName = "MyReferences";
         /// <summary>
         /// 
         /// </summary>
@@ -269,12 +268,12 @@ namespace BusinessLogicLayer
 
                 if (textField.Type == FieldType.FieldRef)
                 {
-                    Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef.ToString()}");
+                    Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef}");
                     return;
                 }
                 else if (textField.Type == FieldType.FieldHyperlink)
                 {
-                    Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink.ToString()}");
+                    Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink}");
                     return;
                 }
             }
@@ -426,12 +425,12 @@ namespace BusinessLogicLayer
 
                     if (textField.Type == FieldType.FieldRef)
                     {
-                        Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef.ToString()}");
+                        Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef}");
                         return;
                     }
                     else if (textField.Type == FieldType.FieldHyperlink)
                     {
-                        Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink.ToString()}");
+                        Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink}");
                         return;
                     }
                 }
@@ -550,12 +549,12 @@ namespace BusinessLogicLayer
 
                     if (textField.Type == FieldType.FieldRef)
                     {
-                        Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef.ToString()}");
+                        Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef}");
                         return;
                     }
                     else if (textField.Type == FieldType.FieldHyperlink)
                     {
-                        Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink.ToString()}");
+                        Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink}");
                         return;
                     }
                 }
@@ -600,8 +599,7 @@ namespace BusinessLogicLayer
         /// </summary>
         /// <param name="path"></param>
         /// <param name="hyperlink"></param>
-        /// <param name="count"></param>
-        public void CreatHyperlinkForImage(string path, string hyperlink, int count = default)
+        public void CreatHyperlinkForImage(string path, string hyperlink)
         {
             DocPicture picture = new DocPicture(Document);
             picture.LoadImage(path);
@@ -654,9 +652,8 @@ namespace BusinessLogicLayer
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="marking"></param>
         /// <returns></returns>
-        public string GetTextFromDocument(bool marking = true)
+        public string GetTextFromDocument()
         {
             string filename = filepath + ".html";
             document.SaveToFile(filename, FileFormat.Html);
