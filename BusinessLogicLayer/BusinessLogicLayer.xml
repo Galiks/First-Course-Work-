@@ -151,7 +151,7 @@
             <param name="section"></param>
             <returns></returns>
         </member>
-        <member name="M:BusinessLogicLayer.WordDocument.GetAllHyperlinks">
+        <member name="M:BusinessLogicLayer.WordDocument.GetHyperlinks">
             <summary>
             
             </summary>

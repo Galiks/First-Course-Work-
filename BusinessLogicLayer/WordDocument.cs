@@ -881,7 +881,7 @@ namespace BusinessLogicLayer
         /// 
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<Field> GetAllHyperlinks()
+        public IEnumerable<Field> GetHyperlinks()
         {
             var links = new HashSet<Field>();
 
@@ -1285,6 +1285,6 @@ namespace BusinessLogicLayer
                     }
                 }
             }
-        }
+        }       
     } 
 }

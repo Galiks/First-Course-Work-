@@ -33,12 +33,8 @@ namespace WebApplication1.Controllers
         //    return View("Index");
         //}
 
-        public async Task<IActionResult> Index(string word, string text, string hyperlinkType, IFormFile image, int count = default)
+        public async Task<IActionResult> Index(string word, string text, string linkType, IFormFile image, int count = default)
         {
-
-           
-
-
             wordDocument.CreateReferencesSection();
             string path = null;
             if (image != null)
@@ -48,27 +44,27 @@ namespace WebApplication1.Controllers
                 await image.CopyToAsync(fileStream);
             }
 
-            if (!string.IsNullOrWhiteSpace(text) & !string.IsNullOrWhiteSpace(word) & !string.IsNullOrWhiteSpace(hyperlinkType))
+            if (!string.IsNullOrWhiteSpace(text) & !string.IsNullOrWhiteSpace(word) & !string.IsNullOrWhiteSpace(linkType))
             {
-                if (hyperlinkType.Equals("bookmark"))
+                if (linkType.Equals("bookmark"))
                 {
                     wordDocument.CreateBookmarksForText(word, text, count);
                 }
-                else if (hyperlinkType.Equals("hyperlink"))
+                else if (linkType.Equals("hyperlink"))
                 {
                     wordDocument.CreateHyperlinksForText(word, text, count);
                 }
             }
-            else if (!string.IsNullOrWhiteSpace(path) & !string.IsNullOrWhiteSpace(text) & !string.IsNullOrWhiteSpace(hyperlinkType))
+            else if (!string.IsNullOrWhiteSpace(path) & !string.IsNullOrWhiteSpace(text) & !string.IsNullOrWhiteSpace(linkType))
             {
-                if (hyperlinkType.Equals("hyperlink"))
+                if (linkType.Equals("hyperlink"))
                 {
                     wordDocument.CreatHyperlinkForImage(path, text);
                 }
             }
-            else if (!string.IsNullOrWhiteSpace(path) & !string.IsNullOrWhiteSpace(word) & !string.IsNullOrWhiteSpace(hyperlinkType))
+            else if (!string.IsNullOrWhiteSpace(path) & !string.IsNullOrWhiteSpace(word) & !string.IsNullOrWhiteSpace(linkType))
             {
-                if (hyperlinkType.Equals("bookmark"))
+                if (linkType.Equals("bookmark"))
                 {
                     wordDocument.CreateBookmarksForImage(path, word, count);
                 }
@@ -83,7 +79,7 @@ namespace WebApplication1.Controllers
 
         public IActionResult EditLinks()
         {
-            var hyperlinks = wordDocument.GetAllHyperlinks().ToList();
+            var hyperlinks = wordDocument.GetHyperlinks().ToList();
             ViewBag.Hyperlinks = hyperlinks;
             var bookmarks = wordDocument.GetAllBookmarks().ToList();
             ViewBag.Bookmarks = bookmarks;
@@ -106,7 +102,7 @@ namespace WebApplication1.Controllers
 
         public IActionResult UpdateHyperlink(int index, string hypertext)
         {
-            var list = wordDocument.GetAllHyperlinks().ToList();
+            var list = wordDocument.GetHyperlinks().ToList();
             Field field = list[index];
             wordDocument.EditLinkInHypertext(field, hypertext);
             return Redirect("EditLinks");
@@ -114,7 +110,7 @@ namespace WebApplication1.Controllers
 
         public IActionResult DeleteHyperlink(int index)
         {
-            var list = wordDocument.GetAllHyperlinks().ToList();
+            var list = wordDocument.GetHyperlinks().ToList();
             Field field = list[index];
             this.wordDocument.DeleteHyperlink(field);
             return Redirect("EditLinks");
@@ -148,6 +144,10 @@ namespace WebApplication1.Controllers
             file.Delete();
         }
 
-
+        public IActionResult CreateHyperlinkForImage(int index)
+        {
+            var image = wordDocument.GetImages().ToList()[index];
+            return Redirect("EditLinks");
+        }
     }
 }
