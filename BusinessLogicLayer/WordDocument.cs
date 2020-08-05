@@ -595,10 +595,10 @@ namespace BusinessLogicLayer
             SaveCurrentDocument();
         }
         /// <summary>
-        /// 
+        /// Добавляет гиперссылку на изображение, добавляемое в документ
         /// </summary>
-        /// <param name="path"></param>
-        /// <param name="hyperlink"></param>
+        /// <param name="path">путь к изображению</param>
+        /// <param name="hyperlink">гиперссылка</param>
         public void CreatHyperlinkForImage(string path, string hyperlink)
         {
             DocPicture picture = new DocPicture(Document);
@@ -609,6 +609,21 @@ namespace BusinessLogicLayer
             ReferencesSection.AddParagraph().AppendHyperlink(hyperlink, picture, HyperlinkType.WebLink);
             SaveCurrentDocument();
         }
+
+        /// <summary>
+        /// Добавляет гиперссылку на имеющееся в документе изображение
+        /// </summary>
+        /// <param name="picture"></param>
+        /// <param name="hyperlink"></param>
+        public void CreateHyperlinkForImage(DocPicture picture, string hyperlink)
+        {
+            picture.Width = 470;
+            picture.Height = 340;
+
+            ReferencesSection.AddParagraph().AppendHyperlink(hyperlink, picture, HyperlinkType.WebLink);
+            SaveCurrentDocument();
+        }
+
         /// <summary>
         /// 
         /// </summary>

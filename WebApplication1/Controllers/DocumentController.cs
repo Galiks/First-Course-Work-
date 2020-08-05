@@ -139,7 +139,7 @@ namespace WebApplication1.Controllers
             doc = System.IO.File.ReadAllBytes(file.FullName);
             string fileExtension = file.Extension;
             string filename = file.Name;
-            DeleteFile(file);
+            //DeleteFile(file);
             return File(doc, "application/" + fileExtension, filename);
         }
 
@@ -147,5 +147,7 @@ namespace WebApplication1.Controllers
         {
             file.Delete();
         }
+
+
     }
 }

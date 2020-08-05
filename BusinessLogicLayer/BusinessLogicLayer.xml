@@ -107,9 +107,16 @@
         </member>
         <member name="M:BusinessLogicLayer.WordDocument.CreatHyperlinkForImage(System.String,System.String)">
             <summary>
-            
+            Добавляет гиперссылку на изображение, добавляемое в документ
             </summary>
-            <param name="path"></param>
+            <param name="path">путь к изображению</param>
+            <param name="hyperlink">гиперссылка</param>
+        </member>
+        <member name="M:BusinessLogicLayer.WordDocument.CreateHyperlinkForImage(Spire.Doc.Fields.DocPicture,System.String)">
+            <summary>
+            Добавляет гиперссылку на имеющееся в документе изображение
+            </summary>
+            <param name="picture"></param>
             <param name="hyperlink"></param>
         </member>
         <member name="M:BusinessLogicLayer.WordDocument.GetSectionAndParagraphByStyleName(System.String)">
