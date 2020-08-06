@@ -73,7 +73,7 @@ namespace WebApplication1.Controllers
 
             ViewBag.Messages = wordDocument.Messages;
             ViewBag.LongText = wordDocument.GetTextFromDocument();
-            ViewBag.Footnotes = wordDocument.GetAllFootnotes();
+            ViewBag.Footnotes = wordDocument.GetFootnotes();
             return View();
         }
 
@@ -81,7 +81,7 @@ namespace WebApplication1.Controllers
         {
             var hyperlinks = wordDocument.GetHyperlinks().ToList();
             ViewBag.Hyperlinks = hyperlinks;
-            var bookmarks = wordDocument.GetAllBookmarks().ToList();
+            var bookmarks = wordDocument.GetBookmarks().ToList();
             ViewBag.Bookmarks = bookmarks;
             var images = wordDocument.GetImages().ToList();
             ViewBag.Images = images;
@@ -144,9 +144,10 @@ namespace WebApplication1.Controllers
             file.Delete();
         }
 
-        public IActionResult CreateHyperlinkForImage(int index)
+        public IActionResult CreateHyperlinkForImage(int index, string hypertext)
         {
             var image = wordDocument.GetImages().ToList()[index];
+            wordDocument.CreateHyperlinkForImage(image, hypertext);
             return Redirect("EditLinks");
         }
     }

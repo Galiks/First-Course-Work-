@@ -157,7 +157,7 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:BusinessLogicLayer.WordDocument.GetAllBookmarks">
+        <member name="M:BusinessLogicLayer.WordDocument.GetBookmarks">
             <summary>
             
             </summary>
@@ -177,7 +177,7 @@
             <param name="field"></param>
             <param name="hyperlink"></param>
         </member>
-        <member name="M:BusinessLogicLayer.WordDocument.GetAllFootnotes">
+        <member name="M:BusinessLogicLayer.WordDocument.GetFootnotes">
             <summary>
             
             </summary>

@@ -617,10 +617,8 @@ namespace BusinessLogicLayer
         /// <param name="hyperlink"></param>
         public void CreateHyperlinkForImage(DocPicture picture, string hyperlink)
         {
-            picture.Width = 470;
-            picture.Height = 340;
-
-            ReferencesSection.AddParagraph().AppendHyperlink(hyperlink, picture, HyperlinkType.WebLink);
+            picture.OwnerParagraph.AppendHyperlink(hyperlink, picture, HyperlinkType.WebLink);
+            
             SaveCurrentDocument();
         }
 
@@ -921,7 +919,7 @@ namespace BusinessLogicLayer
         /// 
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<Bookmark> GetAllBookmarks()
+        public IEnumerable<Bookmark> GetBookmarks()
         {
             HashSet<Bookmark> hashSetBookmarks = new HashSet<Bookmark>();
             BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(document);
@@ -935,11 +933,18 @@ namespace BusinessLogicLayer
                 {
                     try
                     {
-                        hashSetBookmarks.Add(bookmark);
+                        if (bookmark != null)
+                        {
+                            hashSetBookmarks.Add(bookmark); 
+                        }
+                        else
+                        {
+                            return;
+                        }
                     }
-                    catch (IndexOutOfRangeException e)
+                    catch (Exception e)
                     {
-                        loggerException.Error($"При поиске закладки была ошибка: {e.Message}");
+                        loggerException.Error($"При поиске закладки произошла ошибка: {e.Message}{Environment.NewLine}Внутрення ошибка: {(e.InnerException != null? e.InnerException.Message : "Отсутсвует")}");
                     }
                 }
                 else
@@ -948,8 +953,29 @@ namespace BusinessLogicLayer
                 }
             });
 
-            return hashSetBookmarks.Where(b => b != null).ToList();
+
+
+            //List<Bookmark> result;
+
+            //while (true)
+            //{
+            //    try
+            //    {
+            //        result = new List<Bookmark>();
+            //        result.AddRange(hashSetBookmarks.Where(b => b != null).ToList());
+            //        break;
+            //    }
+            //    catch (Exception e)
+            //    {
+            //        loggerException.Error($"При поиске закладки произошла ошибка: {e.Message}{Environment.NewLine}Внутрення ошибка: {(e.InnerException != null ? e.InnerException.Message : "Отсутсвует")}");
+            //    } 
+            //}
+
+            IEnumerable<Bookmark> enumerable = hashSetBookmarks.Where(b => b != null);
+            return enumerable;
         }
+
+
         /// <summary>
         /// 
         /// </summary>
@@ -991,7 +1017,7 @@ namespace BusinessLogicLayer
         /// 
         /// </summary>
         /// <returns></returns>
-        public List<Tuple<string, string>> GetAllFootnotes()
+        public List<Tuple<string, string>> GetFootnotes()
         {
             var result = new List<Tuple<string, string>>();
 
@@ -1285,6 +1311,8 @@ namespace BusinessLogicLayer
                     }
                 }
             }
-        }       
+        }
+        
+       
     } 
 }
