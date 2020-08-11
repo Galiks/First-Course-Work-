@@ -5,6 +5,22 @@
     <head>
         <link href="~/css/style.css" rel="stylesheet" />
         <link href="~/css/toggleButton.css" rel="stylesheet" />
+
+        <style>
+            .div-helper-border {
+                border: 4px double black; /* Параметры границы */
+                padding: 10px; /* Поля вокруг текста */
+            }
+
+            .p-helper {
+                color: #000;
+                font-style: italic;
+            }
+
+            .hidden {
+                display: none;
+            }
+        </style>
     </head>
     <body>
         <header>
@@ -24,6 +40,10 @@
                 </div>
             </nav>
         </header>
+
+
+        <button id="help-button" style="display: inline-block;" type="button">ПОМОЩЬ</button>
+
         <div id="messages">
             @foreach (var item in ViewBag.Messages)
             {
@@ -39,38 +59,44 @@
             </style>
             <div>
                 <form asp-action="Index" asp-controller="Document" method="post" enctype="multipart/form-data">
-                    <p>
+                    <div class="div-helper-border">
+                        <p class="p-helper hidden">Это поле для ввода слова, по которому Вы хотите создать гиперссылку или закладку.</p>
                         <label for="word">Слово для гипертекста: </label>
-                        <input type="text" name="word" id="word" />
-                    </p>
+                        <input type="text" name="word" id="word">
+                    </div>
 
-                    <p>
-                        <label for="text">Выберите текст и/или картинку для ссылки: </label>
-                        <input type="text" name="text" id="text"  />
+                    <div class="div-helper-border">
+                        <p class="p-helper hidden">Это поле для ввода текста, которое будет добавлено в виде гиперссылки или закладки.</p>
+                        <label for="text">Введите текст для гиперссылки/закладки: </label>
+                        <input type="text" name="text" id="text">
+                    </div>
+
+                    <div class="div-helper-border">
+                        <p class="p-helper hidden">С помощью этой кнопки Вы можете добавить картинку, которая будет использована в качестве гиперссылки ли закладки.</p>
                         <label for="image">
-                            Фото:
-                            <input type="file" id="image" name="image" />
+                            Выберите изображение для гиперссылки/закладки::
+                            <input type="file" id="image" name="image">
                         </label>
-                    </p>
+                    </div>
 
-                    <p>
+                    <div class="div-helper-border">
+                        <p class="p-helper hidden">Тут Вы выбираете какой тип должен быть у вашей ссылки: гиперссылка или закладка.</p>
                         <label for="">Выберите тип ссылки: </label>
-                        <lable>Закладка <input type="radio" name="hyperlinkType" value="bookmark" /></lable>
-                        <label>Ссылка <input type="radio" name="hyperlinkType" value="hyperlink" /></label>
-                    </p>
+                        <label>Гиперссылка <input type="radio" name="hyperlinkType" value="hyperlink"></label>
+                        <lable>Закладка <input type="radio" name="hyperlinkType" value="bookmark"></lable>
+                    </div>
 
-                    <p>
+                    <div class="div-helper-border">
+                        <p class="p-helper hidden">В этом поле Вы можете выставить количество добавляемых ссылок, начиная с начала документа. Число должно быть больше нуля. Если число не указано, то все встреченные слова будут помечены как ссылки.</p>
                         <label>Количество ссылок/закладок</label>
-                        <input id="count" name="count" type="number" min="1"/>
-                    </p>
+                        <input id="count" name="count" type="number" min="1">
+                    </div>
 
-                    @*<p>
-                        <label>Выделение текста</label>
-                        <input id="marking" name="marking" type="checkbox" value="true" />
-                        <input name="marking" type="hidden" value="false" />
-                    </p>*@
-
-                    <button>Отправить</button>
+                    <div class="div-helper-border">
+                        <p class="p-helper hidden">Нажимая на эту конпку, Вы отправляете данные программе для добавления нужной вам ссылки.</p>
+                        <label>Отправить данные в программу.</label>
+                        <button>Отправить</button>
+                    </div>
                 </form>
 
             </div>
@@ -85,11 +111,30 @@
                 </div>
             </div>
 
-            
-            <div>
-                <iframe height="600px" width="120%" src='@ViewBag.LongText'></iframe>
-            </div>
-
         </div>
+
+        <div>
+            <iframe height="600px" width="100%" src='@ViewBag.LongText'></iframe>
+        </div>
+
+        <script>
+            let helpButton = document.getElementById("help-button");
+            helpButton.onclick = function () {
+                var pTags = document.getElementsByClassName("p-helper");
+                if (pTags.length > 0) {
+                    if (pTags[0].classList.contains("hidden")) {
+                        for (const pItem of pTags) {
+                            pItem.classList.remove("hidden");
+                        }
+                    }
+                    else {
+                        for (const pItem of pTags) {
+                            pItem.classList.add("hidden");
+                        }
+                    }
+
+                }
+            }
+        </script>
 
     </body>
