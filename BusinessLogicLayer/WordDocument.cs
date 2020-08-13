@@ -181,7 +181,11 @@ namespace BusinessLogicLayer
                 int nounLength = nouns.Count;
                 Parallel.For(0, nounLength, i =>
                 {
-                    nouns.Add(GetWordWithFirstLetterUpper(nouns[i]));
+                    string wordWithFirstLetterUpper = GetWordWithFirstLetterUpper(nouns[i]);
+                    if (!string.IsNullOrWhiteSpace(wordWithFirstLetterUpper))
+                    {
+                        nouns.Add(wordWithFirstLetterUpper); 
+                    }
                 });
                 //for (int i = 0; i < nounLength; i++)
                 //{
@@ -482,7 +486,11 @@ namespace BusinessLogicLayer
                     //for (int i = 0; i < nounLength; i++)
                     Parallel.For(0, nounLength, i =>
                     {
-                        nouns.Add(GetWordWithFirstLetterUpper(nouns[i]));
+                        string wordWithFirstLetterUpper = GetWordWithFirstLetterUpper(nouns[i]);
+                        if (!string.IsNullOrWhiteSpace(wordWithFirstLetterUpper))
+                        {
+                            nouns.Add(wordWithFirstLetterUpper);
+                        }
                     });
                 }
 
