@@ -118,7 +118,20 @@ namespace BusinessLogicLayer
             {
                 List<string> nouns = GetWordsByCases(word);
 
-                Parallel.For(0, nouns.Count, i =>
+                //Parallel.For(0, nouns.Count, i =>
+                //{
+                //    string noun = nouns[i];
+                //    if (i == 0)
+                //    {
+                //        CreateBookmarkByWord(noun, text, count: count);
+                //    }
+                //    else
+                //    {
+                //        CreateBookmarkByWord(noun, count: count);
+                //    }
+                //});
+
+                for (int i = 0; i < nouns.Count; i++)
                 {
                     string noun = nouns[i];
                     if (i == 0)
@@ -129,20 +142,7 @@ namespace BusinessLogicLayer
                     {
                         CreateBookmarkByWord(noun, count: count);
                     }
-                });
-
-                //for (int i = 0; i < nouns.Count; i++)
-                //{
-                //string noun = nouns[i];
-                //if (i == 0)
-                //{
-                //    CreateBookmarkByWord(noun, text, count: count);
-                //}
-                //else
-                //{
-                //    CreateBookmarkByWord(noun, count: count);
-                //}
-                //}
+                }
             }
             catch (CyrWordNotFoundException error)
             {
@@ -195,48 +195,53 @@ namespace BusinessLogicLayer
 
             return nouns;
         }
-        private void CreateBookmarkByWord(string word, string sentence = null, int count = default)
+        private void CreateBookmarkByWord(string word, string text = null, int count = default)
         {
             //Create bookmark objects
             //BookmarkStart start = new BookmarkStart(document, referencesWord);
             //BookmarkEnd end = new BookmarkEnd(document, referencesWord);
 
-            if (!string.IsNullOrWhiteSpace(sentence))
+            if (!string.IsNullOrWhiteSpace(text))
             {
                 referencesParagraph = ReferencesSection.AddParagraph();
                 referencesParagraph.AppendBookmarkStart(referencesWord);
-                referencesParagraph.AppendText(sentence);
+                referencesParagraph.AppendText(text);
                 referencesParagraph.AppendBookmarkEnd(referencesWord);
             }
 
-            TextSelection[] text = document.FindAllString(word, true, true);
+            TextSelection[] textSelection = document.FindAllString(word, true, true);
 
-            if (text == null)
+            if (textSelection == null)
             {
                 return;
             }
 
-            if (text.Length == 0)
+            if (textSelection.Length == 0)
             {
                 return;
             }
 
-            int findLength = count == default ? text.Length : count;
+            int findLength = count == default ? textSelection.Length : count;
 
             //Get the keywords
-            //for (int i = 0; i < findLength; i++)
-            Parallel.For(0, findLength, i =>
+            for (int i = 0; i < findLength; i++)
             {
-                CreateBookmarkByWordHandler(i, text);
-            });
+                TextSelection keywordOne = textSelection[i];
+                CreateBookmarkByWordHandler(i, keywordOne);
+            }
 
 
-            SaveCurrentDocument();
+                //Parallel.For(0, findLength, i =>
+                //{
+                //    CreateBookmarkByWordHandler(i, textSelection);
+                //});
+
+
+                SaveCurrentDocument();
         }
 
-        private void CreateBookmarkByWordHandler(int i, TextSelection[] text)
+        private void CreateBookmarkByWordHandler(int i, TextSelection keywordOne)
         {
-            TextSelection keywordOne = text[i];
             TextRange tr = null;
 
             //Get the textrange its locates
@@ -246,7 +251,7 @@ namespace BusinessLogicLayer
             }
             catch (Exception)
             {
-                CreateBookmarkByWordHandler(i, text);
+                CreateBookmarkByWordHandler(i, keywordOne);
             }
 
             //Set the formatting
@@ -661,7 +666,14 @@ namespace BusinessLogicLayer
         /// <returns></returns>
         public static string GetWordWithFirstLetterUpper(string str)
         {
-            return str[0].ToString().ToUpper() + str.Substring(1);
+            if (!string.IsNullOrWhiteSpace(str))
+            {
+                return str[0].ToString().ToUpper() + str.Substring(1); 
+            }
+            else
+            {
+                return null;
+            }
         }
         /// <summary>
         /// 
