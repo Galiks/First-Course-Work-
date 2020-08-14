@@ -167,30 +167,34 @@ namespace BusinessLogicLayer
             CyrNounCollection cyrNounCollection = new CyrNounCollection();
             CyrNoun cyrNoun = cyrNounCollection.Get(word, out CasesEnum @case, out NumbersEnum numbers);
             var nounsSet = new HashSet<string>(cyrNoun.Decline().ToList());
-            Parallel.ForEach(cyrNoun.DeclinePlural().ToList(), noun =>
-            {
-                nounsSet.Add(noun);
-            });
-            //foreach (var noun in cyrNoun.DeclinePlural().ToList())
+            //Parallel.ForEach(cyrNoun.DeclinePlural().ToList(), noun =>
             //{
             //    nounsSet.Add(noun);
-            //}
+            //});
+            foreach (var noun in cyrNoun.DeclinePlural().ToList())
+            {
+                nounsSet.Add(noun);
+            }
             var nouns = nounsSet.ToList();
             if (cyrNoun.WordType != WordTypesEnum.Surname)
             {
                 int nounLength = nouns.Count;
-                Parallel.For(0, nounLength, i =>
+                //Parallel.For(0, nounLength, i =>
+                //{
+                    //string wordWithFirstLetterUpper = GetWordWithFirstLetterUpper(nouns[i]);
+                    //if (!string.IsNullOrWhiteSpace(wordWithFirstLetterUpper))
+                    //{
+                    //    nouns.Add(wordWithFirstLetterUpper);
+                    //}
+                //});
+                for (int i = 0; i < nounLength; i++)
                 {
                     string wordWithFirstLetterUpper = GetWordWithFirstLetterUpper(nouns[i]);
                     if (!string.IsNullOrWhiteSpace(wordWithFirstLetterUpper))
                     {
-                        nouns.Add(wordWithFirstLetterUpper); 
+                        nouns.Add(wordWithFirstLetterUpper);
                     }
-                });
-                //for (int i = 0; i < nounLength; i++)
-                //{
-                //    nouns.Add(GetWordWithFirstLetterUpper(nouns[i]));
-                //}
+                }
             }
 
             return nouns;
