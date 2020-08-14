@@ -941,37 +941,41 @@ namespace BusinessLogicLayer
         /// <returns></returns>
         public IEnumerable<Bookmark> GetBookmarks()
         {
-            HashSet<Bookmark> hashSetBookmarks = new HashSet<Bookmark>();
+            //HashSet<Bookmark> hashSetBookmarks = new HashSet<Bookmark>();
             BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(document);
             var bookmarks = bookmarksNavigator.Document.Bookmarks;
 
+            #region old code
             //for (int i = 0; i < bookmarks.Count; i++)
-            Parallel.For(0, bookmarks.Count, i =>
-            {
-                Bookmark bookmark = bookmarks[i];
-                if (bookmark.Name != badBookmark)
-                {
-                    try
-                    {
-                        if (bookmark != null)
-                        {
-                            hashSetBookmarks.Add(bookmark); 
-                        }
-                        else
-                        {
-                            return;
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        loggerException.Error($"При поиске закладки произошла ошибка: {e.Message}{Environment.NewLine}Внутрення ошибка: {(e.InnerException != null? e.InnerException.Message : "Отсутсвует")}");
-                    }
-                }
-                else
-                {
-                    return;
-                }
-            });
+            //Parallel.For(0, bookmarks.Count, i =>
+            //for (int i = 0; i < bookmarks.Count; i++)
+            //{
+            //    Bookmark bookmark = bookmarks[i];
+            //    if (bookmark.Name != badBookmark)
+            //    {
+            //        try
+            //        {
+            //            if (bookmark != null)
+            //            {
+            //                hashSetBookmarks.Add(bookmark); 
+            //            }
+            //            else
+            //            {
+            //                continue;
+            //                //return;
+            //            }
+            //        }
+            //        catch (Exception e)
+            //        {
+            //            loggerException.Error($"При поиске закладки произошла ошибка: {e.Message}{Environment.NewLine}Внутрення ошибка: {(e.InnerException != null? e.InnerException.Message : "Отсутсвует")}");
+            //        }
+            //    }
+            //    else
+            //    {
+            //        continue;
+            //        //return;
+            //    }
+            //}
 
 
 
@@ -991,8 +995,14 @@ namespace BusinessLogicLayer
             //    } 
             //}
 
-            IEnumerable<Bookmark> enumerable = hashSetBookmarks.Where(b => b != null);
-            return enumerable;
+            //IEnumerable<Bookmark> enumerable = hashSetBookmarks.Where(b => b != null); 
+            #endregion
+
+
+            foreach (Bookmark bookmark in bookmarks)
+            {
+                yield return bookmark;
+            }
         }
 
 
