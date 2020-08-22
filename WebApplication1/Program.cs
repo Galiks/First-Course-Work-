@@ -1,12 +1,9 @@
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-using System.Diagnostics;
-using System.IO;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
-using System;
 using Microsoft.Extensions.Logging;
 using NLog.Web;
-using Microsoft.AspNetCore;
+using System;
 
 namespace WebApplication1
 {
@@ -14,7 +11,7 @@ namespace WebApplication1
     {
         public static void Main(string[] args)
         {
-            var logger = NLog.Web.NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
+            var logger = NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
 
             try
             {
@@ -32,7 +29,7 @@ namespace WebApplication1
             }
         }
 
-        public static IWebHost BuildWebHost(string[] args) =>     
+        public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
                 .UseUrls(urls: "http://localhost:8080")

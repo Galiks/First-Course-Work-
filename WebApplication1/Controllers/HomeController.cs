@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Spire.Doc;
+using Spire.Pdf;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -28,7 +29,7 @@ namespace WebApplication1.Controllers
             _logger.LogDebug(1, "NLog injected into HomeController");
             _appEnvironment = appEnvironment;
             absolutPath = _appEnvironment.WebRootPath + @"\Files";
-            formats = new List<string>() { ".docx", ".doc" };      
+            formats = new List<string>() { ".docx", ".doc", ".pdf" };      
         }
 
         public async Task<IActionResult> Index(IFormFile file)
@@ -40,8 +41,18 @@ namespace WebApplication1.Controllers
                 {
                     string path = userFolder + file.FileName;
                     pathToFile = path;
+
+                    
+
                     //FileMode.Append
                     await SaveFile(file, file.FileName, path);
+
+                    PdfDocument doc = new PdfDocument();
+                    doc.LoadFromFile(path);
+                    doc.SaveToFile($"{path}.doc", Spire.Pdf.FileFormat.DOC);
+
+
+
                     return RedirectToAction("Index", "Document");
                 }
                 else

@@ -25,10 +25,8 @@ namespace BusinessLogicLayer
         private const string badBookmark = "_GoBack";
         private const int width = 470;
         private const int height = 340;
-        private readonly Document document;
         private readonly string filename;
         private string referencesWord;
-        private readonly HashSet<string> messages;
         private static int indexNextField = 0;
         private Paragraph referencesParagraph;
         private static Section referencesSection;
@@ -36,11 +34,11 @@ namespace BusinessLogicLayer
         /// <summary>
         /// 
         /// </summary>
-        public Document Document => document;
+        public Document Document { get; }
         /// <summary>
         /// 
         /// </summary>
-        public HashSet<string> Messages => messages;
+        public HashSet<string> Messages { get; }
         /// <summary>
         /// 
         /// </summary>
@@ -65,11 +63,11 @@ namespace BusinessLogicLayer
         {
             loggerUser.Info($"Начата работа с файлом: {filename}");
             this.filename = filename;
-            document = new Document();
+            Document = new Document();
             //проблема с дублями файла
             filepath = filename;
-            document.LoadFromFile(filename);
-            messages = new HashSet<string>();
+            Document.LoadFromFile(filename);
+            Messages = new HashSet<string>();
         }
         /// <summary>
         /// 
@@ -213,7 +211,7 @@ namespace BusinessLogicLayer
                 referencesParagraph.AppendBookmarkEnd(referencesWord);
             }
 
-            TextSelection[] textSelection = document.FindAllString(word, true, true);
+            TextSelection[] textSelection = Document.FindAllString(word, true, true);
 
             if (textSelection == null)
             {
@@ -292,7 +290,7 @@ namespace BusinessLogicLayer
             }
 
             //Create a cross-reference field, and link it to bookmark                   
-            Field field = new Field(document)
+            Field field = new Field(Document)
             {
                 Type = FieldType.FieldRef
             };
@@ -303,11 +301,11 @@ namespace BusinessLogicLayer
             paragraph.ChildObjects.Insert(index, field);
 
             //Insert FieldSeparator object
-            FieldMark fieldSeparator = new FieldMark(document, FieldMarkType.FieldSeparator);
+            FieldMark fieldSeparator = new FieldMark(Document, FieldMarkType.FieldSeparator);
             paragraph.ChildObjects.Insert(index + 1, fieldSeparator);
 
             //Insert FieldEnd object to mark the end of the field
-            FieldMark fieldEnd = new FieldMark(document, FieldMarkType.FieldEnd);
+            FieldMark fieldEnd = new FieldMark(Document, FieldMarkType.FieldEnd);
             paragraph.ChildObjects.Insert(index + 3, fieldEnd);
         }
 
@@ -349,7 +347,7 @@ namespace BusinessLogicLayer
         private void CreateBookmarkByImage(string path, string word, int count)
         {
             SetReferencesWord(path);
-            BookmarksNavigator bn = new BookmarksNavigator(document);
+            BookmarksNavigator bn = new BookmarksNavigator(Document);
             bn.MoveToBookmark(referencesWord, true, true);
 
             if (bn.CurrentBookmark == null)
@@ -358,18 +356,18 @@ namespace BusinessLogicLayer
                 para.AppendBookmarkStart(referencesWord);
                 para.AppendBookmarkEnd(referencesWord);
                 bn.MoveToBookmark(referencesWord, true, true);
-                Section section0 = document.AddSection();
+                Section section0 = Document.AddSection();
                 Paragraph paragraph = section0.AddParagraph();
                 Image image = Image.FromFile(path);
                 DocPicture picture = paragraph.AppendPicture(image);
                 picture.Width = width;
                 picture.Height = height;
                 bn.InsertParagraph(paragraph);
-                document.Sections.Remove(section0);
+                Document.Sections.Remove(section0);
             }
 
             //Find the keyword "Hypertext"
-            TextSelection[] text = document.FindAllString(word, true, true);
+            TextSelection[] text = Document.FindAllString(word, true, true);
 
             if (text == null)
             {
@@ -383,7 +381,7 @@ namespace BusinessLogicLayer
 
             //Create bookmark objects
 
-            BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(document);
+            BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(Document);
             bookmarksNavigator.MoveToBookmark(referencesWord);
 
             if (bookmarksNavigator.CurrentBookmark == null)
@@ -449,7 +447,7 @@ namespace BusinessLogicLayer
                 }
 
                 //Create a cross-reference field, and link it to bookmark                   
-                Field field = new Field(document)
+                Field field = new Field(Document)
                 {
                     Type = FieldType.FieldRef
                 };
@@ -460,11 +458,11 @@ namespace BusinessLogicLayer
                 paragraph.ChildObjects.Insert(index, field);
 
                 //Insert FieldSeparator object
-                FieldMark fieldSeparator = new FieldMark(document, FieldMarkType.FieldSeparator);
+                FieldMark fieldSeparator = new FieldMark(Document, FieldMarkType.FieldSeparator);
                 paragraph.ChildObjects.Insert(index + 1, fieldSeparator);
 
                 //Insert FieldEnd object to mark the end of the field
-                FieldMark fieldEnd = new FieldMark(document, FieldMarkType.FieldEnd);
+                FieldMark fieldEnd = new FieldMark(Document, FieldMarkType.FieldEnd);
                 paragraph.ChildObjects.Insert(index + 3, fieldEnd);
             });
 
@@ -523,7 +521,7 @@ namespace BusinessLogicLayer
         }
         private void CreateHyperlinkByWord(string word, string hyperlink, int count)
         {
-            TextSelection[] text = document.FindAllString(word, true, true);
+            TextSelection[] text = Document.FindAllString(word, true, true);
 
             if (text == null)
             {
@@ -579,7 +577,7 @@ namespace BusinessLogicLayer
                 //Add hyperlink
 
 
-                Field field = new Field(document)
+                Field field = new Field(Document)
                 {
                     Code = "HYPERLINK \"" + hyperlink + "\"",
 
@@ -588,7 +586,7 @@ namespace BusinessLogicLayer
 
                 tr.OwnerParagraph.ChildObjects.Insert(index, field);
 
-                FieldMark fm = new FieldMark(document, FieldMarkType.FieldSeparator);
+                FieldMark fm = new FieldMark(Document, FieldMarkType.FieldSeparator);
 
                 tr.OwnerParagraph.ChildObjects.Insert(index + 1, fm);
 
@@ -600,7 +598,7 @@ namespace BusinessLogicLayer
 
                 tr.CharacterFormat.Bold = tr.CharacterFormat.Bold;
 
-                FieldMark fmend = new FieldMark(document, FieldMarkType.FieldEnd);
+                FieldMark fmend = new FieldMark(Document, FieldMarkType.FieldEnd);
 
                 tr.OwnerParagraph.ChildObjects.Insert(index + 3, fmend);
 
@@ -693,7 +691,7 @@ namespace BusinessLogicLayer
         public string GetTextFromDocument()
         {
             string filename = filepath + ".html";
-            document.SaveToFile(filename, FileFormat.Html);
+            Document.SaveToFile(filename, FileFormat.Html);
 
             string[] splitFilename = filename.Split("\\");
             string rightFilename = null;
@@ -908,9 +906,9 @@ namespace BusinessLogicLayer
             var links = new HashSet<Field>();
 
             //foreach (Section section in document.Sections)
-            Parallel.For(0, document.Sections.Count, i =>
+            Parallel.For(0, Document.Sections.Count, i =>
             {
-                Section section = document.Sections[i];
+                Section section = Document.Sections[i];
                 var childObjects = section.Body.ChildObjects;
                 //foreach (DocumentObject sec in section.Body.ChildObjects)
                 Parallel.For(0, childObjects.Count, i =>
@@ -946,7 +944,7 @@ namespace BusinessLogicLayer
         public IEnumerable<Bookmark> GetBookmarks()
         {
             //HashSet<Bookmark> hashSetBookmarks = new HashSet<Bookmark>();
-            BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(document);
+            BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(Document);
             var bookmarks = bookmarksNavigator.Document.Bookmarks;
 
             #region old code
@@ -1017,10 +1015,10 @@ namespace BusinessLogicLayer
         /// <param name="text"></param>
         public void EditTextInBookmark(string bookmarkText, string text)
         {
-            BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(document);
+            BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(Document);
 
 
-            Section tempSection = document.AddSection();
+            Section tempSection = Document.AddSection();
             tempSection.AddParagraph().AppendText(text);
 
             ParagraphBase paragraphBaseFirstItem = tempSection.Paragraphs[0].Items.FirstItem as ParagraphBase;
@@ -1031,7 +1029,7 @@ namespace BusinessLogicLayer
             bookmarksNavigator.MoveToBookmark(TransformWordWithUnderline(bookmarkText));
             bookmarksNavigator.ReplaceBookmarkContent(textBodyPart);
 
-            document.Sections.Remove(tempSection);
+            Document.Sections.Remove(tempSection);
 
             SaveCurrentDocument();
 
@@ -1055,7 +1053,7 @@ namespace BusinessLogicLayer
         {
             var result = new List<Tuple<string, string>>();
 
-            foreach (Section section in document.Sections)
+            foreach (Section section in Document.Sections)
             {
                 foreach (Paragraph paragraph in section.Paragraphs)
                 {
@@ -1132,7 +1130,7 @@ namespace BusinessLogicLayer
             var sectionAndParagraph = GetSectionAndParagraphByStyleName(styleName);
             if (sectionAndParagraph == null)
             {
-                Section sectionForReferences = document.Document.AddSection();
+                Section sectionForReferences = Document.Document.AddSection();
                 var paragraphForReferences = sectionForReferences.AddParagraph();
 
                 AddParagraphStyle(paragraphForReferences);
@@ -1159,7 +1157,7 @@ namespace BusinessLogicLayer
 
         private void AddParagraphStyle(Paragraph paragraphForReferences)
         {
-            ParagraphStyle referenceParagraphStyle = new ParagraphStyle(document)
+            ParagraphStyle referenceParagraphStyle = new ParagraphStyle(Document)
             {
                 Name = styleName
             };
@@ -1168,7 +1166,7 @@ namespace BusinessLogicLayer
             referenceParagraphStyle.CharacterFormat.FontSize = 20;
             referenceParagraphStyle.CharacterFormat.FontName = "Calibri";
 
-            document.Styles.Add(referenceParagraphStyle);
+            Document.Styles.Add(referenceParagraphStyle);
 
             paragraphForReferences.ApplyStyle(referenceParagraphStyle.Name);
         }
@@ -1274,7 +1272,7 @@ namespace BusinessLogicLayer
         /// <param name="bookmarkText"></param>
         public void DeleteBookmark(string bookmarkText)
         {
-            BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(document);
+            BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(Document);
             bookmarksNavigator.MoveToBookmark(TransformWordWithUnderline(bookmarkText));
 
             if (bookmarksNavigator.CurrentBookmark != null)
@@ -1289,7 +1287,7 @@ namespace BusinessLogicLayer
                 {
                     paragraphs.Remove(paragraph);
                 }
-                document.Bookmarks.Remove(bookmarksNavigator.CurrentBookmark);
+                Document.Bookmarks.Remove(bookmarksNavigator.CurrentBookmark);
             }
 
             foreach (Section section in Document.Sections)
@@ -1329,7 +1327,7 @@ namespace BusinessLogicLayer
         /// <returns></returns>
         public IEnumerable<DocPicture> GetImages()
         {          
-            foreach (Section section in document.Sections)
+            foreach (Section section in Document.Sections)
             {
                 //Get Each Paragraph of Section
                 foreach (Paragraph paragraph in section.Paragraphs)
