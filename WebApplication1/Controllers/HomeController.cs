@@ -49,20 +49,19 @@ namespace WebApplication1.Controllers
                     {
                         PdfDocument pdfDoc = new PdfDocument();
                         pdfDoc.LoadFromFile(filepath);
-                        //pathToFile = $"{path}.doc";
                         filepath = $"{filepath}.doc";
                         pdfDoc.SaveToFile(filepath, Spire.Pdf.FileFormat.DOC);
-                        //FileName = pathToFile;
                     }
                     else if (extension.Equals(".svg"))
                     {
-                        //PdfDocument doc1 = new PdfDocument();
-                        //doc1.LoadFromSvg(path);
+                        PdfDocument pdfDoc = new PdfDocument();
+                        pdfDoc.LoadFromFile(filepath, Spire.Pdf.FileFormat.SVG);
                     }
                     else if (extension.Equals(".html"))
                     {
-                        Document document = new Document();
-                        document.LoadFromFile(filepath, Spire.Doc.FileFormat.Html, XHTMLValidationType.None);
+                        //Document document = new Document();
+                        //document.LoadFromFile(filepath, Spire.Doc.FileFormat.Html, XHTMLValidationType.Transitional);
+                        //document.SaveToFile(filepath, Spire.Doc.FileFormat.Html);
 
                     }
                     else if (extension.Equals(".doc") || extension.Equals(".docx"))

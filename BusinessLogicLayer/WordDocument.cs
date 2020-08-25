@@ -12,6 +12,7 @@ using Spire.Doc.Collections;
 using Spire.Doc.Documents;
 using Spire.Doc.Fields;
 using Spire.Doc.Formatting;
+using System.IO;
 
 namespace BusinessLogicLayer
 {
@@ -691,29 +692,55 @@ namespace BusinessLogicLayer
         /// <returns></returns>
         public string GetTextFromDocument()
         {
-            string filename = filepath + ".html";
-            Document.SaveToFile(filename, FileFormat.Html);
-
-            string[] splitFilename = filename.Split("\\");
-            string rightFilename = null;
-
-            //for (int i = 0; i < splitFilename.Length; i++)
-            Parallel.For(0, splitFilename.Length, i =>
+            if (Path.GetExtension(filepath).Equals(".html"))
             {
-                if (splitFilename[i].Equals("wwwroot"))
+                string[] splitFilename = filename.Split("\\");
+                string pathToHtmlFile = null;
+
+                Parallel.For(0, splitFilename.Length, i =>
                 {
-                    rightFilename = @"\" + string.Join(@"\", splitFilename, i + 1, splitFilename.Length - i - 1);
-                    //return splitFilename.Join("\\", splitFilename, i, splitFilename.Length - 1);
-                }
-            });
+                    if (splitFilename[i].Equals("wwwroot"))
+                    {
+                        pathToHtmlFile = @"\" + string.Join(@"\", splitFilename, i + 1, splitFilename.Length - i - 1);
+                        //return splitFilename.Join("\\", splitFilename, i, splitFilename.Length - 1);
+                    }
+                });
 
-            if (string.IsNullOrWhiteSpace(rightFilename))
-            {
-                return "error";
+                if (string.IsNullOrWhiteSpace(pathToHtmlFile))
+                {
+                    return "error";
+                }
+                else
+                {
+                    return pathToHtmlFile;
+                }
             }
             else
             {
-                return rightFilename;
+                string filename = filepath + ".html";
+                Document.SaveToFile(filename, FileFormat.Html);
+
+                string[] splitFilename = filename.Split("\\");
+                string pathToHtmlFile = null;
+
+                //for (int i = 0; i < splitFilename.Length; i++)
+                Parallel.For(0, splitFilename.Length, i =>
+                {
+                    if (splitFilename[i].Equals("wwwroot"))
+                    {
+                        pathToHtmlFile = @"\" + string.Join(@"\", splitFilename, i + 1, splitFilename.Length - i - 1);
+                    //return splitFilename.Join("\\", splitFilename, i, splitFilename.Length - 1);
+                }
+                });
+
+                if (string.IsNullOrWhiteSpace(pathToHtmlFile))
+                {
+                    return "error";
+                }
+                else
+                {
+                    return pathToHtmlFile;
+                } 
             }
 
             #region old version
