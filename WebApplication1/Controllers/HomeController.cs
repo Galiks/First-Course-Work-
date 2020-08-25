@@ -55,6 +55,7 @@ namespace WebApplication1.Controllers
                     else if (extension.Equals(".svg"))
                     {
                         PdfDocument pdfDoc = new PdfDocument();
+                        filepath = $"{filepath}.doc";
                         pdfDoc.LoadFromFile(filepath, Spire.Pdf.FileFormat.SVG);
                     }
                     else if (extension.Equals(".html"))
@@ -68,6 +69,13 @@ namespace WebApplication1.Controllers
                     {
                         //Document doc = new Document(filepath);
                         //doc.SaveToFile($"{path}.doc", Spire.Doc.FileFormat.Doc);
+                    }
+                    else if (extension.Equals(".txt"))
+                    {
+                        Document document = new Document();
+                        document.LoadText(filepath);
+                        filepath = $"{filepath}";
+                        document.SaveToFile(filepath, Spire.Doc.FileFormat.Doc);
                     }
                     else
                     {

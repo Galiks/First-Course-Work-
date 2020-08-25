@@ -694,13 +694,14 @@ namespace BusinessLogicLayer
         {
             if (Path.GetExtension(filepath).Equals(".html"))
             {
-                string[] splitFilename = filename.Split("\\");
+                string[] splitFilename = filepath.Split("\\");
                 string pathToHtmlFile = null;
 
                 Parallel.For(0, splitFilename.Length, i =>
                 {
                     if (splitFilename[i].Equals("wwwroot"))
                     {
+                        
                         pathToHtmlFile = @"\" + string.Join(@"\", splitFilename, i + 1, splitFilename.Length - i - 1);
                         //return splitFilename.Join("\\", splitFilename, i, splitFilename.Length - 1);
                     }
@@ -718,7 +719,7 @@ namespace BusinessLogicLayer
             else
             {
                 string filename = filepath + ".html";
-                Document.SaveToFile(filename, FileFormat.Html);
+                Document.SaveToFile(filename, Spire.Doc.FileFormat.Html);
 
                 string[] splitFilename = filename.Split("\\");
                 string pathToHtmlFile = null;
@@ -1379,7 +1380,7 @@ namespace BusinessLogicLayer
         /// <returns></returns>
         public static List<string> GetFileFormats()
         {
-            return Enum.GetValues(typeof(Spire.Doc.FileFormat)).Cast<Spire.Doc.FileFormat>().Select(f => $".{f.ToString().ToLower()}").ToList();
+            return Enum.GetValues(typeof(FileFormat)).Cast<FileFormat>().Select(f => $".{f.ToString().ToLower()}").ToList();
         }
     }
 }

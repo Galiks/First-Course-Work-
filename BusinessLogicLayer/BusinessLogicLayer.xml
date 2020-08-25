@@ -4,6 +4,143 @@
         <name>BusinessLogicLayer</name>
     </assembly>
     <members>
+        <member name="T:BusinessLogicLayer.Conversion.Conversion">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:BusinessLogicLayer.Conversion.IConversionHtml">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:BusinessLogicLayer.Conversion.IConversionHtml.ConvertHtmlToWord(System.String)">
+            <summary>
+            Конвертирует файл HTML в Word
+            </summary>
+            <param name="filepath">путь к файлу HTML</param>
+            <returns>путь к файлу Word</returns>
+        </member>
+        <member name="T:BusinessLogicLayer.Conversion.IConversionPdf">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:BusinessLogicLayer.Conversion.IConversionPdf.ConvertPdfToTxt(System.String)">
+            <summary>
+            Конвертирует файл PDF в TXT
+            </summary>
+            <param name="filepath">путь к файлу PDF</param>
+            <returns>путь к файлу TXT</returns>
+        </member>
+        <member name="M:BusinessLogicLayer.Conversion.IConversionPdf.ConvertPdfToRtf(System.String)">
+            <summary>
+            Конвертирует файл PDF в RTF
+            </summary>
+            <param name="filepath">путь к файлу PDF</param>
+            <returns>путь к файлу RTF</returns>
+        </member>
+        <member name="M:BusinessLogicLayer.Conversion.IConversionPdf.ConvertPdfToHtml(System.String)">
+            <summary>
+            Конвертирует файл PDF в HTML
+            </summary>
+            <param name="filepath">путь к файлу PDF</param>
+            <returns>путь к файлу HTML</returns>
+        </member>
+        <member name="M:BusinessLogicLayer.Conversion.IConversionPdf.ConvertPdfToWord(System.String)">
+            <summary>
+            Конвертирует файл PDF в Word
+            </summary>
+            <param name="filepath">путь к файлу PDF</param>
+            <returns>путь к файлу Word</returns>
+        </member>
+        <member name="M:BusinessLogicLayer.Conversion.IConversionPdf.ConvertPdfToOdt(System.String)">
+            <summary>
+            Конвертирует файл PDF в ODT
+            </summary>
+            <param name="filepath">путь к файлу PDF</param>
+            <returns>путь к файлу ODT</returns>
+        </member>
+        <member name="T:BusinessLogicLayer.Conversion.IConversionWord">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:BusinessLogicLayer.Conversion.IConversionWord.ConvertWordToTxt(System.String)">
+            <summary>
+            Конвертирует файл Word в TXT
+            </summary>
+            <param name="filepath">путь к файлу Word</param>
+            <returns>путь к файлу TXT</returns>
+        </member>
+        <member name="M:BusinessLogicLayer.Conversion.IConversionWord.ConvertWordToRtf(System.String)">
+            <summary>
+            Конвертирует файл Word в RTF
+            </summary>
+            <param name="filepath">путь к файлу Word</param>
+            <returns>путь к файлу RTF</returns>
+        </member>
+        <member name="M:BusinessLogicLayer.Conversion.IConversionWord.ConvertWordToHtml(System.String)">
+            <summary>
+            Конвертирует файл Word в HTML
+            </summary>
+            <param name="filepath">путь к файлу Word</param>
+            <returns>путь к файлу HTML</returns>
+        </member>
+        <member name="M:BusinessLogicLayer.Conversion.IConversionWord.ConvertWordToPdf(System.String)">
+            <summary>
+            Конвертирует файл Word в PDF
+            </summary>
+            <param name="filepath">путь к файлу Word</param>
+            <returns>путь к файлу PDF</returns>
+        </member>
+        <member name="M:BusinessLogicLayer.Conversion.IConversionWord.ConvertWordToOdt(System.String)">
+            <summary>
+            Конвертирует файл Word в ODT
+            </summary>
+            <param name="filepath">путь к файлу Word</param>
+            <returns>путь к файлу ODT</returns>
+        </member>
+        <member name="T:BusinessLogicLayer.FileFormat">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:BusinessLogicLayer.FileFormat.TXT">
+            <summary>
+            Формат файла TXT
+            </summary>
+        </member>
+        <member name="F:BusinessLogicLayer.FileFormat.RTF">
+            <summary>
+            Формат файла RTF
+            </summary>
+        </member>
+        <member name="F:BusinessLogicLayer.FileFormat.DOC">
+            <summary>
+            Формат файла DOC
+            </summary>
+        </member>
+        <member name="F:BusinessLogicLayer.FileFormat.DOCX">
+            <summary>
+            Формат файла DOCX
+            </summary>
+        </member>
+        <member name="F:BusinessLogicLayer.FileFormat.HTML">
+            <summary>
+            Формат файла HTML
+            </summary>
+        </member>
+        <member name="F:BusinessLogicLayer.FileFormat.PDF">
+            <summary>
+            Формат файла PDF
+            </summary>
+        </member>
+        <member name="F:BusinessLogicLayer.FileFormat.ODT">
+            <summary>
+            Формат файла ODT
+            </summary>
+        </member>
         <member name="T:BusinessLogicLayer.FolderWork">
             <summary>
             
