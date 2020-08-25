@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using BusinessLogicLayer;
+﻿using BusinessLogicLayer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Spire.Doc.Fields;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
@@ -24,7 +22,8 @@ namespace WebApplication1.Controllers
         {
             _appEnvironment = appEnvironment;
             _logger = logger;
-            wordDocument = new WordDocument(HomeController.userFolder + HomeController.FileName);
+            wordDocument = new WordDocument(HomeController.filepath);
+            //wordDocument = new WordDocument(HomeController.userFolder + HomeController.FileName);
         }
 
         //public async Task<IActionResult> SetWordDocument(string filename)
@@ -130,7 +129,7 @@ namespace WebApplication1.Controllers
 
         public FileResult Download()
         {
-            var file = new DirectoryInfo(HomeController.userFolder).GetFiles().Where(f => f.Name == HomeController.FileName).FirstOrDefault();
+            var file = new DirectoryInfo(HomeController.userFolder).GetFiles().Where(f => f.Name == HomeController.filepath).FirstOrDefault();
             var doc = new byte[0];
             doc = System.IO.File.ReadAllBytes(file.FullName);
             string fileExtension = file.Extension;

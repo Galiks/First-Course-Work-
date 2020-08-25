@@ -10,10 +10,10 @@
 
   <ItemGroup>
     <PackageReference Include="Miyconst.Cyriller" Version="0.1.1" />
-    <PackageReference Include="NLog" Version="4.7.2" />
-    <PackageReference Include="NLog.Config" Version="4.7.2" />
+    <PackageReference Include="NLog" Version="4.7.4" />
+    <PackageReference Include="NLog.Config" Version="4.7.4" />
     <PackageReference Include="Open-XML-SDK" Version="2.9.1" />
-    <PackageReference Include="Spire.Doc" Version="8.6.3" />
+    <PackageReference Include="Spire.Office" Version="5.8.5" />
   </ItemGroup>
 
   <ItemGroup>

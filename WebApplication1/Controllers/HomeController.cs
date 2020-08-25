@@ -1,26 +1,24 @@
 ﻿using BusinessLogicLayer;
-using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Spire.Doc;
 using Spire.Pdf;
-using System;
+using Spire.Doc;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Spire.Doc.Documents;
 
 namespace WebApplication1.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly string absolutPath;
         readonly IWebHostEnvironment _appEnvironment;
         private readonly ILogger<HomeController> _logger;
         private readonly List<string> formats;
-        public static string FileName;
-        public static string pathToFile;
+        public static string filepath;
+        //public static string pathToFile;
         public static string userFolder;
 
         public HomeController(ILogger<HomeController> logger, IWebHostEnvironment appEnvironment)
@@ -28,8 +26,7 @@ namespace WebApplication1.Controllers
             _logger = logger;
             _logger.LogDebug(1, "NLog injected into HomeController");
             _appEnvironment = appEnvironment;
-            absolutPath = _appEnvironment.WebRootPath + @"\Files";
-            formats = new List<string>() { ".docx", ".doc", ".pdf" };      
+            formats = WordDocument.GetFileFormats();
         }
 
         public async Task<IActionResult> Index(IFormFile file)
@@ -37,19 +34,47 @@ namespace WebApplication1.Controllers
             if (file != null)
             {
                 var extension = Path.GetExtension(file.FileName);
+
                 if (formats.Contains(extension))
                 {
-                    string path = userFolder + file.FileName;
-                    pathToFile = path;
+                    filepath = userFolder + file.FileName;
+                    //pathToFile = path;
 
-                    
+
 
                     //FileMode.Append
-                    await SaveFile(file, file.FileName, path);
+                    await SaveFile(file, file.FileName, filepath);
 
-                    PdfDocument doc = new PdfDocument();
-                    doc.LoadFromFile(path);
-                    doc.SaveToFile($"{path}.doc", Spire.Pdf.FileFormat.DOC);
+                    if (extension.Equals(".pdf"))
+                    {
+                        PdfDocument pdfDoc = new PdfDocument();
+                        pdfDoc.LoadFromFile(filepath);
+                        //pathToFile = $"{path}.doc";
+                        filepath = $"{filepath}.doc";
+                        pdfDoc.SaveToFile(filepath, Spire.Pdf.FileFormat.DOC);
+                        //FileName = pathToFile;
+                    }
+                    else if (extension.Equals(".svg"))
+                    {
+                        //PdfDocument doc1 = new PdfDocument();
+                        //doc1.LoadFromSvg(path);
+                    }
+                    else if (extension.Equals(".html"))
+                    {
+                        Document document = new Document();
+                        document.LoadFromFile(filepath, Spire.Doc.FileFormat.Html, XHTMLValidationType.None);
+
+                    }
+                    else if (extension.Equals(".doc") || extension.Equals(".docx"))
+                    {
+                        //Document doc = new Document(filepath);
+                        //doc.SaveToFile($"{path}.doc", Spire.Doc.FileFormat.Doc);
+                    }
+                    else
+                    {
+                        Document doc = new Document(filepath);
+                        doc.SaveToFile($"{filepath}.doc", Spire.Doc.FileFormat.Doc);
+                    }
 
 
 
@@ -69,18 +94,15 @@ namespace WebApplication1.Controllers
         {
             try
             {
-                FileName = filename;
                 using var fileStream = new FileStream(path, FileMode.CreateNew);
                 await file.CopyToAsync(fileStream);
             }
             catch (IOException)
             {
-
-                filename = "NEW_" + filename;
-                path = userFolder + @"\" + filename;
-                pathToFile = path;
-                FileName = filename;
-                await SaveFile(file, filename, path);
+                //path = userFolder + @"\" + "NEW_" + filename;
+                //pathToFile = path;
+                filepath = userFolder + @"\" + "NEW_" + filename; ;
+                await SaveFile(file, filename, filepath);
             }
         }
 
@@ -94,6 +116,7 @@ namespace WebApplication1.Controllers
             {
                 //Directory.SetCurrentDirectory(absolutPath);
                 string initials = FolderWork.GetFolderName(firstName, lastName, patronymic);
+                string absolutPath = _appEnvironment.WebRootPath + @"\Files";
                 foreach (var item in Directory.GetDirectories(absolutPath))
                 {
                     if (item.Contains(initials))
@@ -105,7 +128,7 @@ namespace WebApplication1.Controllers
 
                 if (!string.IsNullOrWhiteSpace(userFolder))
                 {
-                    return RedirectToAction("Index"); 
+                    return RedirectToAction("Index");
                 }
                 else
                 {

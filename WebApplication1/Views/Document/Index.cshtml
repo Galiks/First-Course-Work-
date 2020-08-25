@@ -113,8 +113,11 @@
             <div>
                 <h3>Скачать файл: </h3>
                 <div>
+
                     @using (Html.BeginForm("Download", "Document"))
                     {
+                        @Html.DropDownList("fileFormat", Html.GetEnumSelectList(typeof(Spire.Doc.FileFormat)))
+                        <br />
                         <button>Скачать</button>
                     }
                 </div>

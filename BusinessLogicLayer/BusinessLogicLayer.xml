@@ -206,5 +206,11 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="M:BusinessLogicLayer.WordDocument.GetFileFormats">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
     </members>
 </doc>

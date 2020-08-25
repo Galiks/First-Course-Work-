@@ -1,16 +1,17 @@
 ﻿using Cyriller;
 using Cyriller.Model;
 using NLog;
-using Spire.Doc;
-using Spire.Doc.Collections;
-using Spire.Doc.Documents;
-using Spire.Doc.Fields;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Spire.Doc;
+using Spire.Doc.Collections;
+using Spire.Doc.Documents;
+using Spire.Doc.Fields;
+using Spire.Doc.Formatting;
 
 namespace BusinessLogicLayer
 {
@@ -179,11 +180,11 @@ namespace BusinessLogicLayer
                 int nounLength = nouns.Count;
                 //Parallel.For(0, nounLength, i =>
                 //{
-                    //string wordWithFirstLetterUpper = GetWordWithFirstLetterUpper(nouns[i]);
-                    //if (!string.IsNullOrWhiteSpace(wordWithFirstLetterUpper))
-                    //{
-                    //    nouns.Add(wordWithFirstLetterUpper);
-                    //}
+                //string wordWithFirstLetterUpper = GetWordWithFirstLetterUpper(nouns[i]);
+                //if (!string.IsNullOrWhiteSpace(wordWithFirstLetterUpper))
+                //{
+                //    nouns.Add(wordWithFirstLetterUpper);
+                //}
                 //});
                 for (int i = 0; i < nounLength; i++)
                 {
@@ -233,13 +234,13 @@ namespace BusinessLogicLayer
             }
 
 
-                //Parallel.For(0, findLength, i =>
-                //{
-                //    CreateBookmarkByWordHandler(i, textSelection);
-                //});
+            //Parallel.For(0, findLength, i =>
+            //{
+            //    CreateBookmarkByWordHandler(i, textSelection);
+            //});
 
 
-                SaveCurrentDocument();
+            SaveCurrentDocument();
         }
 
         private void CreateBookmarkByWordHandler(int i, TextSelection keywordOne)
@@ -633,7 +634,7 @@ namespace BusinessLogicLayer
         public void CreateHyperlinkForImage(DocPicture picture, string hyperlink)
         {
             picture.OwnerParagraph.AppendHyperlink(hyperlink, picture, HyperlinkType.WebLink);
-            
+
             SaveCurrentDocument();
         }
 
@@ -670,7 +671,7 @@ namespace BusinessLogicLayer
         {
             if (!string.IsNullOrWhiteSpace(str))
             {
-                return str[0].ToString().ToUpper() + str.Substring(1); 
+                return str[0].ToString().ToUpper() + str.Substring(1);
             }
             else
             {
@@ -1326,7 +1327,7 @@ namespace BusinessLogicLayer
         /// </summary>
         /// <returns></returns>
         public IEnumerable<DocPicture> GetImages()
-        {          
+        {
             foreach (Section section in Document.Sections)
             {
                 //Get Each Paragraph of Section
@@ -1338,13 +1339,20 @@ namespace BusinessLogicLayer
                         //If Type of Document Object is Picture, Extract.
                         if (docObject.DocumentObjectType == DocumentObjectType.Picture)
                         {
-                            yield return docObject as DocPicture;                          
+                            yield return docObject as DocPicture;
                         }
                     }
                 }
             }
         }
-        
-       
-    } 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public static List<string> GetFileFormats()
+        {
+            return Enum.GetValues(typeof(Spire.Doc.FileFormat)).Cast<Spire.Doc.FileFormat>().Select(f => $".{f.ToString().ToLower()}").ToList();
+        }
+    }
 }
