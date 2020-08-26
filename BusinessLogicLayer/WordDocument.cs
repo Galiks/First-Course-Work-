@@ -1382,5 +1382,10 @@ namespace BusinessLogicLayer
         {
             return Enum.GetValues(typeof(FileFormat)).Cast<FileFormat>().Select(f => $".{f.ToString().ToLower()}").ToList();
         }
+
+        public static string ConvertFile(string filepath, FileFormat outputFormat)
+        {
+            return null;
+        }
     }
 }

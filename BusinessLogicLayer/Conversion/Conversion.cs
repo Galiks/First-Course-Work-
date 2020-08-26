@@ -1,7 +1,9 @@
-﻿using Spire.Doc;
+﻿using NLog;
+using Spire.Doc;
 using Spire.Pdf;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace BusinessLogicLayer.Conversion
@@ -9,69 +11,126 @@ namespace BusinessLogicLayer.Conversion
     /// <summary>
     /// 
     /// </summary>
-    public class Conversion : IConversionWord, IConversionPdf, IConversionHtml
+    public static class Conversion
     {
+        private static readonly Logger loggerException = LogManager.GetLogger("exception");
+        private static readonly Logger loggerUser = LogManager.GetLogger("user");
         private const string formatWord = "formating";
-        public string ConvertHtmlToWord(string filepath)
+
+
+        public static string ConvertToWord(string filepath)
         {
-            throw new NotImplementedException();
+            string extension = Path.GetExtension(filepath);
+            if (extension.Equals(".doc") || extension.Equals("docx"))
+            {
+                return filepath;
+            }
+            else if (extension.Equals(".pdf"))
+            {
+                return GetFilepathAfterConvertSpirePdf(filepath, Spire.Pdf.FileFormat.DOC);
+            }
+            else
+            {
+                return GetFilepathAfterConvertSpireDoc(filepath, Spire.Doc.FileFormat.Doc);
+            }
         }
 
-        public string ConvertPdfToHtml(string filepath)
+        public static string ConvertToHtml(string filepath)
         {
-            throw new NotImplementedException();
+            string extension = Path.GetExtension(filepath);
+            if (extension.Equals(".html"))
+            {
+                return filepath;
+            }
+            else if (extension.Equals(".pdf"))
+            {
+                return GetFilepathAfterConvertSpirePdf(filepath, Spire.Pdf.FileFormat.HTML);
+            }
+            else
+            {
+                return GetFilepathAfterConvertSpireDoc(filepath, Spire.Doc.FileFormat.Html);
+            }
         }
 
-        public string ConvertPdfToOdt(string filepath)
+        public static string ConvertToOdt(string filepath)
         {
-            throw new NotImplementedException();
+            string extension = Path.GetExtension(filepath);
+            if (extension.Equals(".odt"))
+            {
+                return filepath;
+            }
+            else if (extension.Equals(".pdf"))
+            {
+                return null;
+            }         
+            else
+            {
+                return GetFilepathAfterConvertSpireDoc(filepath, Spire.Doc.FileFormat.Odt);
+            }
         }
 
-        public string ConvertPdfToRtf(string filepath)
+        public static string ConvertToPdf(string filepath)
         {
-            throw new NotImplementedException();
+            string extension = Path.GetExtension(filepath);
+            if (extension.Equals(".pdf"))
+            {
+                return filepath;
+            }
+            else
+            {
+                return GetFilepathAfterConvertSpireDoc(filepath, Spire.Doc.FileFormat.PDF);
+            }
         }
 
-        public string ConvertPdfToTxt(string filepath)
+        public static string ConvertToRtf(string filepath)
         {
-            throw new NotImplementedException();
+            string extension = Path.GetExtension(filepath);
+            if (extension.Equals(".rtf"))
+            {
+                return filepath;
+            }
+            else if (extension.Equals(".pdf"))
+            {
+                return null;
+            }
+            else
+            {
+                return GetFilepathAfterConvertSpireDoc(filepath, Spire.Doc.FileFormat.Rtf);
+            }
         }
 
-        public string ConvertPdfToWord(string filepath)
+        public static string ConvertToTxt(string filepath)
         {
-            PdfDocument pdfDoc = new PdfDocument();
-            pdfDoc.LoadFromFile(filepath);
-            filepath = $"{filepath}_{formatWord}.doc";
-            pdfDoc.SaveToFile(filepath, Spire.Pdf.FileFormat.DOC);
+            string extension = Path.GetExtension(filepath);
+            if (extension.Equals(".txt"))
+            {
+                return filepath;
+            }
+            else if (extension.Equals(".pdf"))
+            {
+                return null;
+            }
+            else
+            {
+                return GetFilepathAfterConvertSpireDoc(filepath, Spire.Doc.FileFormat.Txt);
+            }
+        }
+        //Подумать над названием
+        private static string GetFilepathAfterConvertSpireDoc(string filepath, Spire.Doc.FileFormat fileFormat)
+        {
+            Document document = new Document();
+            document.LoadFromFile(filepath);
+            filepath = $"{filepath}_{formatWord}.{fileFormat.ToString().ToLower()}";
+            document.SaveToFile(filepath, fileFormat);
             return filepath;
         }
 
-        public string ConvertWordToHtml(string filepath)
+        private static string GetFilepathAfterConvertSpirePdf(string filepath, Spire.Pdf.FileFormat fileFormat)
         {
-            throw new NotImplementedException();
-        }
-
-        public string ConvertWordToOdt(string filepath)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string ConvertWordToPdf(string filepath)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string ConvertWordToRtf(string filepath)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string ConvertWordToTxt(string filepath)
-        {
-            Document document = new Document();
-            document.LoadText(filepath);
-            filepath = $"{filepath}_{formatWord}.txt";
-            document.SaveToFile(filepath, Spire.Doc.FileFormat.Txt);
+            PdfDocument pdfDocument = new PdfDocument();
+            pdfDocument.LoadFromFile(filepath);
+            filepath = $"{filepath}_{formatWord}.{fileFormat.ToString().ToLower()}";
+            pdfDocument.SaveToFile(filepath, fileFormat);
             return filepath;
         }
     }
