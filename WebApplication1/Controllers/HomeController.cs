@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Spire.Doc.Documents;
+using BusinessLogicLayer.Conversion;
 
 namespace WebApplication1.Controllers
 {
@@ -28,7 +29,7 @@ namespace WebApplication1.Controllers
             _appEnvironment = appEnvironment;
             formats = WordDocument.GetFileFormats();
         }
-
+        [RequestSizeLimit(10000000)]
         public async Task<IActionResult> Index(IFormFile file)
         {
             if (file != null)
@@ -45,52 +46,21 @@ namespace WebApplication1.Controllers
                     //FileMode.Append
                     await SaveFile(file, file.FileName, filepath);
 
-                    if (extension.Equals(".pdf"))
-                    {
-                        PdfDocument pdfDoc = new PdfDocument();
-                        pdfDoc.LoadFromFile(filepath);
-                        filepath = $"{filepath}.doc";
-                        pdfDoc.SaveToFile(filepath, Spire.Pdf.FileFormat.DOC);
-                    }
-                    else if (extension.Equals(".svg"))
-                    {
-                        PdfDocument pdfDoc = new PdfDocument();
-                        filepath = $"{filepath}.doc";
-                        pdfDoc.LoadFromFile(filepath, Spire.Pdf.FileFormat.SVG);
-                    }
-                    else if (extension.Equals(".html"))
-                    {
-                        //Document document = new Document();
-                        //document.LoadFromFile(filepath, Spire.Doc.FileFormat.Html, XHTMLValidationType.Transitional);
-                        //document.SaveToFile(filepath, Spire.Doc.FileFormat.Html);
+                    filepath = Conversion.ConvertToWordDocx(filepath);
 
-                    }
-                    else if (extension.Equals(".doc") || extension.Equals(".docx"))
+                    if (string.IsNullOrWhiteSpace(filepath))
                     {
-                        //Document doc = new Document(filepath);
-                        //doc.SaveToFile($"{path}.doc", Spire.Doc.FileFormat.Doc);
+                        _logger.LogInformation("Преобразование невозможно");
+                        ViewBag.FileFormatErrorMessage = "Неверный формат файла. Дальнейшее преобразование невозможно!";
+                        return View();
                     }
-                    else if (extension.Equals(".txt"))
-                    {
-                        Document document = new Document();
-                        document.LoadText(filepath);
-                        filepath = $"{filepath}";
-                        document.SaveToFile(filepath, Spire.Doc.FileFormat.Doc);
-                    }
-                    else
-                    {
-                        Document doc = new Document(filepath);
-                        doc.SaveToFile($"{filepath}.doc", Spire.Doc.FileFormat.Doc);
-                    }
-
-
 
                     return RedirectToAction("Index", "Document");
                 }
                 else
                 {
                     _logger.LogInformation("Введён не тот формат.");
-                    ViewBag.FileFormatErrorMessage = "Неверный формат файла. Должен быть DOC, PDF, DOCX";
+                    ViewBag.FileFormatErrorMessage = "Неверный формат файла. Должен быть TXT, RTF, HTML, ODT, DOC, DOCX, PDF";
                     return View();
                 }
             }
@@ -99,18 +69,28 @@ namespace WebApplication1.Controllers
 
         private async Task SaveFile(IFormFile file, string filename, string path)
         {
-            try
+            if (System.IO.File.Exists(path))
+            {
+                //filepath = userFolder + @"\" + "NEW_" + filename;
+                filename = "NEW_" + filename;
+                filepath = userFolder + filename;
+                await SaveFile(file, filename, filepath);
+            }
+            else
             {
                 using var fileStream = new FileStream(path, FileMode.CreateNew);
                 await file.CopyToAsync(fileStream);
             }
-            catch (IOException)
-            {
-                //path = userFolder + @"\" + "NEW_" + filename;
-                //pathToFile = path;
-                filepath = userFolder + @"\" + "NEW_" + filename; ;
-                await SaveFile(file, filename, filepath);
-            }
+            //try
+            //{
+            //    using var fileStream = new FileStream(path, FileMode.CreateNew);
+            //    await file.CopyToAsync(fileStream);
+            //}
+            //catch (IOException)
+            //{
+            //    filepath = userFolder + @"\" + "NEW_" + filename;
+            //    await SaveFile(file, filename, filepath);
+            //}
         }
 
         public IActionResult LogIn(string lastName, string firstName, string patronymic)

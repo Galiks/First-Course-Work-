@@ -18,10 +18,10 @@ namespace BusinessLogicLayer.Conversion
         private const string formatWord = "formating";
 
 
-        public static string ConvertToWord(string filepath)
+        public static string ConvertToWordDoc(string filepath)
         {
             string extension = Path.GetExtension(filepath);
-            if (extension.Equals(".doc") || extension.Equals("docx"))
+            if (extension.Equals(".doc"))
             {
                 return filepath;
             }
@@ -32,6 +32,23 @@ namespace BusinessLogicLayer.Conversion
             else
             {
                 return GetFilepathAfterConvertSpireDoc(filepath, Spire.Doc.FileFormat.Doc);
+            }
+        }
+
+        public static string ConvertToWordDocx(string filepath)
+        {
+            string extension = Path.GetExtension(filepath);
+            if (extension.Equals(".docx"))
+            {
+                return filepath;
+            }
+            else if (extension.Equals(".pdf"))
+            {
+                return GetFilepathAfterConvertSpirePdf(filepath, Spire.Pdf.FileFormat.DOCX);
+            }
+            else
+            {
+                return GetFilepathAfterConvertSpireDoc(filepath, Spire.Doc.FileFormat.Docx);
             }
         }
 

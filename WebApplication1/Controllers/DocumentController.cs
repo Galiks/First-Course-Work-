@@ -1,4 +1,5 @@
 ﻿using BusinessLogicLayer;
+using BusinessLogicLayer.Conversion;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -127,15 +128,43 @@ namespace WebApplication1.Controllers
             return Redirect("EditLinks");
         }
 
-        public FileResult Download()
+        public FileResult Download(FileFormat fileFormat)
         {
-            var file = new DirectoryInfo(HomeController.userFolder).GetFiles().Where(f => f.Name == HomeController.filepath).FirstOrDefault();
-            var doc = new byte[0];
-            doc = System.IO.File.ReadAllBytes(file.FullName);
+            string filepath = new DirectoryInfo(HomeController.userFolder).GetFiles().Where(f => f.FullName == HomeController.filepath).FirstOrDefault().FullName;
+            switch (fileFormat)
+            {
+                case FileFormat.TXT:
+                    filepath = Conversion.ConvertToTxt(filepath);
+                    break;
+                case FileFormat.RTF:
+                    filepath = Conversion.ConvertToRtf(filepath);
+                    break;
+                case FileFormat.DOC:
+                    filepath = Conversion.ConvertToWordDoc(filepath);
+                    break;
+                case FileFormat.DOCX:
+                    filepath = Conversion.ConvertToWordDocx(filepath);
+                    break;
+                case FileFormat.HTML:
+                    filepath = Conversion.ConvertToHtml(filepath);
+                    break;
+                case FileFormat.PDF:
+                    filepath = Conversion.ConvertToPdf(filepath);
+                    break;
+                case FileFormat.ODT:
+                    filepath = Conversion.ConvertToOdt(filepath);
+                    break;
+                default:
+                    break;
+            }
+
+
+            FileInfo file = new DirectoryInfo(HomeController.userFolder).GetFiles().Where(f => f.FullName == filepath).FirstOrDefault();
+            byte[] fileBytes = System.IO.File.ReadAllBytes(file.FullName);
             string fileExtension = file.Extension;
             string filename = file.Name;
             //DeleteFile(file);
-            return File(doc, "application/" + fileExtension, filename);
+            return File(fileBytes, "application/" + fileExtension, filename);
         }
 
         private void DeleteFile(FileInfo file)

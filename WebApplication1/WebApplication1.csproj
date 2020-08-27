@@ -9,6 +9,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="HttpError\403.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="HttpError\404.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="wwwroot\css\style.css" />
   </ItemGroup>
 

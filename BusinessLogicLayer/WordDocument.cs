@@ -13,6 +13,7 @@ using Spire.Doc.Documents;
 using Spire.Doc.Fields;
 using Spire.Doc.Formatting;
 using System.IO;
+using BusinessLogicLayer.Conversion;
 
 namespace BusinessLogicLayer
 {
@@ -692,56 +693,27 @@ namespace BusinessLogicLayer
         /// <returns></returns>
         public string GetTextFromDocument()
         {
-            if (Path.GetExtension(filepath).Equals(".html"))
+            string filename = Conversion.Conversion.ConvertToHtml(filepath);
+            string[] splitFilename = filename.Split("\\");
+            string pathToHtmlFile = null;
+
+            //for (int i = 0; i < splitFilename.Length; i++)
+            Parallel.For(0, splitFilename.Length, i =>
             {
-                string[] splitFilename = filepath.Split("\\");
-                string pathToHtmlFile = null;
-
-                Parallel.For(0, splitFilename.Length, i =>
+                if (splitFilename[i].Equals("wwwroot"))
                 {
-                    if (splitFilename[i].Equals("wwwroot"))
-                    {
-                        
-                        pathToHtmlFile = @"\" + string.Join(@"\", splitFilename, i + 1, splitFilename.Length - i - 1);
-                        //return splitFilename.Join("\\", splitFilename, i, splitFilename.Length - 1);
-                    }
-                });
-
-                if (string.IsNullOrWhiteSpace(pathToHtmlFile))
-                {
-                    return "error";
+                    pathToHtmlFile = @"\" + string.Join(@"\", splitFilename, i + 1, splitFilename.Length - i - 1);
+                    //return splitFilename.Join("\\", splitFilename, i, splitFilename.Length - 1);
                 }
-                else
-                {
-                    return pathToHtmlFile;
-                }
+            });
+
+            if (string.IsNullOrWhiteSpace(pathToHtmlFile))
+            {
+                return "error";
             }
             else
             {
-                string filename = filepath + ".html";
-                Document.SaveToFile(filename, Spire.Doc.FileFormat.Html);
-
-                string[] splitFilename = filename.Split("\\");
-                string pathToHtmlFile = null;
-
-                //for (int i = 0; i < splitFilename.Length; i++)
-                Parallel.For(0, splitFilename.Length, i =>
-                {
-                    if (splitFilename[i].Equals("wwwroot"))
-                    {
-                        pathToHtmlFile = @"\" + string.Join(@"\", splitFilename, i + 1, splitFilename.Length - i - 1);
-                    //return splitFilename.Join("\\", splitFilename, i, splitFilename.Length - 1);
-                }
-                });
-
-                if (string.IsNullOrWhiteSpace(pathToHtmlFile))
-                {
-                    return "error";
-                }
-                else
-                {
-                    return pathToHtmlFile;
-                } 
+                return pathToHtmlFile;
             }
 
             #region old version
