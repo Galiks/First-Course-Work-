@@ -9,6 +9,55 @@
             
             </summary>
         </member>
+        <member name="M:BusinessLogicLayer.Conversion.Conversion.ConvertToWordDoc(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="filepath"></param>
+            <returns></returns>
+        </member>
+        <member name="M:BusinessLogicLayer.Conversion.Conversion.ConvertToWordDocx(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="filepath"></param>
+            <returns></returns>
+        </member>
+        <member name="M:BusinessLogicLayer.Conversion.Conversion.ConvertToHtml(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="filepath"></param>
+            <returns></returns>
+        </member>
+        <member name="M:BusinessLogicLayer.Conversion.Conversion.ConvertToOdt(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="filepath"></param>
+            <returns></returns>
+        </member>
+        <member name="M:BusinessLogicLayer.Conversion.Conversion.ConvertToPdf(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="filepath"></param>
+            <returns></returns>
+        </member>
+        <member name="M:BusinessLogicLayer.Conversion.Conversion.ConvertToRtf(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="filepath"></param>
+            <returns></returns>
+        </member>
+        <member name="M:BusinessLogicLayer.Conversion.Conversion.ConvertToTxt(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="filepath"></param>
+            <returns></returns>
+        </member>
         <member name="T:BusinessLogicLayer.Conversion.IConversionHtml">
             <summary>
             

@@ -117,7 +117,15 @@ namespace WebApplication1.Controllers
                     _logger.LogError($"Инициалы пользователя пусты.");
                 }
 
-                string absolutPath = _appEnvironment.WebRootPath + @"\Files";
+                string absolutPath = _appEnvironment.WebRootPath + @"\Files";            
+
+                if (!Directory.Exists(absolutPath))
+                {
+                    _logger.LogError($"Абсолютный путь {absolutPath} не найден.");
+                    Directory.CreateDirectory(absolutPath);
+                    _logger.LogInformation($"Создан абсолютный путь {absolutPath}.");
+                    return View();
+                }
                 try
                 {
                     foreach (var item in Directory.GetDirectories(absolutPath))
@@ -173,7 +181,7 @@ namespace WebApplication1.Controllers
                 if (!string.IsNullOrWhiteSpace(userFolder))
                 {
                     _logger.LogInformation($"Папка для пользователя {firstName} {lastName} {patronymic} была успешно создана.");
-                    return RedirectToAction("Index");
+                    return RedirectToAction("Login");
                 }
                 else
                 {
@@ -185,7 +193,7 @@ namespace WebApplication1.Controllers
 
         private void WriteExceptionInLog(Exception e)
         {
-            _logger.LogError($"Message {e.Message} {(e.InnerException is null ? "" : Environment.NewLine, "InnerException: ", e.InnerException.Message)}");
+            _logger.LogError($"Message {e.Message} {(e?.InnerException is null ? "" : string.Join(Environment.NewLine, "InnerException: ", e.InnerException.Message))}");
         }
     }
 }
