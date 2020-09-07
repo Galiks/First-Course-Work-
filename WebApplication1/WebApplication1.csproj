@@ -37,9 +37,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\Files\Images\" />
-    <Folder Include="wwwroot\Files\Doc\" />
     <Folder Include="wwwroot\images\" />
+    <Folder Include="wwwroot\Files\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -71,6 +71,7 @@ namespace BusinessLogicLayer
             filepath = filename;
             Document.LoadFromFile(filename);
             Messages = new HashSet<string>();
+            CreateReferencesSection();
         }
         /// <summary>
         /// 
@@ -89,15 +90,24 @@ namespace BusinessLogicLayer
             //005F       
             if (!string.IsNullOrWhiteSpace(word))
             {
-                referencesWord = TransformWordWithUnderline(word);
+                referencesWord = TransformWord(word);
             }
         }
-        private string TransformWordWithUnderline(string word)
+        private string TransformWord(string word)
         {
             if (!string.IsNullOrWhiteSpace(word))
             {
                 var splitWord = word.Split("\\");
-                return splitWord[^1].Replace(' ', '\u005F').Replace('/', '\u005F');
+                string result = splitWord[^1].Replace(' ', '\u005F').Replace('/', '\u005F');
+                if (result.Length > 20)
+                {
+                    result = result.Substring(0, 17) + Path.GetExtension(result);
+                    return result;
+                }
+                else
+                {
+                    return result;
+                }
             }
             else
             {
@@ -232,7 +242,7 @@ namespace BusinessLogicLayer
             for (int i = 0; i < findLength; i++)
             {
                 TextSelection keywordOne = textSelection[i];
-                CreateBookmarkByWordHandler(i, keywordOne);
+                CreateBookmark(i, keywordOne);
             }
 
 
@@ -245,7 +255,7 @@ namespace BusinessLogicLayer
             SaveCurrentDocument();
         }
 
-        private void CreateBookmarkByWordHandler(int i, TextSelection keywordOne)
+        private void CreateBookmark(int i, TextSelection keywordOne)
         {
             TextRange tr = null;
 
@@ -256,7 +266,7 @@ namespace BusinessLogicLayer
             }
             catch (Exception)
             {
-                CreateBookmarkByWordHandler(i, keywordOne);
+                CreateBookmark(i, keywordOne);
             }
 
             //Set the formatting
@@ -297,6 +307,7 @@ namespace BusinessLogicLayer
             {
                 Type = FieldType.FieldRef
             };
+            //string code = $@"REF {referencesWord} \p \h";
             string code = $@"REF {referencesWord} \p \h";
             field.Code = code;
 
@@ -310,6 +321,8 @@ namespace BusinessLogicLayer
             //Insert FieldEnd object to mark the end of the field
             FieldMark fieldEnd = new FieldMark(Document, FieldMarkType.FieldEnd);
             paragraph.ChildObjects.Insert(index + 3, fieldEnd);
+
+            SaveCurrentDocument();
         }
 
         /// <summary>
@@ -320,7 +333,7 @@ namespace BusinessLogicLayer
         /// <param name="count"></param>
         public void CreateBookmarksForImage(string path, string word, int count = default)
         {
-            SetReferencesWord(path);
+            //SetReferencesWord(path);
             try
             {
                 List<string> nouns = GetWordsByCases(word);
@@ -338,6 +351,11 @@ namespace BusinessLogicLayer
                 CreateBookmarkByImage(path, word, count);
                 //SetBookmarkForImage(path);
             }
+            catch (Exception e)
+            {
+                var text = e.Message;
+                throw e;
+            }
             finally
             {
                 if (IndexNextField.Equals(default))
@@ -347,6 +365,7 @@ namespace BusinessLogicLayer
 
             }
         }
+
         private void CreateBookmarkByImage(string path, string word, int count)
         {
             SetReferencesWord(path);
@@ -471,6 +490,215 @@ namespace BusinessLogicLayer
 
             SaveCurrentDocument();
         }
+
+
+        #region нерабочая новая версия
+        //private void CreateBookmarkByImage(string path, string word, int count)
+        //{
+        //    SetReferencesWord(path);
+        //    BookmarksNavigator bn = new BookmarksNavigator(Document);
+        //    //bn.MoveToBookmark(referencesWord, true, true);
+        //    bn.MoveToBookmark(referencesWord);
+
+        //    if (bn.CurrentBookmark == null)
+        //    {
+        //        var para = referencesSection.AddParagraph();
+        //        var bookmarkStart = para.AppendBookmarkStart(referencesWord);
+        //        SaveCurrentDocument();
+        //        DocPicture picture = para.AppendPicture(path);
+        //        picture.Width = width;
+        //        picture.Height = height;
+        //        SaveCurrentDocument();
+        //        var bookmarkEnd = para.AppendBookmarkEnd(referencesWord);
+
+        //        SaveCurrentDocument();
+
+        //        //Paragraph paragraph0 = bn.CurrentBookmark.BookmarkStart.OwnerParagraph;
+        //        //Section section0 = Document.AddSection();
+        //        //Paragraph paragraph0 = section0.AddParagraph();
+        //        //Image image = Image.FromFile(path);
+        //        //DocPicture picture = paragraph0.AppendPicture(path);
+        //        //picture.Width = width;
+        //        //picture.Height = height;
+        //        //bn.MoveToBookmark(referencesWord, true, true);
+        //        bn.MoveToBookmark(referencesWord);
+        //        //bn.InsertParagraph(para);
+
+        //        SaveCurrentDocument();
+
+        //        //Document.Sections.Remove(section0);
+        //    }
+
+
+
+        //    //Find the keyword "Hypertext"
+        //    TextSelection[] textSelection = Document.FindAllString(word, true, true);
+
+        //    if (textSelection == null || textSelection.Length == 0)
+        //    {
+        //        return;
+        //    }
+
+        //    //Create bookmark objects
+
+        //    //BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(Document);
+        //    //bookmarksNavigator.MoveToBookmark(referencesWord);
+
+        //    //if (bn.CurrentBookmark == null)
+        //    //{
+        //    //    //Image image = Image.FromFile(path);
+
+        //    //    SetReferencesWord(path);
+
+        //    //    var referParagraph = referencesSection.AddParagraph();
+        //    //    referParagraph.AppendBookmarkStart(referencesWord);
+        //    //    referParagraph.AppendPicture(path);
+        //    //    referParagraph.AppendBookmarkEnd(referencesWord);
+        //    //    //SaveCurrentDocument();
+
+        //    //    bn.MoveToBookmark(referencesWord);
+        //    //    bn.InsertParagraph(referParagraph);
+
+        //    //    SaveCurrentDocument();
+        //    //}
+
+        //    int findLength = count == default ? textSelection.Length : count;
+
+        //    //Get the keywords
+        //    //for (int i = 0; i < findLength; i++)
+        //    //Parallel.For(0, findLength, i =>
+        //    for (int i = 0; i < findLength; i++)
+        //    {
+        //        TextSelection seletion = textSelection[i];
+
+        //        //Get the text range
+
+        //        TextRange tr = seletion.GetAsOneRange();
+
+        //        int index = tr.OwnerParagraph.ChildObjects.IndexOf(tr) - IndexNextField;
+        //        Paragraph paragraph = tr.OwnerParagraph;
+
+        //        DocumentObject child;
+        //        try
+        //        {
+        //            child = paragraph.ChildObjects[index];
+        //        }
+        //        catch (IndexOutOfRangeException)
+        //        {
+        //            index = tr.OwnerParagraph.ChildObjects.IndexOf(tr);
+        //            child = paragraph.ChildObjects[index];
+        //        }
+
+        //        if (child.DocumentObjectType == DocumentObjectType.Field)
+        //        {
+        //            Field textField = child as Field;
+
+        //            if (textField.Type == FieldType.FieldRef)
+        //            {
+        //                Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef}");
+        //                return;
+        //            }
+        //            else if (textField.Type == FieldType.FieldHyperlink)
+        //            {
+        //                Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink}");
+        //                return;
+        //            }
+        //        }
+
+        //        //Add hyperlink
+
+
+        //        Field field = new Field(Document)
+        //        {
+        //            Code = "HYPERLINK file:///" + filepath.ToLower() + "#" + referencesWord + "\"",
+
+        //            Type = FieldType.FieldHyperlink
+        //        };
+
+        //        tr.OwnerParagraph.ChildObjects.Insert(index, field);
+
+        //        FieldMark fm = new FieldMark(Document, FieldMarkType.FieldSeparator);
+
+        //        tr.OwnerParagraph.ChildObjects.Insert(index + 1, fm);
+
+        //        //Set character format
+
+        //        tr.CharacterFormat.TextColor = Color.Blue;
+
+        //        tr.CharacterFormat.UnderlineStyle = UnderlineStyle.Single;
+
+        //        tr.CharacterFormat.Bold = tr.CharacterFormat.Bold;
+
+        //        FieldMark fmend = new FieldMark(Document, FieldMarkType.FieldEnd);
+
+        //        tr.OwnerParagraph.ChildObjects.Insert(index + 3, fmend);
+
+        //        field.End = fmend;
+        //    }
+
+        //    //    TextSelection keywordOne = textSelection[i];
+
+        //    //    //Get the textrange its locates
+        //    //    TextRange tr = keywordOne.GetAsOneRange();
+
+        //    //    //Set the formatting
+        //    //    tr.CharacterFormat.UnderlineStyle = UnderlineStyle.Single;
+        //    //    tr.CharacterFormat.TextColor = Color.Blue;
+
+        //    //    //Get the paragraph it locates
+        //    //    Paragraph paragraph = tr.OwnerParagraph;
+
+        //    //    if (paragraph.Equals(referencesParagraph))
+        //    //    {
+        //    //        return;
+        //    //    }
+
+        //    //    //Get the index of the keyword in its paragraph
+        //    //    int index = paragraph.ChildObjects.IndexOf(tr);
+
+        //    //    DocumentObject child = paragraph.ChildObjects[index];
+
+        //    //    if (child.DocumentObjectType == DocumentObjectType.Field)
+        //    //    {
+        //    //        Field textField = child as Field;
+
+        //    //        if (textField.Type == FieldType.FieldRef)
+        //    //        {
+        //    //            Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef}");
+        //    //            return;
+        //    //        }
+        //    //        else if (textField.Type == FieldType.FieldHyperlink)
+        //    //        {
+        //    //            Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink}");
+        //    //            return;
+        //    //        }
+        //    //    }
+
+        //    //    //Create a cross-reference field, and link it to bookmark                   
+        //    //    Field field = new Field(Document)
+        //    //    {
+        //    //        //Type = FieldType.FieldRef
+        //    //        Type = FieldType.FieldRef,
+        //    //        Code = $@"REF {referencesWord} \p \h"
+        //    //    };
+
+        //    //    //Insert field
+        //    //    paragraph.ChildObjects.Insert(index, field);
+
+        //    //    //Insert FieldSeparator object
+        //    //    FieldMark fieldSeparator = new FieldMark(Document, FieldMarkType.FieldSeparator);
+        //    //    paragraph.ChildObjects.Insert(index + 1, fieldSeparator);
+
+        //    //    //Insert FieldEnd object to mark the end of the field
+        //    //    FieldMark fieldEnd = new FieldMark(Document, FieldMarkType.FieldEnd);
+        //    //    paragraph.ChildObjects.Insert(index + 3, fieldEnd);
+
+        //    //    SaveCurrentDocument();
+        //    //}
+
+        //    SaveCurrentDocument();
+        //} 
+        #endregion
         /// <summary>
         /// 
         /// </summary>
@@ -1027,7 +1255,7 @@ namespace BusinessLogicLayer
             TextBodySelection textBodySelection = new TextBodySelection(paragraphBaseFirstItem, paragraphBaseLastItem);
             TextBodyPart textBodyPart = new TextBodyPart(textBodySelection);
 
-            bookmarksNavigator.MoveToBookmark(TransformWordWithUnderline(bookmarkText));
+            bookmarksNavigator.MoveToBookmark(TransformWord(bookmarkText));
             bookmarksNavigator.ReplaceBookmarkContent(textBodyPart);
 
             Document.Sections.Remove(tempSection);
@@ -1274,7 +1502,7 @@ namespace BusinessLogicLayer
         public void DeleteBookmark(string bookmarkText)
         {
             BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(Document);
-            bookmarksNavigator.MoveToBookmark(TransformWordWithUnderline(bookmarkText));
+            bookmarksNavigator.MoveToBookmark(TransformWord(bookmarkText));
 
             if (bookmarksNavigator.CurrentBookmark != null)
             {
@@ -1353,11 +1581,6 @@ namespace BusinessLogicLayer
         public static List<string> GetFileFormats()
         {
             return Enum.GetValues(typeof(FileFormat)).Cast<FileFormat>().Select(f => $".{f.ToString().ToLower()}").ToList();
-        }
-
-        public static string ConvertFile(string filepath, FileFormat outputFormat)
-        {
-            return null;
         }
     }
 }

@@ -16,7 +16,8 @@ namespace WebApplication1
             try
             {
                 logger.Info("Init main.");
-                CreateHostBuilderBy8080(args).Build().Run();
+                //CreateHostBuilderBy8001(args).Build().Run();
+                CreateHostBuilder(args).Build().Run();
             }
             catch (Exception e)
             {
@@ -42,12 +43,12 @@ namespace WebApplication1
                 .Build();
 
 
-        public static IHostBuilder CreateHostBuilderBy8080(string[] args) =>
+        public static IHostBuilder CreateHostBuilderBy8001(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                    webBuilder.UseUrls(urls: "http://localhost:8080");
+                    webBuilder.UseUrls(urls: "http://localhost:8001");
                 })
                 .ConfigureLogging(logging =>
                 {
@@ -69,5 +70,31 @@ namespace WebApplication1
                     logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information);
                 })
                 .UseNLog();
+
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+           Host.CreateDefaultBuilder(args)
+               .ConfigureWebHostDefaults(webBuilder =>
+               {
+                   webBuilder.UseStartup<Startup>();
+               })
+               .ConfigureLogging(logging =>
+               {
+                   logging.ClearProviders();
+                   logging.SetMinimumLevel(LogLevel.Information);
+               })
+               .UseNLog();
+        //public static IHostBuilder CreateHostBuilder(string[] args) =>
+        //    Host.CreateDefaultBuilder(args)
+        //        .ConfigureWebHostDefaults(webBuilder =>
+        //        {
+        //            webBuilder.UseStartup<Startup>();
+        //            webBuilder.UseUrls(urls: "http://localhost:5001");
+        //        })
+        //        .ConfigureLogging(logging =>
+        //        {
+        //    logging.ClearProviders();
+        //    logging.SetMinimumLevel(LogLevel.Information);
+        //})
+        //        .UseNLog();
     }
 }

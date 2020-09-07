@@ -21,11 +21,11 @@ namespace WebApplication1
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
-            services.Configure<KestrelServerOptions>(Configuration.GetSection("Kestrel"));
-            services.Configure<FormOptions>(x =>
-           {
-               x.ValueLengthLimit = 10000000;
-           });
+            //services.Configure<KestrelServerOptions>(Configuration.GetSection("Kestrel"));
+           // services.Configure<FormOptions>(x =>
+           //{
+           //    x.ValueLengthLimit = 10000000;
+           //});
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -55,11 +55,11 @@ namespace WebApplication1
                     pattern: "{controller=Home}/{action=LogIn}/{id?}");
             });
 
-            app.Use(async (context, next) =>
-            {
-                context.Features.Get<IHttpMaxRequestBodySizeFeature>().MaxRequestBodySize = 10000000;
-                await next.Invoke();
-            });
+            //app.Use(async (context, next) =>
+            //{
+            //    context.Features.Get<IHttpMaxRequestBodySizeFeature>().MaxRequestBodySize = 10000000;
+            //    await next.Invoke();
+            //});
 
             app.UseStatusCodePages();
         }

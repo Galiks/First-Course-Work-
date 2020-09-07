@@ -30,7 +30,7 @@ namespace WebApplication1.Controllers
             formats = WordDocument.GetFileFormats();
         }
         [RequestSizeLimit(10000000)]
-        public async Task<IActionResult> Index(IFormFile file)
+        public IActionResult Index(IFormFile file)
         {
             if (file != null)
             {
@@ -39,18 +39,17 @@ namespace WebApplication1.Controllers
                 if (formats.Contains(extension))
                 {
                     filepath = userFolder + file.FileName;
-                    //pathToFile = path;
 
-
-
-                    //FileMode.Append
-                    await SaveFile(file, file.FileName, filepath);
+                    //await SaveFile(file, file.FileName, filepath);
+                    FolderWork.SaveFile(file, file.FileName, ref filepath, ref userFolder);
+                    _logger.LogInformation($"Сохранён файл {filepath}");
 
                     filepath = Conversion.ConvertToWordDocx(filepath);
+                    _logger.LogInformation($"Сохранён переконвентированный файл {filepath}");
 
                     if (string.IsNullOrWhiteSpace(filepath))
                     {
-                        _logger.LogInformation("Преобразование невозможно");
+                        _logger.LogInformation($"Преобразование файла {filepath} невозможно");
                         ViewBag.FileFormatErrorMessage = "Неверный формат файла. Дальнейшее преобразование невозможно!";
                         return View();
                     }
@@ -59,7 +58,7 @@ namespace WebApplication1.Controllers
                 }
                 else
                 {
-                    _logger.LogInformation("Введён не тот формат.");
+                    _logger.LogInformation($"Введён не тот формат файла - {extension}. Файл - {file.FileName}.");
                     ViewBag.FileFormatErrorMessage = "Неверный формат файла. Должен быть TXT, RTF, HTML, ODT, DOC, DOCX, PDF";
                     return View();
                 }
@@ -67,31 +66,20 @@ namespace WebApplication1.Controllers
             return View();
         }
 
-        private async Task SaveFile(IFormFile file, string filename, string path)
-        {
-            if (System.IO.File.Exists(path))
-            {
-                //filepath = userFolder + @"\" + "NEW_" + filename;
-                filename = "NEW_" + filename;
-                filepath = userFolder + filename;
-                await SaveFile(file, filename, filepath);
-            }
-            else
-            {
-                using var fileStream = new FileStream(path, FileMode.CreateNew);
-                await file.CopyToAsync(fileStream);
-            }
-            //try
-            //{
-            //    using var fileStream = new FileStream(path, FileMode.CreateNew);
-            //    await file.CopyToAsync(fileStream);
-            //}
-            //catch (IOException)
-            //{
-            //    filepath = userFolder + @"\" + "NEW_" + filename;
-            //    await SaveFile(file, filename, filepath);
-            //}
-        }
+        //private async Task SaveFile(IFormFile file, string filename, string path)
+        //{
+        //    if (System.IO.File.Exists(path))
+        //    {
+        //        filename = "NEW_" + filename;
+        //        filepath = userFolder + filename;
+        //        await SaveFile(file, filename, filepath);
+        //    }
+        //    else
+        //    {
+        //        using var fileStream = new FileStream(path, FileMode.CreateNew);
+        //        await file.CopyToAsync(fileStream);
+        //    }
+        //}
 
         public IActionResult LogIn(string lastName, string firstName, string patronymic)
         {
@@ -101,24 +89,35 @@ namespace WebApplication1.Controllers
             }
             else
             {
-                //Directory.SetCurrentDirectory(absolutPath);
                 string initials = FolderWork.GetFolderName(firstName, lastName, patronymic);
                 string absolutPath = _appEnvironment.WebRootPath + @"\Files";
-                foreach (var item in Directory.GetDirectories(absolutPath))
+                try
                 {
-                    if (item.Contains(initials))
+                    foreach (var item in Directory.GetDirectories(absolutPath))
                     {
-                        userFolder = item + @"\";
+                        if (item.Contains(initials))
+                        {
+                            userFolder = item + @"\";
+                        }
                     }
+                }
+                catch (System.Exception)
+                {
+                    _logger.LogError($"Абсолютный путь {absolutPath} не найден.");
+                    Directory.CreateDirectory(absolutPath);
+                    _logger.LogInformation($"Создан абсолютный путь {absolutPath}.");
+                    
                 }
 
 
                 if (!string.IsNullOrWhiteSpace(userFolder))
                 {
+                    _logger.LogError($"Пользователь {firstName} {lastName} {patronymic} не был найден.");
                     return RedirectToAction("Index");
                 }
                 else
                 {
+                    _logger.LogInformation($"Пользователь {firstName} {lastName} {patronymic} вошёл в систему.");
                     return View();
                 }
             }
@@ -129,12 +128,22 @@ namespace WebApplication1.Controllers
         {
             if (string.IsNullOrWhiteSpace(lastName) || string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(patronymic))
             {
+                _logger.LogError($"Поля при регистрации оказались пустыми пустые.");
                 return View();
             }
             else
             {
                 userFolder = FolderWork.CreateFolder(firstName, lastName, patronymic, _appEnvironment.WebRootPath + @"\Files") + @"\";
-                return RedirectToAction("Index");
+                if (!string.IsNullOrWhiteSpace(userFolder))
+                {
+                    _logger.LogInformation($"Папка для пользователя {firstName} {lastName} {patronymic} была успешно создана.");
+                    return RedirectToAction("Index"); 
+                }
+                else
+                {
+                    _logger.LogError($"Папка для пользователя {firstName} {lastName} {patronymic} не была создана.");
+                    return View();
+                }
             }
         }
     }
