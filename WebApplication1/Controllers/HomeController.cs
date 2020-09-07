@@ -1,15 +1,12 @@
 ﻿using BusinessLogicLayer;
+using BusinessLogicLayer.Conversion;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Spire.Pdf;
-using Spire.Doc;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
-using Spire.Doc.Documents;
-using BusinessLogicLayer.Conversion;
 
 namespace WebApplication1.Controllers
 {
@@ -27,7 +24,14 @@ namespace WebApplication1.Controllers
             _logger = logger;
             _logger.LogDebug(1, "NLog injected into HomeController");
             _appEnvironment = appEnvironment;
-            formats = WordDocument.GetFileFormats();
+            try
+            {
+                formats = WordDocument.GetFileFormats();
+            }
+            catch (Exception e)
+            {
+                WriteExceptionInLog(e);
+            }
         }
         [RequestSizeLimit(10000000)]
         public IActionResult Index(IFormFile file)
@@ -44,7 +48,15 @@ namespace WebApplication1.Controllers
                     FolderWork.SaveFile(file, file.FileName, ref filepath, ref userFolder);
                     _logger.LogInformation($"Сохранён файл {filepath}");
 
-                    filepath = Conversion.ConvertToWordDocx(filepath);
+                    try
+                    {
+                        filepath = Conversion.ConvertToWordDocx(filepath);
+                    }
+                    catch (Exception e)
+                    {
+                        WriteExceptionInLog(e);
+                        return View();
+                    }
                     _logger.LogInformation($"Сохранён переконвентированный файл {filepath}");
 
                     if (string.IsNullOrWhiteSpace(filepath))
@@ -89,7 +101,22 @@ namespace WebApplication1.Controllers
             }
             else
             {
-                string initials = FolderWork.GetFolderName(firstName, lastName, patronymic);
+                string initials = null;
+                try
+                {
+                    initials = FolderWork.GetFolderName(firstName, lastName, patronymic);
+                }
+                catch (Exception e)
+                {
+                    WriteExceptionInLog(e);
+                    return View();
+                }
+
+                if (string.IsNullOrWhiteSpace(initials))
+                {
+                    _logger.LogError($"Инициалы пользователя пусты.");
+                }
+
                 string absolutPath = _appEnvironment.WebRootPath + @"\Files";
                 try
                 {
@@ -101,12 +128,13 @@ namespace WebApplication1.Controllers
                         }
                     }
                 }
-                catch (System.Exception)
+                catch (Exception e)
                 {
                     _logger.LogError($"Абсолютный путь {absolutPath} не найден.");
+                    WriteExceptionInLog(e);
                     Directory.CreateDirectory(absolutPath);
                     _logger.LogInformation($"Создан абсолютный путь {absolutPath}.");
-                    
+                    return View();
                 }
 
 
@@ -133,11 +161,19 @@ namespace WebApplication1.Controllers
             }
             else
             {
-                userFolder = FolderWork.CreateFolder(firstName, lastName, patronymic, _appEnvironment.WebRootPath + @"\Files") + @"\";
+                try
+                {
+                    userFolder = FolderWork.CreateFolder(firstName, lastName, patronymic, _appEnvironment.WebRootPath + @"\Files") + @"\";
+                }
+                catch (Exception e)
+                {
+                    WriteExceptionInLog(e);
+                    return View();
+                }
                 if (!string.IsNullOrWhiteSpace(userFolder))
                 {
                     _logger.LogInformation($"Папка для пользователя {firstName} {lastName} {patronymic} была успешно создана.");
-                    return RedirectToAction("Index"); 
+                    return RedirectToAction("Index");
                 }
                 else
                 {
@@ -145,6 +181,11 @@ namespace WebApplication1.Controllers
                     return View();
                 }
             }
+        }
+
+        private void WriteExceptionInLog(Exception e)
+        {
+            _logger.LogError($"Message {e.Message} {(e.InnerException is null ? "" : Environment.NewLine, "InnerException: ", e.InnerException.Message)}");
         }
     }
 }

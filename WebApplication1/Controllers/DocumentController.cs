@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Spire.Doc.Fields;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -37,9 +38,11 @@ namespace WebApplication1.Controllers
                     await FolderWork.SaveImage(image, path);
                     _logger.LogInformation($"Изображение {image.FileName} сохранено по пути {path}.");
                 }
-                catch (System.Exception)
+                catch (Exception e)
                 {
                     _logger.LogError($"Не удалось сохранить изображение {image.FileName}.");
+                    WriteExceptionInLog(e);
+                    return View();
                 }
             }
 
@@ -47,36 +50,80 @@ namespace WebApplication1.Controllers
             {
                 if (linkType.Equals("bookmark"))
                 {
-                    _logger.LogInformation($"Начато создание закладки для текста с параметрами {text}, {word}");
-                    wordDocument.CreateBookmarksForText(word, text, count);
+                    try
+                    {
+                        _logger.LogInformation($"Начато создание закладки для текста с параметрами {text}, {word}");
+                        wordDocument.CreateBookmarksForText(word, text, count);
+                        _logger.LogInformation($"Завершилось создание закладки для текста с параметрами {text}, {word}");
+                    }
+                    catch (Exception e)
+                    {
+                        WriteExceptionInLog(e);
+                        return View();
+                    }
                 }
                 else if (linkType.Equals("hyperlink"))
                 {
-                    _logger.LogInformation($"Начато создание гиперссылки для текста с параметрами {text}, {word}");
-                    wordDocument.CreateHyperlinksForText(word, text, count);
+                    try
+                    {
+                        _logger.LogInformation($"Начато создание гиперссылки для текста с параметрами {text}, {word}");
+                        wordDocument.CreateHyperlinksForText(word, text, count);
+                        _logger.LogInformation($"Завершилось создание гиперссылки для текста с параметрами {text}, {word}");
+                    }
+                    catch (Exception e)
+                    {
+                        WriteExceptionInLog(e);
+                        return View();
+                    }
                 }
             }
             else if (!string.IsNullOrWhiteSpace(path) & !string.IsNullOrWhiteSpace(text) & !string.IsNullOrWhiteSpace(linkType))
             {
                 if (linkType.Equals("hyperlink"))
                 {
-                    _logger.LogInformation($"Начато создание гиперссылки для изображения с параметрами {text}, {path}");
-                    wordDocument.CreatHyperlinkForImage(path, text);
+                    try
+                    {
+                        _logger.LogInformation($"Начато создание гиперссылки для изображения с параметрами {text}, {path}");
+                        wordDocument.CreatHyperlinkForImage(path, text);
+                        _logger.LogInformation($"Завершилось создание гиперссылки для изображения с параметрами {text}, {path}");
+                    }
+                    catch (Exception e)
+                    {
+                        WriteExceptionInLog(e);
+                        return View();
+                    }
                 }
             }
             else if (!string.IsNullOrWhiteSpace(path) & !string.IsNullOrWhiteSpace(word) & !string.IsNullOrWhiteSpace(linkType))
             {
                 if (linkType.Equals("bookmark"))
                 {
-                    _logger.LogInformation($"Начато создание закладки для изображения с параметрами {text}, {path}");
-                    wordDocument.CreateBookmarksForImage(path, word, count);
+                    try
+                    {
+                        _logger.LogInformation($"Начато создание закладки для изображения с параметрами {text}, {path}");
+                        wordDocument.CreateBookmarksForImage(path, word, count);
+                        _logger.LogInformation($"Завершилось создание закладки для изображения с параметрами {text}, {path}");
+                    }
+                    catch (Exception e)
+                    {
+                        WriteExceptionInLog(e);
+                        return View();
+                    }
                 }
             }
 
 
-            ViewBag.Messages = wordDocument.Messages;
-            ViewBag.LongText = wordDocument.GetTextFromDocument();
-            ViewBag.Footnotes = wordDocument.GetFootnotes();
+            try
+            {
+                ViewBag.Messages = wordDocument.Messages;
+                ViewBag.LongText = wordDocument.GetTextFromDocument();
+                ViewBag.Footnotes = wordDocument.GetFootnotes();
+            }
+            catch (Exception e)
+            {
+                WriteExceptionInLog(e);
+                return View();
+            }
             return View();
         }
 
@@ -90,12 +137,20 @@ namespace WebApplication1.Controllers
 
         public IActionResult EditLinks()
         {
-            var hyperlinks = wordDocument.GetHyperlinks().ToList();
-            ViewBag.Hyperlinks = hyperlinks;
-            var bookmarks = wordDocument.GetBookmarks().ToList();
-            ViewBag.Bookmarks = bookmarks;
-            var images = wordDocument.GetImages().ToList();
-            ViewBag.Images = images;
+            try
+            {
+                var hyperlinks = wordDocument.GetHyperlinks().ToList();
+                ViewBag.Hyperlinks = hyperlinks;
+                var bookmarks = wordDocument.GetBookmarks().ToList();
+                ViewBag.Bookmarks = bookmarks;
+                var images = wordDocument.GetImages().ToList();
+                ViewBag.Images = images;
+            }
+            catch (Exception e)
+            {
+                WriteExceptionInLog(e);
+                return View();
+            }
 
             return View();
         }
@@ -115,9 +170,17 @@ namespace WebApplication1.Controllers
         {
             var list = wordDocument.GetHyperlinks().ToList();
             Field field = list[index];
-            _logger.LogInformation($"Начато изменение гиперссылки {field.FieldText} на {hypertext}");
-            wordDocument.EditLinkInHypertext(field, hypertext);
-            _logger.LogInformation($"Завершилось изменение гиперссылки {field.FieldText} на {hypertext}");
+            try
+            {
+                _logger.LogInformation($"Начато изменение гиперссылки {field.FieldText} на {hypertext}");
+                wordDocument.EditLinkInHypertext(field, hypertext);
+                _logger.LogInformation($"Завершилось изменение гиперссылки {field.FieldText} на {hypertext}");
+            }
+            catch (Exception e)
+            {
+                WriteExceptionInLog(e);
+                return Redirect("EditLinks");
+            }
             return Redirect("EditLinks");
         }
 
@@ -125,71 +188,68 @@ namespace WebApplication1.Controllers
         {
             var list = wordDocument.GetHyperlinks().ToList();
             Field field = list[index];
-            _logger.LogInformation($"Начато удаление гиперссылки {field.FieldText}");
-            this.wordDocument.DeleteHyperlink(field);
-            _logger.LogInformation($"Завершилось удаление гиперссылки {field.FieldText}");
+            try
+            {
+                _logger.LogInformation($"Начато удаление гиперссылки {field.FieldText}");
+                wordDocument.DeleteHyperlink(field);
+                _logger.LogInformation($"Завершилось удаление гиперссылки {field.FieldText}");
+            }
+            catch (Exception e)
+            {
+                WriteExceptionInLog(e);
+                return Redirect("EditLinks");
+            }
             return Redirect("EditLinks");
         }
 
         public IActionResult UpdateBookmark(string bookmark, string text)
         {
-            _logger.LogInformation($"Начато изменение закладки {bookmark} на {text}");
-            wordDocument.EditTextInBookmark(bookmark, text);
-            _logger.LogInformation($"Завершилось изменение закладки {bookmark} на {text}");
+            try
+            {
+                _logger.LogInformation($"Начато изменение закладки {bookmark} на {text}");
+                wordDocument.EditTextInBookmark(bookmark, text);
+                _logger.LogInformation($"Завершилось изменение закладки {bookmark} на {text}");
+            }
+            catch (Exception e)
+            {
+                WriteExceptionInLog(e);
+                return Redirect("EditLinks");
+            }
             return Redirect("EditLinks");
         }
 
         public IActionResult DeleteBookmark(string bookmark)
         {
-            _logger.LogInformation($"Начато удаление закладки {bookmark}");
-            wordDocument.DeleteBookmark(bookmark);
-            _logger.LogInformation($"Завершилось удаление закладки {bookmark}");
+            try
+            {
+                _logger.LogInformation($"Начато удаление закладки {bookmark}");
+                wordDocument.DeleteBookmark(bookmark);
+                _logger.LogInformation($"Завершилось удаление закладки {bookmark}");
+            }
+            catch (Exception e)
+            {
+                WriteExceptionInLog(e);
+                return Redirect("EditLinks");
+            }
             return Redirect("EditLinks");
         }
 
         public FileResult Download(FileFormat fileFormat)
         {
-            FolderWork.SetParametresForDownloadFile(fileFormat, userFolder: HomeController.userFolder, filepath: HomeController.filepath, out byte[] fileBytes, out string fileExtension, out string filename);
-            _logger.LogInformation($"Начато скачивание файла {filename}");
-            return File(fileBytes, "application/" + fileExtension, filename);
+            try
+            {
+                FolderWork.SetParametresForDownloadFile(fileFormat, userFolder: HomeController.userFolder, filepath: HomeController.filepath, out byte[] fileBytes, out string fileExtension, out string filename);
+                _logger.LogInformation($"Начато скачивание файла {filename}");
+                return File(fileBytes, "application/" + fileExtension, filename);
+            }
+            catch (Exception e)
+            {
+                WriteExceptionInLog(e);
+                return null;
+            }
         }
 
-        //private static void SetParametresForDownloadFile(FileFormat fileFormat, out byte[] fileBytes, out string fileExtension, out string filename)
-        //{
-        //    string filepath = new DirectoryInfo(HomeController.userFolder).GetFiles().Where(f => f.FullName == HomeController.filepath).FirstOrDefault().FullName;
-        //    switch (fileFormat)
-        //    {
-        //        case FileFormat.TXT:
-        //            filepath = Conversion.ConvertToTxt(filepath);
-        //            break;
-        //        case FileFormat.RTF:
-        //            filepath = Conversion.ConvertToRtf(filepath);
-        //            break;
-        //        case FileFormat.DOC:
-        //            filepath = Conversion.ConvertToWordDoc(filepath);
-        //            break;
-        //        case FileFormat.DOCX:
-        //            filepath = Conversion.ConvertToWordDocx(filepath);
-        //            break;
-        //        case FileFormat.HTML:
-        //            filepath = Conversion.ConvertToHtml(filepath);
-        //            break;
-        //        case FileFormat.PDF:
-        //            filepath = Conversion.ConvertToPdf(filepath);
-        //            break;
-        //        case FileFormat.ODT:
-        //            filepath = Conversion.ConvertToOdt(filepath);
-        //            break;
-        //        default:
-        //            break;
-        //    }
-
-
-        //    FileInfo file = new DirectoryInfo(HomeController.userFolder).GetFiles().Where(f => f.FullName == filepath).FirstOrDefault();
-        //    fileBytes = System.IO.File.ReadAllBytes(file.FullName);
-        //    fileExtension = file.Extension;
-        //    filename = file.Name;
-        //}
+       
 
         private void DeleteFile(FileInfo file)
         {
@@ -199,10 +259,23 @@ namespace WebApplication1.Controllers
         public IActionResult CreateHyperlinkForExistingImage(int index, string hypertext)
         {
             var image = wordDocument.GetImages().ToList()[index];
-            _logger.LogInformation($"Начато создание гиперссылки для существующего изображения с параметрами {image}, {hypertext}");
-            wordDocument.CreateHyperlinkForImage(image, hypertext);
-            _logger.LogInformation($"Завершилось создание гиперссылки для существующего изображения с параметрами {image}, {hypertext}");
+            try
+            {
+                _logger.LogInformation($"Начато создание гиперссылки для существующего изображения с параметрами {image}, {hypertext}");
+                wordDocument.CreateHyperlinkForImage(image, hypertext);
+                _logger.LogInformation($"Завершилось создание гиперссылки для существующего изображения с параметрами {image}, {hypertext}");
+            }
+            catch (Exception e)
+            {
+                WriteExceptionInLog(e);
+                return Redirect("EditLinks");
+            }
             return Redirect("EditLinks");
+        }
+
+        private void WriteExceptionInLog(Exception e)
+        {
+            _logger.LogError($"Message {e.Message} {(e.InnerException is null ? "" : Environment.NewLine, "InnerException: ", e.InnerException.Message)}");
         }
     }
 }

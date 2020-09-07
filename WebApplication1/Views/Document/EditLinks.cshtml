@@ -140,14 +140,12 @@
                     @for (int i = 0; i < ViewBag.Bookmarks.Count; i++)
                     {
 
-                        var nextSibling = ViewBag?.Bookmarks[i].BookmarkStart.Owner.NextSibling;
-                        if (nextSibling != null)
+                        var nextSibling = ViewBag?.Bookmarks[i].BookmarkStart.NextSibling;
+                        if (nextSibling != null && nextSibling.DocumentObjectType == DocumentObjectType.Picture)
                         {
-                            var firstChild = nextSibling.FirstChild;
-                            if (firstChild != null && firstChild.DocumentObjectType == DocumentObjectType.Picture)
-                            {
+
                                 <tr>
-                                    <td><img width='200px' height='200px' src='data:image/jpeg;base64,@Convert.ToBase64String(firstChild.ImageBytes)' /></td>
+                                    <td><img width='200px' height='200px' src='data:image/jpeg;base64,@Convert.ToBase64String(nextSibling.ImageBytes)' /></td>
                                     <td width="40px">
                                         <form asp-action="UpdateBookmark" asp-controller="Document" method="post" enctype="multipart/form-data">
                                             <label for="image">
@@ -162,24 +160,25 @@
                                         @Html.ActionLink("Удалить", "DeleteBookmark", new { bookmark = ViewBag.Bookmarks[i].Name })
                                     </td>
                                 </tr>
-                            }
-                            else
-                            {
-                                <tr>
-                                    <td>@ViewBag.Bookmarks[i].BookmarkStart.Owner.Text</td>
-                                    <td width="40px">
-                                        <form asp-action="UpdateBookmark" asp-controller="Document" method="post">
-                                            <input type="text" name="text" />
-                                            <input type="text" name="bookmark" hidden value="@ViewBag.Bookmarks[i].Name" />
-
-                                            <button>Редактировать</button>
-                                        </form>
-                                    </td>
-                                    <td>
-                                        @Html.ActionLink("Удалить", "DeleteBookmark", new { bookmark = ViewBag.Bookmarks[i].Name })
-                                    </td>
-                                </tr>
-                            }
+                            
+                        }
+                        else if (nextSibling != null && nextSibling.DocumentObjectType == DocumentObjectType.TextRange)
+                        {
+                             <tr>
+                                 <td>@ViewBag.Bookmarks[i].Name</td>
+                                 <td width="40px">
+                                     <form asp-action="UpdateBookmark" asp-controller="Document" method="post">
+                                         <input type="text" name="text" />
+                                         <input type="text" name="bookmark" hidden value="@ViewBag.Bookmarks[i].Name" />
+                         
+                                         <button>Редактировать</button>
+                                     </form>
+                                 </td>
+                                 <td>
+                                     @Html.ActionLink("Удалить", "DeleteBookmark", new { bookmark = ViewBag.Bookmarks[i].Name })
+                                 </td>
+                             </tr>
+                            
                         }
                     }
                 </table>

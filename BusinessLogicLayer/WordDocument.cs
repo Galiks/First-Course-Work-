@@ -73,11 +73,18 @@ namespace BusinessLogicLayer
             }
             catch (Exception e)
             {
-                loggerException.Error($"Message {e.Message} {(e.InnerException is null ? "" : Environment.NewLine, "InnerException: ", e.InnerException.Message)}");
+                WriteExceptionInLog(e);
+                throw e;
             }
             Messages = new HashSet<string>();
             CreateReferencesSection();
         }
+
+        private static void WriteExceptionInLog(Exception e)
+        {
+            loggerException.Error($"Message {e.Message} {(e.InnerException is null ? "" : Environment.NewLine, "InnerException: ", e.InnerException.Message)}");
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -143,18 +150,42 @@ namespace BusinessLogicLayer
                     string noun = nouns[i];
                     if (i == 0)
                     {
-                        CreateBookmarkByWord(noun, text, count: count);
+                        try
+                        {
+                            CreateBookmarkByWord(noun, text, count: count);
+                        }
+                        catch (Exception e)
+                        {
+                            WriteExceptionInLog(e);
+                            throw e;
+                        }
                     }
                     else
                     {
-                        CreateBookmarkByWord(noun, count: count);
+                        try
+                        {
+                            CreateBookmarkByWord(noun, text: text, count: count);
+                        }
+                        catch (Exception e)
+                        {
+                            WriteExceptionInLog(e);
+                            throw e;
+                        }
                     }
                 }
             }
-            catch (CyrWordNotFoundException error)
+            catch (CyrWordNotFoundException e)
             {
-                loggerException.Error(error.Message);
-                CreateBookmarkByWord(word, text, count);
+                WriteExceptionInLog(e);
+                try
+                {
+                    CreateBookmarkByWord(word, text, count);
+                }
+                catch (Exception secondError)
+                {
+                    WriteExceptionInLog(secondError);
+                    throw secondError;
+                }
             }
             finally
             {
@@ -196,12 +227,19 @@ namespace BusinessLogicLayer
         }
         private void CreateBookmarkByWord(string word, string text = null, int count = default)
         {
-            string referencesWord = GetReferencesWord(word);
+            string referencesWord = GetReferencesWord(text);
+            if (string.IsNullOrWhiteSpace(referencesWord))
+            {
+                loggerException.Error("Слово для закладки является NULL.");
+                return;
+            }
             //Create bookmark objects
             //BookmarkStart start = new BookmarkStart(document, referencesWord);
             //BookmarkEnd end = new BookmarkEnd(document, referencesWord);
 
-            if (!string.IsNullOrWhiteSpace(text))
+            BookmarksNavigator bn = new BookmarksNavigator(Document);
+            bn.MoveToBookmark(referencesWord, true, true);
+            if (bn.CurrentBookmark == null)
             {
                 referencesParagraph = ReferencesSection.AddParagraph();
                 referencesParagraph.AppendBookmarkStart(referencesWord);
@@ -211,13 +249,9 @@ namespace BusinessLogicLayer
 
             TextSelection[] textSelection = Document.FindAllString(word, true, true);
 
-            if (textSelection == null)
+            if (textSelection == null || textSelection.Length == 0)
             {
-                return;
-            }
-
-            if (textSelection.Length == 0)
-            {
+                loggerException.Error($"Не было найдено слов");
                 return;
             }
 
@@ -227,14 +261,16 @@ namespace BusinessLogicLayer
             for (int i = 0; i < findLength; i++)
             {
                 TextSelection keywordOne = textSelection[i];
-                CreateBookmark(i, keywordOne, referencesWord);
+                try
+                {
+                    CreateBookmark(i, keywordOne, referencesWord);
+                }
+                catch (Exception e)
+                {
+                    WriteExceptionInLog(e);
+                    throw e;
+                }
             }
-
-
-            //Parallel.For(0, findLength, i =>
-            //{
-            //    CreateBookmarkByWordHandler(i, textSelection);
-            //});
 
 
             SaveCurrentDocument();
@@ -249,9 +285,18 @@ namespace BusinessLogicLayer
             {
                 tr = keywordOne.GetAsOneRange();
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                CreateBookmark(i, keywordOne, referencesWord);
+                WriteExceptionInLog(e);
+                try
+                {
+                    CreateBookmark(i, keywordOne, referencesWord);
+                }
+                catch (Exception secondError)
+                {
+                    WriteExceptionInLog(secondError);
+                    throw secondError;
+                }
             }
 
             //Set the formatting
@@ -263,6 +308,7 @@ namespace BusinessLogicLayer
 
             if (paragraph.Equals(referencesParagraph))
             {
+                loggerException.Error("Параграф равен параграфу для сносок. Остановка поиска слов");
                 return;
             }
 
@@ -277,11 +323,13 @@ namespace BusinessLogicLayer
 
                 if (textField.Type == FieldType.FieldRef)
                 {
+                    loggerException.Error($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef}");
                     Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef}");
                     return;
                 }
                 else if (textField.Type == FieldType.FieldHyperlink)
                 {
+                    loggerException.Error($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink}");
                     Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink}");
                     return;
                 }
@@ -327,19 +375,31 @@ namespace BusinessLogicLayer
                 {
                     string noun = nouns[i];
 
-                    CreateBookmarkByImage(path, noun, count);
+                    try
+                    {
+                        CreateBookmarkByImage(path, noun, count);
+                    }
+                    catch (Exception e)
+                    {
+                        WriteExceptionInLog(e);
+                        throw e;
+                    }
                     //SetBookmarkForImage(path);
                 }
             }
-            catch (CyrWordNotFoundException)
-            {
-                CreateBookmarkByImage(path, word, count);
-                //SetBookmarkForImage(path);
-            }
             catch (Exception e)
             {
-                var text = e.Message;
-                throw e;
+                WriteExceptionInLog(e);
+                try
+                {
+                    CreateBookmarkByImage(path, word, count);
+                }
+                catch (Exception secondError)
+                {
+                    WriteExceptionInLog(secondError);
+                    throw secondError;
+                }
+                //SetBookmarkForImage(path);
             }
             finally
             {
@@ -369,7 +429,7 @@ namespace BusinessLogicLayer
 
                 SaveCurrentDocument();
 
-                bn.MoveToBookmark(referencesWord, true, true);
+                //bn.MoveToBookmark(referencesWord, true, true);
                 //Section section0 = Document.AddSection();
                 //Paragraph paragraph = section0.AddParagraph();
                 //Image image = Image.FromFile(path);
@@ -385,13 +445,9 @@ namespace BusinessLogicLayer
             //Find the keyword "Hypertext"
             TextSelection[] text = Document.FindAllString(word, true, true);
 
-            if (text == null)
+            if (text == null || text.Length == 0)
             {
-                return;
-            }
-
-            if (text.Length == 0)
-            {
+                loggerException.Error($"Не было найдено слов");
                 return;
             }
 
@@ -424,7 +480,15 @@ namespace BusinessLogicLayer
             for (int i = 0; i < findLength; i++)
             {
                 TextSelection keywordOne = text[i];
-                CreateBookmark(i, keywordOne, referencesWord);
+                try
+                {
+                    CreateBookmark(i, keywordOne, referencesWord);
+                }
+                catch (Exception e)
+                {
+                    WriteExceptionInLog(e);
+                    throw e;
+                }
             }
             //Parallel.For(0, findLength, i =>
             //{
@@ -489,8 +553,6 @@ namespace BusinessLogicLayer
             SaveCurrentDocument();
         }
 
-
-
         /// <summary>
         /// 
         /// </summary>
@@ -527,12 +589,29 @@ namespace BusinessLogicLayer
                 for (int i = 0; i < nouns.Count; i++)
                 {
                     string noun = nouns[i];
-                    CreateHyperlinkByWord(noun, text, count);
+                    try
+                    {
+                        CreateHyperlinkByWord(noun, text, count);
+                    }
+                    catch (Exception e)
+                    {
+                        WriteExceptionInLog(e);
+                        throw e;
+                    }
                 }
             }
-            catch (CyrWordNotFoundException)
+            catch (Exception e)
             {
-                CreateHyperlinkByWord(word, text, count);
+                WriteExceptionInLog(e);
+                try
+                {
+                    CreateHyperlinkByWord(word, text, count);
+                }
+                catch (Exception secondError)
+                {
+                    WriteExceptionInLog(secondError);
+                    throw secondError;
+                }
             }
             finally
             {
@@ -546,13 +625,9 @@ namespace BusinessLogicLayer
         {
             TextSelection[] text = Document.FindAllString(word, true, true);
 
-            if (text == null)
+            if (text == null || text.Length == 0)
             {
-                return;
-            }
-
-            if (text.Length == 0)
-            {
+                loggerException.Error($"Не было найдено слов");
                 return;
             }
 
@@ -575,8 +650,9 @@ namespace BusinessLogicLayer
                 {
                     child = paragraph.ChildObjects[index];
                 }
-                catch (IndexOutOfRangeException)
+                catch (IndexOutOfRangeException e)
                 {
+                    WriteExceptionInLog(e);
                     index = tr.OwnerParagraph.ChildObjects.IndexOf(tr);
                     child = paragraph.ChildObjects[index];
                 }
@@ -705,7 +781,15 @@ namespace BusinessLogicLayer
         /// </summary>
         public void SaveCurrentDocument()
         {
-            Document.SaveToFile(filename);
+            try
+            {
+                Document.SaveToFile(filename);
+            }
+            catch (Exception e)
+            {
+                WriteExceptionInLog(e);
+                throw e;
+            }
         }
         /// <summary>
         /// 
@@ -729,7 +813,8 @@ namespace BusinessLogicLayer
 
             if (string.IsNullOrWhiteSpace(pathToHtmlFile))
             {
-                return "error";
+                loggerException.Error("Путь к HTML файлу не создан.");
+                return null;
             }
             else
             {
@@ -1027,8 +1112,6 @@ namespace BusinessLogicLayer
                 yield return bookmark;
             }
         }
-
-
         /// <summary>
         /// 
         /// </summary>
@@ -1207,7 +1290,15 @@ namespace BusinessLogicLayer
             int endOwnerParagraphIndex = field.End.OwnerParagraph.OwnerTextBody.ChildObjects.IndexOf(field.End.OwnerParagraph);
 
             #region Remove font color and etc
-            FormatFieldResultText(field.Separator.OwnerParagraph.OwnerTextBody, sepOwnerParagraphIndex, endOwnerParagraphIndex, sepIndex, endIndex);
+            try
+            {
+                FormatFieldResultText(field.Separator.OwnerParagraph.OwnerTextBody, sepOwnerParagraphIndex, endOwnerParagraphIndex, sepIndex, endIndex);
+            }
+            catch (Exception e)
+            {
+                WriteExceptionInLog(e);
+                throw e;
+            }
             #endregion
 
             field.End.OwnerParagraph.ChildObjects.RemoveAt(endIndex);
@@ -1252,7 +1343,15 @@ namespace BusinessLogicLayer
                 {
                     for (int j = sepIndex + 1; j < endIndex; j++)
                     {
-                        FormatText(para.ChildObjects[j] as TextRange);
+                        try
+                        {
+                            FormatText(para.ChildObjects[j] as TextRange);
+                        }
+                        catch (Exception e)
+                        {
+                            WriteExceptionInLog(e);
+                            throw e;
+                        }
                     }
 
                 }
@@ -1260,21 +1359,48 @@ namespace BusinessLogicLayer
                 {
                     for (int j = sepIndex + 1; j < para.ChildObjects.Count; j++)
                     {
-                        FormatText(para.ChildObjects[j] as TextRange);
+
+                        try
+                        {
+                            FormatText(para.ChildObjects[j] as TextRange);
+                        }
+                        catch (Exception e)
+                        {
+                            WriteExceptionInLog(e);
+                            throw e;
+                        }
                     }
                 }
                 else if (i == endOwnerParaIndex)
                 {
                     for (int j = 0; j < endIndex; j++)
                     {
-                        FormatText(para.ChildObjects[j] as TextRange);
+
+                        try
+                        {
+                            FormatText(para.ChildObjects[j] as TextRange);
+                        }
+                        catch (Exception e)
+                        {
+                            WriteExceptionInLog(e);
+                            throw e;
+                        }
                     }
                 }
                 else
                 {
                     for (int j = 0; j < para.ChildObjects.Count; j++)
                     {
-                        FormatText(para.ChildObjects[j] as TextRange);
+
+                        try
+                        {
+                            FormatText(para.ChildObjects[j] as TextRange);
+                        }
+                        catch (Exception e)
+                        {
+                            WriteExceptionInLog(e);
+                            throw e;
+                        }
                     }
                 }
             }

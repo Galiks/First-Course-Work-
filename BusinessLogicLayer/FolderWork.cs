@@ -118,9 +118,14 @@ namespace BusinessLogicLayer
 
 
             FileInfo file = new DirectoryInfo(userFolder).GetFiles().Where(f => f.FullName == newFilepath).FirstOrDefault();
-            fileBytes = System.IO.File.ReadAllBytes(file.FullName);
+            fileBytes = File.ReadAllBytes(file.FullName);
             fileExtension = file.Extension;
             filename = file.Name;
+        }
+
+        private static void WriteExceptionInLog(Exception e)
+        {
+            loggerException.Error($"Message {e.Message} {(e.InnerException is null ? "" : Environment.NewLine, "InnerException: ", e.InnerException.Message)}");
         }
     }
 }
