@@ -115,7 +115,9 @@ namespace WebApplication1.Controllers
         {
             var list = wordDocument.GetHyperlinks().ToList();
             Field field = list[index];
+            _logger.LogInformation($"Начато изменение гиперссылки {field.FieldText} на {hypertext}");
             wordDocument.EditLinkInHypertext(field, hypertext);
+            _logger.LogInformation($"Завершилось изменение гиперссылки {field.FieldText} на {hypertext}");
             return Redirect("EditLinks");
         }
 
@@ -123,25 +125,32 @@ namespace WebApplication1.Controllers
         {
             var list = wordDocument.GetHyperlinks().ToList();
             Field field = list[index];
+            _logger.LogInformation($"Начато удаление гиперссылки {field.FieldText}");
             this.wordDocument.DeleteHyperlink(field);
+            _logger.LogInformation($"Завершилось удаление гиперссылки {field.FieldText}");
             return Redirect("EditLinks");
         }
 
         public IActionResult UpdateBookmark(string bookmark, string text)
         {
+            _logger.LogInformation($"Начато изменение закладки {bookmark} на {text}");
             wordDocument.EditTextInBookmark(bookmark, text);
+            _logger.LogInformation($"Завершилось изменение закладки {bookmark} на {text}");
             return Redirect("EditLinks");
         }
 
         public IActionResult DeleteBookmark(string bookmark)
         {
+            _logger.LogInformation($"Начато удаление закладки {bookmark}");
             wordDocument.DeleteBookmark(bookmark);
+            _logger.LogInformation($"Завершилось удаление закладки {bookmark}");
             return Redirect("EditLinks");
         }
 
         public FileResult Download(FileFormat fileFormat)
         {
             FolderWork.SetParametresForDownloadFile(fileFormat, userFolder: HomeController.userFolder, filepath: HomeController.filepath, out byte[] fileBytes, out string fileExtension, out string filename);
+            _logger.LogInformation($"Начато скачивание файла {filename}");
             return File(fileBytes, "application/" + fileExtension, filename);
         }
 
@@ -192,6 +201,7 @@ namespace WebApplication1.Controllers
             var image = wordDocument.GetImages().ToList()[index];
             _logger.LogInformation($"Начато создание гиперссылки для существующего изображения с параметрами {image}, {hypertext}");
             wordDocument.CreateHyperlinkForImage(image, hypertext);
+            _logger.LogInformation($"Завершилось создание гиперссылки для существующего изображения с параметрами {image}, {hypertext}");
             return Redirect("EditLinks");
         }
     }

@@ -112,12 +112,12 @@ namespace WebApplication1.Controllers
 
                 if (!string.IsNullOrWhiteSpace(userFolder))
                 {
-                    _logger.LogError($"Пользователь {firstName} {lastName} {patronymic} не был найден.");
+                    _logger.LogInformation($"Пользователь {firstName} {lastName} {patronymic} вошёл в систему.");
                     return RedirectToAction("Index");
                 }
                 else
                 {
-                    _logger.LogInformation($"Пользователь {firstName} {lastName} {patronymic} вошёл в систему.");
+                    _logger.LogError($"Пользователь {firstName} {lastName} {patronymic} не был найден.");
                     return View();
                 }
             }

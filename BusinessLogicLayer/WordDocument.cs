@@ -1,19 +1,17 @@
 ﻿using Cyriller;
 using Cyriller.Model;
 using NLog;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Spire.Doc;
 using Spire.Doc.Collections;
 using Spire.Doc.Documents;
 using Spire.Doc.Fields;
-using Spire.Doc.Formatting;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
-using BusinessLogicLayer.Conversion;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace BusinessLogicLayer
 {
@@ -29,7 +27,7 @@ namespace BusinessLogicLayer
         private const int width = 470;
         private const int height = 340;
         private readonly string filename;
-        private string referencesWord;
+        //private string referencesWord;
         private static int indexNextField = 0;
         private Paragraph referencesParagraph;
         private static Section referencesSection;
@@ -64,12 +62,19 @@ namespace BusinessLogicLayer
         /// <param name="filename"></param>
         public WordDocument(string filename)
         {
-            loggerUser.Info($"Начата работа с файлом: {filename}");
+            //loggerUser.Info($"Начата работа с файлом: {filename}");
             this.filename = filename;
             Document = new Document();
             //проблема с дублями файла
             filepath = filename;
-            Document.LoadFromFile(filename);
+            try
+            {
+                Document.LoadFromFile(filename);
+            }
+            catch (Exception e)
+            {
+                loggerException.Error($"Message {e.Message} {(e.InnerException is null ? "" : Environment.NewLine, "InnerException: ", e.InnerException.Message)}");
+            }
             Messages = new HashSet<string>();
             CreateReferencesSection();
         }
@@ -84,13 +89,18 @@ namespace BusinessLogicLayer
         /// 
         /// </summary>
         /// <param name="word"></param>
-        public void SetReferencesWord(string word)
+        private string GetReferencesWord(string word)
         {
             //­­­U+00AD
             //005F       
             if (!string.IsNullOrWhiteSpace(word))
             {
-                referencesWord = TransformWord(word);
+                return TransformWord(word);
+            }
+            else
+            {
+                loggerException.Error($"Передаваемый параметр является null");
+                return null;
             }
         }
         private string TransformWord(string word)
@@ -111,6 +121,7 @@ namespace BusinessLogicLayer
             }
             else
             {
+                loggerException.Error($"Передаваемый параметр является null");
                 return null;
             }
         }
@@ -123,24 +134,9 @@ namespace BusinessLogicLayer
         /// <param name="count"></param>
         public void CreateBookmarksForText(string word, string text, int count = default)
         {
-            SetReferencesWord(text);
-
             try
             {
                 List<string> nouns = GetWordsByCases(word);
-
-                //Parallel.For(0, nouns.Count, i =>
-                //{
-                //    string noun = nouns[i];
-                //    if (i == 0)
-                //    {
-                //        CreateBookmarkByWord(noun, text, count: count);
-                //    }
-                //    else
-                //    {
-                //        CreateBookmarkByWord(noun, count: count);
-                //    }
-                //});
 
                 for (int i = 0; i < nouns.Count; i++)
                 {
@@ -178,10 +174,6 @@ namespace BusinessLogicLayer
             CyrNounCollection cyrNounCollection = new CyrNounCollection();
             CyrNoun cyrNoun = cyrNounCollection.Get(word, out CasesEnum @case, out NumbersEnum numbers);
             var nounsSet = new HashSet<string>(cyrNoun.Decline().ToList());
-            //Parallel.ForEach(cyrNoun.DeclinePlural().ToList(), noun =>
-            //{
-            //    nounsSet.Add(noun);
-            //});
             foreach (var noun in cyrNoun.DeclinePlural().ToList())
             {
                 nounsSet.Add(noun);
@@ -190,14 +182,6 @@ namespace BusinessLogicLayer
             if (cyrNoun.WordType != WordTypesEnum.Surname)
             {
                 int nounLength = nouns.Count;
-                //Parallel.For(0, nounLength, i =>
-                //{
-                //string wordWithFirstLetterUpper = GetWordWithFirstLetterUpper(nouns[i]);
-                //if (!string.IsNullOrWhiteSpace(wordWithFirstLetterUpper))
-                //{
-                //    nouns.Add(wordWithFirstLetterUpper);
-                //}
-                //});
                 for (int i = 0; i < nounLength; i++)
                 {
                     string wordWithFirstLetterUpper = GetWordWithFirstLetterUpper(nouns[i]);
@@ -212,6 +196,7 @@ namespace BusinessLogicLayer
         }
         private void CreateBookmarkByWord(string word, string text = null, int count = default)
         {
+            string referencesWord = GetReferencesWord(word);
             //Create bookmark objects
             //BookmarkStart start = new BookmarkStart(document, referencesWord);
             //BookmarkEnd end = new BookmarkEnd(document, referencesWord);
@@ -242,7 +227,7 @@ namespace BusinessLogicLayer
             for (int i = 0; i < findLength; i++)
             {
                 TextSelection keywordOne = textSelection[i];
-                CreateBookmark(i, keywordOne);
+                CreateBookmark(i, keywordOne, referencesWord);
             }
 
 
@@ -255,7 +240,7 @@ namespace BusinessLogicLayer
             SaveCurrentDocument();
         }
 
-        private void CreateBookmark(int i, TextSelection keywordOne)
+        private void CreateBookmark(int i, TextSelection keywordOne, string referencesWord)
         {
             TextRange tr = null;
 
@@ -266,7 +251,7 @@ namespace BusinessLogicLayer
             }
             catch (Exception)
             {
-                CreateBookmark(i, keywordOne);
+                CreateBookmark(i, keywordOne, referencesWord);
             }
 
             //Set the formatting
@@ -368,7 +353,7 @@ namespace BusinessLogicLayer
 
         private void CreateBookmarkByImage(string path, string word, int count)
         {
-            SetReferencesWord(path);
+            string referencesWord = GetReferencesWord(path);
             BookmarksNavigator bn = new BookmarksNavigator(Document);
             bn.MoveToBookmark(referencesWord, true, true);
 
@@ -376,16 +361,25 @@ namespace BusinessLogicLayer
             {
                 var para = referencesSection.AddParagraph();
                 para.AppendBookmarkStart(referencesWord);
-                para.AppendBookmarkEnd(referencesWord);
-                bn.MoveToBookmark(referencesWord, true, true);
-                Section section0 = Document.AddSection();
-                Paragraph paragraph = section0.AddParagraph();
-                Image image = Image.FromFile(path);
-                DocPicture picture = paragraph.AppendPicture(image);
+                DocPicture picture = para.AppendPicture(path);
                 picture.Width = width;
                 picture.Height = height;
-                bn.InsertParagraph(paragraph);
-                Document.Sections.Remove(section0);
+                para.AppendBookmarkEnd(referencesWord);
+                
+
+                SaveCurrentDocument();
+
+                bn.MoveToBookmark(referencesWord, true, true);
+                //Section section0 = Document.AddSection();
+                //Paragraph paragraph = section0.AddParagraph();
+                //Image image = Image.FromFile(path);
+                //DocPicture picture = paragraph.AppendPicture(image);
+                //picture.Width = width;
+                //picture.Height = height;
+                //bn.InsertParagraph(paragraph);
+                //Document.Sections.Remove(section0);
+
+                
             }
 
             //Find the keyword "Hypertext"
@@ -403,302 +397,100 @@ namespace BusinessLogicLayer
 
             //Create bookmark objects
 
-            BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(Document);
-            bookmarksNavigator.MoveToBookmark(referencesWord);
+            //BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(Document);
+            //bookmarksNavigator.MoveToBookmark(referencesWord);
 
-            if (bookmarksNavigator.CurrentBookmark == null)
-            {
-                Image image = Image.FromFile(path);
+            //if (bookmarksNavigator.CurrentBookmark == null)
+            //{
+            //    Image image = Image.FromFile(path);
 
-                SetReferencesWord(path);
+            //    GetReferencesWord(path);
 
-                var referParagraph = referencesSection.AddParagraph();
-                referParagraph.AppendBookmarkStart(referencesWord);
-                referParagraph.AppendPicture(image);
-                referParagraph.AppendBookmarkEnd(referencesWord);
-                SaveCurrentDocument();
+            //    var referParagraph = referencesSection.AddParagraph();
+            //    referParagraph.AppendBookmarkStart(referencesWord);
+            //    referParagraph.AppendPicture(image);
+            //    referParagraph.AppendBookmarkEnd(referencesWord);
+            //    SaveCurrentDocument();
 
-                bookmarksNavigator.MoveToBookmark(referencesWord);
-                bookmarksNavigator.InsertParagraph(referParagraph);
+            //    bookmarksNavigator.MoveToBookmark(referencesWord);
+            //    bookmarksNavigator.InsertParagraph(referParagraph);
 
-                SaveCurrentDocument();
-            }
+            //    SaveCurrentDocument();
+            //}
 
             int findLength = count == default ? text.Length : count;
 
             //Get the keywords
-            //for (int i = 0; i < findLength; i++)
-            Parallel.For(0, findLength, i =>
+            for (int i = 0; i < findLength; i++)
             {
                 TextSelection keywordOne = text[i];
+                CreateBookmark(i, keywordOne, referencesWord);
+            }
+            //Parallel.For(0, findLength, i =>
+            //{
+            //    TextSelection keywordOne = text[i];
 
-                //Get the textrange its locates
-                TextRange tr = keywordOne.GetAsOneRange();
+            //    //Get the textrange its locates
+            //    TextRange tr = keywordOne.GetAsOneRange();
 
-                //Set the formatting
-                tr.CharacterFormat.UnderlineStyle = UnderlineStyle.Single;
-                tr.CharacterFormat.TextColor = Color.Blue;
+            //    //Set the formatting
+            //    tr.CharacterFormat.UnderlineStyle = UnderlineStyle.Single;
+            //    tr.CharacterFormat.TextColor = Color.Blue;
 
-                //Get the paragraph it locates
-                Paragraph paragraph = tr.OwnerParagraph;
+            //    //Get the paragraph it locates
+            //    Paragraph paragraph = tr.OwnerParagraph;
 
-                if (paragraph.Equals(referencesParagraph))
-                {
-                    return;
-                }
+            //    if (paragraph.Equals(referencesParagraph))
+            //    {
+            //        return;
+            //    }
 
-                //Get the index of the keyword in its paragraph
-                int index = paragraph.ChildObjects.IndexOf(tr);
+            //    //Get the index of the keyword in its paragraph
+            //    int index = paragraph.ChildObjects.IndexOf(tr);
 
-                DocumentObject child = paragraph.ChildObjects[index];
+            //    DocumentObject child = paragraph.ChildObjects[index];
 
-                if (child.DocumentObjectType == DocumentObjectType.Field)
-                {
-                    Field textField = child as Field;
+            //    if (child.DocumentObjectType == DocumentObjectType.Field)
+            //    {
+            //        Field textField = child as Field;
 
-                    if (textField.Type == FieldType.FieldRef)
-                    {
-                        Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef}");
-                        return;
-                    }
-                    else if (textField.Type == FieldType.FieldHyperlink)
-                    {
-                        Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink}");
-                        return;
-                    }
-                }
+            //        if (textField.Type == FieldType.FieldRef)
+            //        {
+            //            Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef}");
+            //            return;
+            //        }
+            //        else if (textField.Type == FieldType.FieldHyperlink)
+            //        {
+            //            Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink}");
+            //            return;
+            //        }
+            //    }
 
-                //Create a cross-reference field, and link it to bookmark                   
-                Field field = new Field(Document)
-                {
-                    Type = FieldType.FieldRef
-                };
-                string code = $@"REF {referencesWord} \p \h";
-                field.Code = code;
+            //    //Create a cross-reference field, and link it to bookmark                   
+            //    Field field = new Field(Document)
+            //    {
+            //        Type = FieldType.FieldRef
+            //    };
+            //    string code = $@"REF {referencesWord} \p \h";
+            //    field.Code = code;
 
-                //Insert field
-                paragraph.ChildObjects.Insert(index, field);
+            //    //Insert field
+            //    paragraph.ChildObjects.Insert(index, field);
 
-                //Insert FieldSeparator object
-                FieldMark fieldSeparator = new FieldMark(Document, FieldMarkType.FieldSeparator);
-                paragraph.ChildObjects.Insert(index + 1, fieldSeparator);
+            //    //Insert FieldSeparator object
+            //    FieldMark fieldSeparator = new FieldMark(Document, FieldMarkType.FieldSeparator);
+            //    paragraph.ChildObjects.Insert(index + 1, fieldSeparator);
 
-                //Insert FieldEnd object to mark the end of the field
-                FieldMark fieldEnd = new FieldMark(Document, FieldMarkType.FieldEnd);
-                paragraph.ChildObjects.Insert(index + 3, fieldEnd);
-            });
+            //    //Insert FieldEnd object to mark the end of the field
+            //    FieldMark fieldEnd = new FieldMark(Document, FieldMarkType.FieldEnd);
+            //    paragraph.ChildObjects.Insert(index + 3, fieldEnd);
+            //});
 
             SaveCurrentDocument();
         }
 
 
-        #region нерабочая новая версия
-        //private void CreateBookmarkByImage(string path, string word, int count)
-        //{
-        //    SetReferencesWord(path);
-        //    BookmarksNavigator bn = new BookmarksNavigator(Document);
-        //    //bn.MoveToBookmark(referencesWord, true, true);
-        //    bn.MoveToBookmark(referencesWord);
 
-        //    if (bn.CurrentBookmark == null)
-        //    {
-        //        var para = referencesSection.AddParagraph();
-        //        var bookmarkStart = para.AppendBookmarkStart(referencesWord);
-        //        SaveCurrentDocument();
-        //        DocPicture picture = para.AppendPicture(path);
-        //        picture.Width = width;
-        //        picture.Height = height;
-        //        SaveCurrentDocument();
-        //        var bookmarkEnd = para.AppendBookmarkEnd(referencesWord);
-
-        //        SaveCurrentDocument();
-
-        //        //Paragraph paragraph0 = bn.CurrentBookmark.BookmarkStart.OwnerParagraph;
-        //        //Section section0 = Document.AddSection();
-        //        //Paragraph paragraph0 = section0.AddParagraph();
-        //        //Image image = Image.FromFile(path);
-        //        //DocPicture picture = paragraph0.AppendPicture(path);
-        //        //picture.Width = width;
-        //        //picture.Height = height;
-        //        //bn.MoveToBookmark(referencesWord, true, true);
-        //        bn.MoveToBookmark(referencesWord);
-        //        //bn.InsertParagraph(para);
-
-        //        SaveCurrentDocument();
-
-        //        //Document.Sections.Remove(section0);
-        //    }
-
-
-
-        //    //Find the keyword "Hypertext"
-        //    TextSelection[] textSelection = Document.FindAllString(word, true, true);
-
-        //    if (textSelection == null || textSelection.Length == 0)
-        //    {
-        //        return;
-        //    }
-
-        //    //Create bookmark objects
-
-        //    //BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(Document);
-        //    //bookmarksNavigator.MoveToBookmark(referencesWord);
-
-        //    //if (bn.CurrentBookmark == null)
-        //    //{
-        //    //    //Image image = Image.FromFile(path);
-
-        //    //    SetReferencesWord(path);
-
-        //    //    var referParagraph = referencesSection.AddParagraph();
-        //    //    referParagraph.AppendBookmarkStart(referencesWord);
-        //    //    referParagraph.AppendPicture(path);
-        //    //    referParagraph.AppendBookmarkEnd(referencesWord);
-        //    //    //SaveCurrentDocument();
-
-        //    //    bn.MoveToBookmark(referencesWord);
-        //    //    bn.InsertParagraph(referParagraph);
-
-        //    //    SaveCurrentDocument();
-        //    //}
-
-        //    int findLength = count == default ? textSelection.Length : count;
-
-        //    //Get the keywords
-        //    //for (int i = 0; i < findLength; i++)
-        //    //Parallel.For(0, findLength, i =>
-        //    for (int i = 0; i < findLength; i++)
-        //    {
-        //        TextSelection seletion = textSelection[i];
-
-        //        //Get the text range
-
-        //        TextRange tr = seletion.GetAsOneRange();
-
-        //        int index = tr.OwnerParagraph.ChildObjects.IndexOf(tr) - IndexNextField;
-        //        Paragraph paragraph = tr.OwnerParagraph;
-
-        //        DocumentObject child;
-        //        try
-        //        {
-        //            child = paragraph.ChildObjects[index];
-        //        }
-        //        catch (IndexOutOfRangeException)
-        //        {
-        //            index = tr.OwnerParagraph.ChildObjects.IndexOf(tr);
-        //            child = paragraph.ChildObjects[index];
-        //        }
-
-        //        if (child.DocumentObjectType == DocumentObjectType.Field)
-        //        {
-        //            Field textField = child as Field;
-
-        //            if (textField.Type == FieldType.FieldRef)
-        //            {
-        //                Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef}");
-        //                return;
-        //            }
-        //            else if (textField.Type == FieldType.FieldHyperlink)
-        //            {
-        //                Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink}");
-        //                return;
-        //            }
-        //        }
-
-        //        //Add hyperlink
-
-
-        //        Field field = new Field(Document)
-        //        {
-        //            Code = "HYPERLINK file:///" + filepath.ToLower() + "#" + referencesWord + "\"",
-
-        //            Type = FieldType.FieldHyperlink
-        //        };
-
-        //        tr.OwnerParagraph.ChildObjects.Insert(index, field);
-
-        //        FieldMark fm = new FieldMark(Document, FieldMarkType.FieldSeparator);
-
-        //        tr.OwnerParagraph.ChildObjects.Insert(index + 1, fm);
-
-        //        //Set character format
-
-        //        tr.CharacterFormat.TextColor = Color.Blue;
-
-        //        tr.CharacterFormat.UnderlineStyle = UnderlineStyle.Single;
-
-        //        tr.CharacterFormat.Bold = tr.CharacterFormat.Bold;
-
-        //        FieldMark fmend = new FieldMark(Document, FieldMarkType.FieldEnd);
-
-        //        tr.OwnerParagraph.ChildObjects.Insert(index + 3, fmend);
-
-        //        field.End = fmend;
-        //    }
-
-        //    //    TextSelection keywordOne = textSelection[i];
-
-        //    //    //Get the textrange its locates
-        //    //    TextRange tr = keywordOne.GetAsOneRange();
-
-        //    //    //Set the formatting
-        //    //    tr.CharacterFormat.UnderlineStyle = UnderlineStyle.Single;
-        //    //    tr.CharacterFormat.TextColor = Color.Blue;
-
-        //    //    //Get the paragraph it locates
-        //    //    Paragraph paragraph = tr.OwnerParagraph;
-
-        //    //    if (paragraph.Equals(referencesParagraph))
-        //    //    {
-        //    //        return;
-        //    //    }
-
-        //    //    //Get the index of the keyword in its paragraph
-        //    //    int index = paragraph.ChildObjects.IndexOf(tr);
-
-        //    //    DocumentObject child = paragraph.ChildObjects[index];
-
-        //    //    if (child.DocumentObjectType == DocumentObjectType.Field)
-        //    //    {
-        //    //        Field textField = child as Field;
-
-        //    //        if (textField.Type == FieldType.FieldRef)
-        //    //        {
-        //    //            Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef}");
-        //    //            return;
-        //    //        }
-        //    //        else if (textField.Type == FieldType.FieldHyperlink)
-        //    //        {
-        //    //            Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink}");
-        //    //            return;
-        //    //        }
-        //    //    }
-
-        //    //    //Create a cross-reference field, and link it to bookmark                   
-        //    //    Field field = new Field(Document)
-        //    //    {
-        //    //        //Type = FieldType.FieldRef
-        //    //        Type = FieldType.FieldRef,
-        //    //        Code = $@"REF {referencesWord} \p \h"
-        //    //    };
-
-        //    //    //Insert field
-        //    //    paragraph.ChildObjects.Insert(index, field);
-
-        //    //    //Insert FieldSeparator object
-        //    //    FieldMark fieldSeparator = new FieldMark(Document, FieldMarkType.FieldSeparator);
-        //    //    paragraph.ChildObjects.Insert(index + 1, fieldSeparator);
-
-        //    //    //Insert FieldEnd object to mark the end of the field
-        //    //    FieldMark fieldEnd = new FieldMark(Document, FieldMarkType.FieldEnd);
-        //    //    paragraph.ChildObjects.Insert(index + 3, fieldEnd);
-
-        //    //    SaveCurrentDocument();
-        //    //}
-
-        //    SaveCurrentDocument();
-        //} 
-        #endregion
         /// <summary>
         /// 
         /// </summary>

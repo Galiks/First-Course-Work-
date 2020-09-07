@@ -233,7 +233,7 @@
             
             </summary>
         </member>
-        <member name="M:BusinessLogicLayer.WordDocument.SetReferencesWord(System.String)">
+        <member name="M:BusinessLogicLayer.WordDocument.GetReferencesWord(System.String)">
             <summary>
             
             </summary>
