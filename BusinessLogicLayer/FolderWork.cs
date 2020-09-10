@@ -124,9 +124,14 @@ namespace BusinessLogicLayer
             filename = file.Name;
         }
 
-        private static void WriteExceptionInLog(Exception e)
+        private void WriteExceptionInLog(Exception e)
         {
-            loggerException.Error($"Message {e.Message} {(e.InnerException is null ? "" : Environment.NewLine, "InnerException: ", e.InnerException.Message)}");
+            loggerException.Error($"Message {e.Message} {(e.InnerException is null ? "" : GetInnerException(e.InnerException))}");
+        }
+
+        private string GetInnerException(Exception innerException)
+        {
+            return $"{Environment.NewLine} InnerException: {innerException.Message}";
         }
     }
 }

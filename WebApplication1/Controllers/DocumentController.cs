@@ -127,14 +127,6 @@ namespace WebApplication1.Controllers
             return View();
         }
 
-        //private async Task<FileStream> SaveImage(IFormFile image, string path)
-        //{
-        //    var fileStream = new FileStream(path, FileMode.Create);
-        //    await image.CopyToAsync(fileStream);
-        //    _logger.LogInformation($"Загружено изображение {image.FileName}");
-        //    return fileStream;
-        //}
-
         public IActionResult EditLinks()
         {
             try
@@ -275,7 +267,12 @@ namespace WebApplication1.Controllers
 
         private void WriteExceptionInLog(Exception e)
         {
-            _logger.LogError($"Message {e.Message} {(e.InnerException is null ? "" : Environment.NewLine, "InnerException: ", e.InnerException.Message)}");
+            _logger.LogError($"Message {e.Message} {(e.InnerException is null ? "" : GetInnerException(e.InnerException))}");
+        }
+
+        private string GetInnerException(Exception innerException)
+        {
+            return $"{Environment.NewLine} InnerException: {innerException.Message}";
         }
     }
 }
