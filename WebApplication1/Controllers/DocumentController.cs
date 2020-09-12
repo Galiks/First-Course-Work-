@@ -27,7 +27,7 @@ namespace WebApplication1.Controllers
             wordDocument = new WordDocument(HomeController.filepath);
         }
 
-        public async Task<IActionResult> Index(string word, string text, string linkType, IFormFile image, int count = default)
+        public async Task<IActionResult> Index(string word, string text, string linkType, IFormFile image, string oneOrAll, int count = default)
         {
             string path = null;
             if (image != null)
@@ -53,7 +53,14 @@ namespace WebApplication1.Controllers
                     try
                     {
                         _logger.LogInformation($"Начато создание закладки для текста с параметрами {text}, {word}");
-                        wordDocument.CreateBookmarksForText(word, text, count);
+                        if (oneOrAll.Equals("all"))
+                        {
+                            wordDocument.CreateBookmarksForText(word, text, count);
+                        }
+                        else if (oneOrAll.Equals("one"))
+                        {
+                            wordDocument.CreateBookmarkForOneWord(word, text);
+                        }
                         _logger.LogInformation($"Завершилось создание закладки для текста с параметрами {text}, {word}");
                     }
                     catch (Exception e)
@@ -67,7 +74,14 @@ namespace WebApplication1.Controllers
                     try
                     {
                         _logger.LogInformation($"Начато создание гиперссылки для текста с параметрами {text}, {word}");
-                        wordDocument.CreateHyperlinksForText(word, text, count);
+                        if (oneOrAll.Equals("all"))
+                        {
+                            wordDocument.CreateHyperlinksForText(word, text, count);
+                        }
+                        else if (oneOrAll.Equals("one"))
+                        {
+                            wordDocument.CreateHyperlinkForOneWord(word, text);
+                        }
                         _logger.LogInformation($"Завершилось создание гиперссылки для текста с параметрами {text}, {word}");
                     }
                     catch (Exception e)
@@ -101,7 +115,14 @@ namespace WebApplication1.Controllers
                     try
                     {
                         _logger.LogInformation($"Начато создание закладки для изображения с параметрами {text}, {path}");
-                        wordDocument.CreateBookmarksForImage(path, word, count);
+                        if (oneOrAll.Equals("all"))
+                        {
+                            wordDocument.CreateBookmarksForImage(path, word, count);
+                        }
+                        else if (oneOrAll.Equals("one"))
+                        {
+                            wordDocument.CreateBookmarkByImgeForOneWord(path, word);
+                        }
                         _logger.LogInformation($"Завершилось создание закладки для изображения с параметрами {text}, {path}");
                     }
                     catch (Exception e)
@@ -241,7 +262,7 @@ namespace WebApplication1.Controllers
             }
         }
 
-       
+
 
         private void DeleteFile(FileInfo file)
         {

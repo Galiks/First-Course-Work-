@@ -41,8 +41,6 @@ namespace WebApplication1
                 })
                 .UseNLog()
                 .Build();
-
-
         public static IHostBuilder CreateHostBuilderBy8001(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
@@ -76,6 +74,7 @@ namespace WebApplication1
                .ConfigureWebHostDefaults(webBuilder =>
                {
                    webBuilder.UseStartup<Startup>();
+                   //webBuilder.UseUrls(urls: "http://localhost:80");
                })
                .ConfigureLogging(logging =>
                {
@@ -83,18 +82,5 @@ namespace WebApplication1
                    logging.SetMinimumLevel(LogLevel.Information);
                })
                .UseNLog();
-        //public static IHostBuilder CreateHostBuilder(string[] args) =>
-        //    Host.CreateDefaultBuilder(args)
-        //        .ConfigureWebHostDefaults(webBuilder =>
-        //        {
-        //            webBuilder.UseStartup<Startup>();
-        //            webBuilder.UseUrls(urls: "http://localhost:5001");
-        //        })
-        //        .ConfigureLogging(logging =>
-        //        {
-        //    logging.ClearProviders();
-        //    logging.SetMinimumLevel(LogLevel.Information);
-        //})
-        //        .UseNLog();
     }
 }

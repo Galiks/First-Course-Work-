@@ -1,7 +1,7 @@
 ﻿@using BusinessLogicLayer; 
 
 @{
-    ViewData["Title"] = "Document Page";
+    ViewData["Title"] = "Создание ссылок для документа";
 }
 
     <head>
@@ -98,10 +98,21 @@
                     </div>
 
                     <div class="div-helper-border">
+                        <p class="p-helper hidden">Тут Вы выбираете пометить ссылками все слова или же только одно слово.</p>
+                        <label>Определённое слово или все слова.</label>
+                        <p class="p-helper hidden">При выборе одного слова в разделе со сносками будет обратная ссылка.</p>
+                        <label>Определённое слово <input type="radio" name="oneOrAll" value="one" /></label>
+                        <p class="p-helper hidden">При выборе всех слов будут выделены все слова и ссылки обратно не будет. Количество создаваемых ссылок можно ограничить в разделе "Количество ссылок/закладок".</p>
+                        <label>Все слова <input type="radio" name="oneOrAll" value="all" /></label>
+                    </div>
+
+                    <div class="div-helper-border">
                         <p class="p-helper hidden">В этом поле Вы можете выставить количество добавляемых ссылок, начиная с начала документа. Число должно быть больше нуля. Если число не указано, то все встреченные слова будут помечены как ссылки.</p>
                         <label>Количество ссылок/закладок</label>
-                        <input id="count" name="count" type="number" min="1">
+                        <input id="count" name="count" type="number" min="0">
                     </div>
+
+
 
                     <div class="div-helper-border">
                         <p class="p-helper hidden">Нажимая на эту конпку, Вы отправляете данные программе для добавления нужной вам ссылки.</p>

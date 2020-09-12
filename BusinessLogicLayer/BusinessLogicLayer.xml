@@ -303,6 +303,13 @@
             <param name="word">начальное слово</param>
             <returns></returns>
         </member>
+        <member name="M:BusinessLogicLayer.WordDocument.CreateBookmarkForOneWord(System.String,System.String)">
+            <summary>
+            
+            </summary>
+            <param name="word"></param>
+            <param name="text"></param>
+        </member>
         <member name="M:BusinessLogicLayer.WordDocument.CreateBookmarksForImage(System.String,System.String,System.Int32)">
             <summary>
             
@@ -311,6 +318,13 @@
             <param name="word"></param>
             <param name="count"></param>
         </member>
+        <member name="M:BusinessLogicLayer.WordDocument.CreateBookmarkByImgeForOneWord(System.String,System.String)">
+            <summary>
+            
+            </summary>
+            <param name="path"></param>
+            <param name="word"></param>
+        </member>
         <member name="M:BusinessLogicLayer.WordDocument.CreateHyperlinksForText(System.String,System.String,System.Int32)">
             <summary>
             
@@ -318,6 +332,11 @@
             <param name="word"></param>
             <param name="text"></param>
             <param name="count"></param>
+        </member>
+        <member name="M:BusinessLogicLayer.WordDocument.CreateHyperlinkForOneWord(System.String,System.String)">
+            <summary>
+            
+            </summary>
         </member>
         <member name="M:BusinessLogicLayer.WordDocument.CreatHyperlinkForImage(System.String,System.String)">
             <summary>

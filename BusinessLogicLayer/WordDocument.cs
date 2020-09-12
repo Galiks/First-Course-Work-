@@ -148,8 +148,6 @@ namespace BusinessLogicLayer
             {
                 List<string> nouns = GetWordsByCases(word);
 
-                
-
                 for (int i = 0; i < nouns.Count; i++)
                 {
                     string noun = nouns[i];
@@ -281,17 +279,11 @@ namespace BusinessLogicLayer
             //BookmarkStart start = new BookmarkStart(document, referencesWord);
             //BookmarkEnd end = new BookmarkEnd(document, referencesWord);
 
-            BookmarksNavigator bn = new BookmarksNavigator(Document);
-            bn.MoveToBookmark(referencesWord, true, true);
-            if (bn.CurrentBookmark == null)
-            {
-                referencesParagraph = ReferencesSection.AddParagraph();
-                referencesParagraph.AppendBookmarkStart(referencesWord);
-                referencesParagraph.AppendText(text);
-                referencesParagraph.AppendBookmarkEnd(referencesWord);
-            }
+            AppendTextBookmark(text, referencesWord);
 
             TextSelection[] textSelection = Document.FindAllString(word, true, true);
+
+
 
             if (textSelection == null || textSelection.Length == 0)
             {
@@ -309,8 +301,8 @@ namespace BusinessLogicLayer
                     {
                         if (usersCountOfAddedWord > countOfAddedLink)
                         {
-                            CreateBookmark(i, keywordOne, referencesWord);
-                            countOfAddedLink++;  
+                            CreateBookmark(keywordOne, referencesWord);
+                            countOfAddedLink++;
                         }
                         else
                         {
@@ -320,9 +312,9 @@ namespace BusinessLogicLayer
                     }
                     else
                     {
-                        CreateBookmark(i, keywordOne, referencesWord);
+                        CreateBookmark(keywordOne, referencesWord);
                     }
-                    
+
                 }
                 catch (Exception e)
                 {
@@ -335,7 +327,46 @@ namespace BusinessLogicLayer
             SaveCurrentDocument();
         }
 
-        private void CreateBookmark(int i, TextSelection keywordOne, string referencesWord)
+        private void AppendTextBookmark(string text, string referencesWord)
+        {
+            BookmarksNavigator bn = new BookmarksNavigator(Document);
+            bn.MoveToBookmark(referencesWord, true, true);
+            if (bn.CurrentBookmark == null)
+            {
+                referencesParagraph = ReferencesSection.AddParagraph();
+                referencesParagraph.AppendBookmarkStart(referencesWord);
+                referencesParagraph.AppendText(text);
+                referencesParagraph.AppendBookmarkEnd(referencesWord);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="word"></param>
+        /// <param name="text"></param>
+        public void CreateBookmarkForOneWord(string word, string text)
+        {
+            string referencesWord = GetReferencesWord(text);
+            AppendTextBookmark(text, referencesWord);
+            TextSelection keyword = Document.FindString(word, true, true);
+            CreateBookmark(keyword, referencesWord);
+
+            referencesWord = GetReferencesWord(word);
+            keyword = Document.FindString(text, true, true);
+
+            BookmarksNavigator bn = new BookmarksNavigator(Document);
+            bn.MoveToBookmark(referencesWord, true, true);
+            if (bn.CurrentBookmark == null)
+            {
+                
+            }
+
+            CreateBookmark(keyword, referencesWord);
+
+        }
+
+        private void CreateBookmark(TextSelection keywordOne, string referencesWord)
         {
             TextRange tr = null;
 
@@ -349,7 +380,7 @@ namespace BusinessLogicLayer
                 WriteExceptionInLog(e);
                 try
                 {
-                    CreateBookmark(i, keywordOne, referencesWord);
+                    CreateBookmark(keywordOne, referencesWord);
                 }
                 catch (Exception secondError)
                 {
@@ -481,23 +512,7 @@ namespace BusinessLogicLayer
         private void CreateBookmarkByImage(string path, string word)
         {
             string referencesWord = GetReferencesWord(path);
-            BookmarksNavigator bn = new BookmarksNavigator(Document);
-            bn.MoveToBookmark(referencesWord, true, true);
-
-            if (bn.CurrentBookmark == null)
-            {
-                var para = referencesSection.AddParagraph();
-                para.AppendBookmarkStart(referencesWord);
-                DocPicture picture = para.AppendPicture(path);
-                picture.Width = width;
-                picture.Height = height;
-                para.AppendBookmarkEnd(referencesWord);
-                
-
-                SaveCurrentDocument();
-
-                
-            }
+            AppendImageBookmark(path, referencesWord);
 
             //Find the keyword "Hypertext"
             TextSelection[] text = Document.FindAllString(word, true, true);
@@ -518,7 +533,7 @@ namespace BusinessLogicLayer
                     {
                         if (usersCountOfAddedWord > countOfAddedLink)
                         {
-                            CreateBookmark(i, keywordOne, referencesWord);
+                            CreateBookmark(keywordOne, referencesWord);
                             countOfAddedLink++;
                         }
                         else
@@ -529,7 +544,7 @@ namespace BusinessLogicLayer
                     }
                     else
                     {
-                        CreateBookmark(i, keywordOne, referencesWord);
+                        CreateBookmark(keywordOne, referencesWord);
                     }
                 }
                 catch (Exception e)
@@ -538,9 +553,45 @@ namespace BusinessLogicLayer
                     throw e;
                 }
             }
-           
+
 
             SaveCurrentDocument();
+        }
+
+        private void AppendImageBookmark(string path, string referencesWord)
+        {
+            BookmarksNavigator bn = new BookmarksNavigator(Document);
+            bn.MoveToBookmark(referencesWord, true, true);
+
+            if (bn.CurrentBookmark == null)
+            {
+                var para = referencesSection.AddParagraph();
+                para.AppendBookmarkStart(referencesWord);
+                DocPicture picture = para.AppendPicture(path);
+                picture.Width = width;
+                picture.Height = height;
+                para.AppendBookmarkEnd(referencesWord);
+
+
+                SaveCurrentDocument();
+
+
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="word"></param>
+        public void CreateBookmarkByImgeForOneWord(string path, string word)
+        {
+            string refercesWord = GetReferencesWord(path);
+            AppendImageBookmark(path, refercesWord);
+
+            TextSelection keyword = Document.FindString(word, true, true);
+
+            CreateBookmark(keyword, refercesWord);
         }
 
         /// <summary>
@@ -677,7 +728,14 @@ namespace BusinessLogicLayer
 
             SaveCurrentDocument();
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        public void CreateHyperlinkForOneWord(string word, string hyperlink)
+        {
+            TextSelection keyword = Document.FindString(word, true, true);
+            CreateHyperlink(hyperlink, keyword);
+        }
         private void CreateHyperlink(string hyperlink, TextSelection seletion)
         {
             TextRange tr = seletion.GetAsOneRange();
