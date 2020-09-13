@@ -138,7 +138,7 @@ namespace WebApplication1.Controllers
             {
                 ViewBag.Messages = wordDocument.Messages;
                 ViewBag.LongText = wordDocument.GetTextFromDocument();
-                ViewBag.Footnotes = wordDocument.GetFootnotes();
+                //ViewBag.Footnotes = wordDocument.GetFootnotes();
             }
             catch (Exception e)
             {

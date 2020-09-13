@@ -350,23 +350,27 @@ namespace BusinessLogicLayer
             string referencesWord = GetReferencesWord(text);
             AppendTextBookmark(text, referencesWord);
             TextSelection keyword = Document.FindString(word, true, true);
-            CreateBookmark(keyword, referencesWord);
+            CreateBookmark(keyword, referencesWord);            
 
-            referencesWord = GetReferencesWord(word);
-            keyword = Document.FindString(text, true, true);
+            Paragraph backlinkParagraph = keyword.GetAsOneRange().OwnerParagraph;
 
             BookmarksNavigator bn = new BookmarksNavigator(Document);
             bn.MoveToBookmark(referencesWord, true, true);
             if (bn.CurrentBookmark == null)
             {
-                
+                backlinkParagraph.AppendBookmarkStart(word);
+                backlinkParagraph.AppendBookmarkEnd(word);
+
+                SaveCurrentDocument();
             }
 
-            CreateBookmark(keyword, referencesWord);
+            keyword = Document.FindAllString(text, true, true).Last();
+            referencesWord = GetReferencesWord(word);
+            CreateBookmark(keyword, referencesWord, false);
 
         }
 
-        private void CreateBookmark(TextSelection keywordOne, string referencesWord)
+        private void CreateBookmark(TextSelection keywordOne, string referencesWord, bool isCheckField = true)
         {
             TextRange tr = null;
 
@@ -396,10 +400,13 @@ namespace BusinessLogicLayer
             //Get the paragraph it locates
             Paragraph paragraph = tr.OwnerParagraph;
 
-            if (paragraph.Equals(referencesParagraph))
+            if (isCheckField)
             {
-                loggerException.Error("Параграф равен параграфу для сносок. Остановка поиска слов");
-                return;
+                if (paragraph.Equals(referencesParagraph))
+                {
+                    loggerException.Error("Параграф равен параграфу для сносок. Остановка поиска слов");
+                    return;
+                } 
             }
 
             //Get the index of the keyword in its paragraph
@@ -407,22 +414,25 @@ namespace BusinessLogicLayer
 
             DocumentObject child = paragraph.ChildObjects[index];
 
-            if (child.DocumentObjectType == DocumentObjectType.Field)
+            if (isCheckField)
             {
-                Field textField = child as Field;
+                if (child.DocumentObjectType == DocumentObjectType.Field)
+                {
+                    Field textField = child as Field;
 
-                if (textField.Type == FieldType.FieldRef)
-                {
-                    loggerException.Error($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef}");
-                    Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef}");
-                    return;
-                }
-                else if (textField.Type == FieldType.FieldHyperlink)
-                {
-                    loggerException.Error($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink}");
-                    Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink}");
-                    return;
-                }
+                    if (textField.Type == FieldType.FieldRef)
+                    {
+                        loggerException.Error($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef}");
+                        Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef}");
+                        return;
+                    }
+                    else if (textField.Type == FieldType.FieldHyperlink)
+                    {
+                        loggerException.Error($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink}");
+                        Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink}");
+                        return;
+                    }
+                } 
             }
 
             //Create a cross-reference field, and link it to bookmark                   
@@ -430,7 +440,6 @@ namespace BusinessLogicLayer
             {
                 Type = FieldType.FieldRef
             };
-            //string code = $@"REF {referencesWord} \p \h";
             string code = $@"REF {referencesWord} \p \h";
             field.Code = code;
 
@@ -816,6 +825,21 @@ namespace BusinessLogicLayer
 
             ReferencesSection.AddParagraph().AppendHyperlink(hyperlink, picture, HyperlinkType.WebLink);
             SaveCurrentDocument();
+        }
+
+        private Paragraph GetParagraphByWord(string word)
+        {
+            foreach (Section section in Document.Sections)
+            {
+                foreach (Paragraph paragraph in section.Paragraphs)
+                {
+                    if (paragraph.Text.Contains(word))
+                    {
+                        return paragraph;
+                    }
+                }
+            }
+            return null;
         }
 
         /// <summary>
