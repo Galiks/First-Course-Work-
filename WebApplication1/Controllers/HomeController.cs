@@ -171,7 +171,7 @@ namespace WebApplication1.Controllers
             {
                 try
                 {
-                    userFolder = FolderWork.CreateFolder(firstName, lastName, patronymic, _appEnvironment.WebRootPath + @"\Files") + @"\";
+                    userFolder = FolderWork.CreateFolderForUser(firstName, lastName, patronymic, _appEnvironment.WebRootPath + @"\Files") + @"\";
                 }
                 catch (Exception e)
                 {

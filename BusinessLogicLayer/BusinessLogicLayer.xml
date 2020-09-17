@@ -195,7 +195,7 @@
             
             </summary>
         </member>
-        <member name="M:BusinessLogicLayer.FolderWork.CreateFolder(System.String,System.String,System.String,System.String)">
+        <member name="M:BusinessLogicLayer.FolderWork.CreateFolderForUser(System.String,System.String,System.String,System.String)">
             <summary>
             
             </summary>
@@ -240,6 +240,13 @@
             <param name="fileBytes"></param>
             <param name="fileExtension"></param>
             <param name="filename"></param>
+        </member>
+        <member name="M:BusinessLogicLayer.FolderWork.CreateForlderForHTML(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="filepath"></param>
+            <returns></returns>
         </member>
         <member name="T:BusinessLogicLayer.WordDocument">
             <summary>

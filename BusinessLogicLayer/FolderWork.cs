@@ -2,7 +2,9 @@
 using NLog;
 using System;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace BusinessLogicLayer
@@ -23,7 +25,7 @@ namespace BusinessLogicLayer
         /// <param name="lastname"></param>
         /// <param name="patronymic"></param>
         /// <param name="path"></param>
-        public static string CreateFolder(string firstname, string lastname, string patronymic, string path)
+        public static string CreateFolderForUser(string firstname, string lastname, string patronymic, string path)
         {
             Directory.SetCurrentDirectory(path);
 
@@ -105,7 +107,11 @@ namespace BusinessLogicLayer
                     newFilepath = Conversion.Conversion.ConvertToWordDocx(newFilepath);
                     break;
                 case FileFormat.HTML:
-                    newFilepath = Conversion.Conversion.ConvertToHtml(newFilepath);
+                    string filepathForArchive = userFolder + "\\html";
+                    newFilepath = userFolder + "\\html.zip";
+                    ZipFile.CreateFromDirectory(filepathForArchive, newFilepath);
+                    //newFilepath = Conversion.Conversion.ConvertToHtml(newFilepath);
+                    
                     break;
                 case FileFormat.PDF:
                     newFilepath = Conversion.Conversion.ConvertToPdf(newFilepath);
@@ -118,7 +124,8 @@ namespace BusinessLogicLayer
             }
 
 
-            FileInfo file = new DirectoryInfo(userFolder).GetFiles().Where(f => f.FullName == newFilepath).FirstOrDefault();
+            //FileInfo file = new DirectoryInfo(userFolder).GetFiles().Where(f => f.FullName == newFilepath).FirstOrDefault();
+            FileInfo file = new FileInfo(newFilepath);
             fileBytes = File.ReadAllBytes(file.FullName);
             fileExtension = file.Extension;
             filename = file.Name;
@@ -132,6 +139,18 @@ namespace BusinessLogicLayer
         private string GetInnerException(Exception innerException)
         {
             return $"{Environment.NewLine} InnerException: {innerException.Message}";
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="filepath"></param>
+        /// <returns></returns>
+        public static string CreateForlderForHTML(string filepath)
+        {
+            FileInfo fileInfo = new FileInfo(filepath);
+            Directory.SetCurrentDirectory(fileInfo.DirectoryName);
+            return Directory.CreateDirectory("html").FullName;
         }
     }
 }

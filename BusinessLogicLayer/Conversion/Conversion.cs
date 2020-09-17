@@ -185,7 +185,16 @@ namespace BusinessLogicLayer.Conversion
         {
             Document document = new Document();
             document.LoadFromFile(filepath);
-            filepath = $"{filepath}_{formatWord}.{fileFormat.ToString().ToLower()}";
+
+            if (fileFormat == Spire.Doc.FileFormat.Html)
+            {
+                filepath = FolderWork.CreateForlderForHTML(filepath);
+                filepath = $"{filepath}\\{formatWord}.{fileFormat.ToString().ToLower()}"; 
+            }
+            else
+            {
+                filepath = $"{filepath}_{formatWord}.{fileFormat.ToString().ToLower()}";
+            }
             document.SaveToFile(filepath, fileFormat);
             return filepath;
         }
@@ -194,7 +203,15 @@ namespace BusinessLogicLayer.Conversion
         {
             PdfDocument pdfDocument = new PdfDocument();
             pdfDocument.LoadFromFile(filepath);
-            filepath = $"{filepath}_{formatWord}.{fileFormat.ToString().ToLower()}";
+            if (fileFormat == Spire.Pdf.FileFormat.HTML)
+            {
+                filepath = FolderWork.CreateForlderForHTML(filepath);
+                filepath = $"{filepath}\\html\\{formatWord}.{fileFormat.ToString().ToLower()}";
+            }
+            else
+            {
+                filepath = $"{filepath}_{formatWord}.{fileFormat.ToString().ToLower()}";
+            }
             pdfDocument.SaveToFile(filepath, fileFormat);
             return filepath;
         }

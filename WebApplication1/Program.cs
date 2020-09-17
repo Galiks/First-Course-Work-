@@ -74,7 +74,7 @@ namespace WebApplication1
                .ConfigureWebHostDefaults(webBuilder =>
                {
                    webBuilder.UseStartup<Startup>();
-                   //webBuilder.UseUrls(urls: "http://localhost:80");
+                   webBuilder.UseUrls(urls: "http://localhost:80");
                })
                .ConfigureLogging(logging =>
                {
