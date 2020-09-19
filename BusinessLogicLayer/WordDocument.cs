@@ -457,6 +457,85 @@ namespace BusinessLogicLayer
             SaveCurrentDocument();
         }
 
+        private void CreateBookmark(Paragraph paragraph, string referencesWord, bool isCheckField = true)
+        {
+
+
+            if (isCheckField)
+            {
+                if (paragraph.Equals(referencesParagraph))
+                {
+                    loggerException.Error("Параграф равен параграфу для сносок. Остановка поиска слов");
+                    return;
+                }
+            }
+
+            //Get the index of the keyword in its paragraph
+            int index = -1;
+            DocumentObject child = null;
+
+            for (int i = 0; i < paragraph.ChildObjects.Count; i++)
+            {
+                DocumentObject documentObject = paragraph.ChildObjects[i];
+                if (documentObject.DocumentObjectType == DocumentObjectType.Picture)
+                {
+                    index = i;
+                    child = documentObject;
+                    break;
+                }
+                
+            }
+
+            if (index == -1 || child is null)
+            {
+                return;
+            }
+
+            //DocumentObject child = paragraph.ChildObjects[index];
+
+            if (isCheckField)
+            {
+                if (child.DocumentObjectType == DocumentObjectType.Field)
+                {
+                    Field textField = child as Field;
+
+                    if (textField.Type == FieldType.FieldRef)
+                    {
+                        loggerException.Error($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef}");
+                        Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldRef}");
+                        return;
+                    }
+                    else if (textField.Type == FieldType.FieldHyperlink)
+                    {
+                        loggerException.Error($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink}");
+                        Messages.Add($"Поле {textField.FieldText} не было добавлено, так как оно уже имеет тип {FieldType.FieldHyperlink}");
+                        return;
+                    }
+                }
+            }
+
+            //Create a cross-reference field, and link it to bookmark                   
+            Field field = new Field(Document)
+            {
+                Type = FieldType.FieldRef
+            };
+            string code = $@"REF {referencesWord} \p \h";
+            field.Code = code;
+
+            //Insert field
+            paragraph.ChildObjects.Insert(index, field);
+
+            //Insert FieldSeparator object
+            FieldMark fieldSeparator = new FieldMark(Document, FieldMarkType.FieldSeparator);
+            paragraph.ChildObjects.Insert(index + 1, fieldSeparator);
+
+            //Insert FieldEnd object to mark the end of the field
+            FieldMark fieldEnd = new FieldMark(Document, FieldMarkType.FieldEnd);
+            paragraph.ChildObjects.Insert(index + 3, fieldEnd);
+
+            SaveCurrentDocument();
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -567,14 +646,15 @@ namespace BusinessLogicLayer
             SaveCurrentDocument();
         }
 
-        private void AppendImageBookmark(string path, string referencesWord)
+        private Paragraph AppendImageBookmark(string path, string referencesWord)
         {
+            var para = referencesSection.AddParagraph();
             BookmarksNavigator bn = new BookmarksNavigator(Document);
             bn.MoveToBookmark(referencesWord, true, true);
 
             if (bn.CurrentBookmark == null)
             {
-                var para = referencesSection.AddParagraph();
+                
                 para.AppendBookmarkStart(referencesWord);
                 DocPicture picture = para.AppendPicture(path);
                 picture.Width = width;
@@ -586,6 +666,12 @@ namespace BusinessLogicLayer
 
 
             }
+            else
+            {
+                throw new Exception("Подобная закладка уже есть!");
+            }
+
+            return para;
         }
 
         /// <summary>
@@ -595,12 +681,29 @@ namespace BusinessLogicLayer
         /// <param name="word"></param>
         public void CreateBookmarkByImgeForOneWord(string path, string word)
         {
-            string refercesWord = GetReferencesWord(path);
-            AppendImageBookmark(path, refercesWord);
+            string referencesWord = GetReferencesWord(path);
+            Paragraph imageParagraph = AppendImageBookmark(path, referencesWord);
 
             TextSelection keyword = Document.FindString(word, true, true);
 
-            CreateBookmark(keyword, refercesWord);
+            CreateBookmark(keyword, referencesWord);
+
+            Paragraph backlinkParagraph = keyword.GetAsOneRange().OwnerParagraph;
+
+            referencesWord = GetReferencesWord(word);
+
+            BookmarksNavigator bn = new BookmarksNavigator(Document);
+            bn.MoveToBookmark(referencesWord, true, true);
+            if (bn.CurrentBookmark == null)
+            {
+                backlinkParagraph.AppendBookmarkStart(referencesWord);
+                backlinkParagraph.AppendBookmarkEnd(referencesWord);
+
+                SaveCurrentDocument();
+            }
+
+            //keyword = Document.FindAllString(referencesWord, true, true).Last();
+            CreateBookmark(imageParagraph, referencesWord, false);
         }
 
         /// <summary>
