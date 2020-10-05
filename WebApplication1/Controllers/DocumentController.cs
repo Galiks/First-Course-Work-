@@ -15,7 +15,7 @@ namespace WebApplication1.Controllers
 {
     public class DocumentController : Controller
     {
-        readonly IWebHostEnvironment _appEnvironment;
+        private readonly IWebHostEnvironment _appEnvironment;
         private readonly ILogger<DocumentController> _logger;
         private readonly WordDocument wordDocument;
 
@@ -29,123 +29,143 @@ namespace WebApplication1.Controllers
 
         public async Task<IActionResult> Index(string word, string text, string linkType, IFormFile image, string oneOrAll, int count = default)
         {
-            string path = null;
-            if (image != null)
-            {
-                path = _appEnvironment.WebRootPath + "/Images/" + image.FileName;
-                try
-                {
-                    await FolderWork.SaveImage(image, path);
-                    _logger.LogInformation($"Изображение {image.FileName} сохранено по пути {path}.");
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError($"Не удалось сохранить изображение {image.FileName}.");
-                    WriteExceptionInLog(e);
-                    return View();
-                }
-            }
-
-            if (!string.IsNullOrWhiteSpace(text) & !string.IsNullOrWhiteSpace(word) & !string.IsNullOrWhiteSpace(linkType))
-            {
-                if (linkType.Equals("bookmark"))
-                {
-                    try
-                    {
-                        _logger.LogInformation($"Начато создание закладки для текста с параметрами {text}, {word}");
-                        if (oneOrAll.Equals("all"))
-                        {
-                            wordDocument.CreateBookmarksForText(word, text, count);
-                        }
-                        else if (oneOrAll.Equals("one"))
-                        {
-                            wordDocument.CreateBookmarkForOneWord(word, text);
-                        }
-                        _logger.LogInformation($"Завершилось создание закладки для текста с параметрами {text}, {word}");
-                    }
-                    catch (Exception e)
-                    {
-                        WriteExceptionInLog(e);
-                        return View();
-                    }
-                }
-                else if (linkType.Equals("hyperlink"))
-                {
-                    try
-                    {
-                        _logger.LogInformation($"Начато создание гиперссылки для текста с параметрами {text}, {word}");
-                        if (oneOrAll.Equals("all"))
-                        {
-                            wordDocument.CreateHyperlinksForText(word, text, count);
-                        }
-                        else if (oneOrAll.Equals("one"))
-                        {
-                            wordDocument.CreateHyperlinkForOneWord(word, text);
-                        }
-                        _logger.LogInformation($"Завершилось создание гиперссылки для текста с параметрами {text}, {word}");
-                    }
-                    catch (Exception e)
-                    {
-                        WriteExceptionInLog(e);
-                        return View();
-                    }
-                }
-            }
-            else if (!string.IsNullOrWhiteSpace(path) & !string.IsNullOrWhiteSpace(text) & !string.IsNullOrWhiteSpace(linkType))
-            {
-                if (linkType.Equals("hyperlink"))
-                {
-                    try
-                    {
-                        _logger.LogInformation($"Начато создание гиперссылки для изображения с параметрами {text}, {path}");
-                        wordDocument.CreatHyperlinkForImage(path, text);
-                        _logger.LogInformation($"Завершилось создание гиперссылки для изображения с параметрами {text}, {path}");
-                    }
-                    catch (Exception e)
-                    {
-                        WriteExceptionInLog(e);
-                        return View();
-                    }
-                }
-            }
-            else if (!string.IsNullOrWhiteSpace(path) & !string.IsNullOrWhiteSpace(word) & !string.IsNullOrWhiteSpace(linkType))
-            {
-                if (linkType.Equals("bookmark"))
-                {
-                    try
-                    {
-                        _logger.LogInformation($"Начато создание закладки для изображения с параметрами {text}, {path}");
-                        if (oneOrAll.Equals("all"))
-                        {
-                            wordDocument.CreateBookmarksForImage(path, word, count);
-                        }
-                        else if (oneOrAll.Equals("one"))
-                        {
-                            wordDocument.CreateBookmarkByImgeForOneWord(path, word);
-                        }
-                        _logger.LogInformation($"Завершилось создание закладки для изображения с параметрами {text}, {path}");
-                    }
-                    catch (Exception e)
-                    {
-                        WriteExceptionInLog(e);
-                        return View();
-                    }
-                }
-            }
-
-
             try
             {
+                string path = null;
+                if (image != null)
+                {
+                    path = _appEnvironment.WebRootPath + "/Images/" + image.FileName;
+                    try
+                    {
+                        await FolderWork.SaveImage(image, path);
+                        _logger.LogInformation($"Изображение {image.FileName} сохранено по пути {path}.");
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogError($"Не удалось сохранить изображение {image.FileName}.");
+                        WriteExceptionInLog(e);
+                        ViewBag.Messages = e.Message.ToString();
+                        ViewBag.LongText = wordDocument.GetTextFromDocument();
+                        return View();
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(text) & !string.IsNullOrWhiteSpace(word) & !string.IsNullOrWhiteSpace(linkType))
+                {
+                    if (linkType.Equals("bookmark"))
+                    {
+                        try
+                        {
+                            _logger.LogInformation($"Начато создание закладки для текста с параметрами {text}, {word}");
+                            if (oneOrAll.Equals("all"))
+                            {
+                                wordDocument.CreateBookmarksForText(word, text, count);
+                            }
+                            else if (oneOrAll.Equals("one"))
+                            {
+                                wordDocument.CreateBookmarkForOneWord(word, text);
+                            }
+                            _logger.LogInformation($"Завершилось создание закладки для текста с параметрами {text}, {word}");
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.LogError($"Message {e.Message}");
+                            WriteExceptionInLog(e);
+                            ViewBag.Messages = e.Message.ToString();
+                            ViewBag.LongText = wordDocument.GetTextFromDocument();
+                            return View();
+                        }
+                    }
+                    else if (linkType.Equals("hyperlink"))
+                    {
+                        try
+                        {
+                            _logger.LogInformation($"Начато создание гиперссылки для текста с параметрами {text}, {word}");
+                            if (oneOrAll.Equals("all"))
+                            {
+                                wordDocument.CreateHyperlinksForText(word, text, count);
+                            }
+                            else if (oneOrAll.Equals("one"))
+                            {
+                                wordDocument.CreateHyperlinkForOneWord(word, text);
+                            }
+                            _logger.LogInformation($"Завершилось создание гиперссылки для текста с параметрами {text}, {word}");
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.LogError($"Message {e.Message}");
+                            WriteExceptionInLog(e);
+                            ViewBag.Messages = e.Message.ToString();
+                            ViewBag.LongText = wordDocument.GetTextFromDocument();
+                            return View();
+                        }
+                    }
+                }
+                else if (!string.IsNullOrWhiteSpace(path) & !string.IsNullOrWhiteSpace(text) & !string.IsNullOrWhiteSpace(linkType))
+                {
+                    if (linkType.Equals("hyperlink"))
+                    {
+                        try
+                        {
+                            _logger.LogInformation($"Начато создание гиперссылки для изображения с параметрами {text}, {path}");
+                            wordDocument.CreatHyperlinkForImage(path, text);
+                            _logger.LogInformation($"Завершилось создание гиперссылки для изображения с параметрами {text}, {path}");
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.LogError($"Message {e.Message}");
+                            WriteExceptionInLog(e);
+                            ViewBag.Messages = e.Message.ToString();
+                            ViewBag.LongText = wordDocument.GetTextFromDocument();
+                            return View();
+                        }
+                    }
+                }
+                else if (!string.IsNullOrWhiteSpace(path) & !string.IsNullOrWhiteSpace(word) & !string.IsNullOrWhiteSpace(linkType))
+                {
+                    if (linkType.Equals("bookmark"))
+                    {
+                        try
+                        {
+                            _logger.LogInformation($"Начато создание закладки для изображения с параметрами {text}, {path}");
+                            if (oneOrAll.Equals("all"))
+                            {
+                                wordDocument.CreateBookmarksForImage(path, word, count);
+                            }
+                            else if (oneOrAll.Equals("one"))
+                            {
+                                wordDocument.CreateBookmarkByImgeForOneWord(path, word);
+                            }
+                            _logger.LogInformation($"Завершилось создание закладки для изображения с параметрами {text}, {path}");
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.LogError($"Message {e.Message}");
+                            WriteExceptionInLog(e);
+                            ViewBag.Messages = e.Message.ToString();
+                            ViewBag.LongText = wordDocument.GetTextFromDocument();
+                            return View();
+                        }
+                    }
+                }
+
+
+
                 ViewBag.Messages = wordDocument.Messages;
                 ViewBag.LongText = wordDocument.GetTextFromDocument();
                 //ViewBag.Footnotes = wordDocument.GetFootnotes();
+                return View();
             }
             catch (Exception e)
             {
+                _logger.LogError($"Message {e.Message}");
                 WriteExceptionInLog(e);
+                ViewBag.Messages = e.Message.ToString();
+                ViewBag.LongText = wordDocument.GetTextFromDocument();
                 return View();
             }
-            return View();
+            
+            
         }
 
         public IActionResult EditLinks()
@@ -161,7 +181,9 @@ namespace WebApplication1.Controllers
             }
             catch (Exception e)
             {
+                _logger.LogError($"Message {e.Message}");
                 WriteExceptionInLog(e);
+                ViewBag.Messages = e.Message.ToString();
                 return View();
             }
 
@@ -191,7 +213,9 @@ namespace WebApplication1.Controllers
             }
             catch (Exception e)
             {
+                _logger.LogError($"Message {e.Message}");
                 WriteExceptionInLog(e);
+                ViewBag.Messages = e.Message.ToString();
                 return Redirect("EditLinks");
             }
             return Redirect("EditLinks");
@@ -209,7 +233,9 @@ namespace WebApplication1.Controllers
             }
             catch (Exception e)
             {
+                _logger.LogError($"Message {e.Message}");
                 WriteExceptionInLog(e);
+                ViewBag.Messages = e.Message.ToString();
                 return Redirect("EditLinks");
             }
             return Redirect("EditLinks");
@@ -225,7 +251,9 @@ namespace WebApplication1.Controllers
             }
             catch (Exception e)
             {
+                _logger.LogError($"Message {e.Message}");
                 WriteExceptionInLog(e);
+                ViewBag.Messages = e.Message.ToString();
                 return Redirect("EditLinks");
             }
             return Redirect("EditLinks");
@@ -241,7 +269,9 @@ namespace WebApplication1.Controllers
             }
             catch (Exception e)
             {
+                _logger.LogError($"Message {e.Message}");
                 WriteExceptionInLog(e);
+                ViewBag.Messages = e.Message.ToString();
                 return Redirect("EditLinks");
             }
             return Redirect("EditLinks");
@@ -257,7 +287,9 @@ namespace WebApplication1.Controllers
             }
             catch (Exception e)
             {
+                _logger.LogError($"Message {e.Message}");
                 WriteExceptionInLog(e);
+                ViewBag.Messages = e.Message.ToString();
                 return null;
             }
         }
@@ -280,7 +312,9 @@ namespace WebApplication1.Controllers
             }
             catch (Exception e)
             {
+                _logger.LogError($"Message {e.Message}");
                 WriteExceptionInLog(e);
+                ViewBag.Messages = e.Message.ToString();
                 return Redirect("EditLinks");
             }
             return Redirect("EditLinks");
@@ -288,7 +322,12 @@ namespace WebApplication1.Controllers
 
         private void WriteExceptionInLog(Exception e)
         {
-            _logger.LogError($"Message {e.Message} {(e.InnerException is null ? "" : GetInnerException(e.InnerException))}");
+            string innerException = null;
+            if (e?.InnerException != null)
+            {
+                innerException = GetInnerException(e.InnerException);
+            }
+            _logger.LogError($"Message {e.Message} | {innerException}");
         }
 
         private string GetInnerException(Exception innerException)

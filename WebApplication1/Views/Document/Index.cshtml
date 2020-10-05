@@ -56,9 +56,9 @@
         <button id="help-button" style="display: inline-block;" type="button">ПОМОЩЬ</button>
 
         <div id="messages">
-            @foreach (var item in ViewBag.Messages)
+            @if (@ViewBag.Messages is string)
             {
-                <p>@item</p>
+                <p>Возникла ошибка во время исполнения: @ViewBag.Messages</p>
             }
         </div>
 

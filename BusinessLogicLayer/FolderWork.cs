@@ -133,7 +133,12 @@ namespace BusinessLogicLayer
 
         private void WriteExceptionInLog(Exception e)
         {
-            loggerException.Error($"Message {e.Message} {(e.InnerException is null ? "" : GetInnerException(e.InnerException))}");
+            string innerException = null;
+            if (e?.InnerException != null)
+            {
+                innerException = GetInnerException(e.InnerException);
+            }
+            loggerException.Error($"Message {e.Message} | {innerException}");
         }
 
         private string GetInnerException(Exception innerException)

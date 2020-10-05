@@ -193,7 +193,17 @@ namespace WebApplication1.Controllers
 
         private void WriteExceptionInLog(Exception e)
         {
-            _logger.LogError($"Message {e.Message} {(e?.InnerException is null ? "" : string.Join(Environment.NewLine, "InnerException: ", e.InnerException.Message))}");
+            string innerException = null;
+            if (e?.InnerException != null)
+            {
+                innerException = GetInnerException(e.InnerException);
+            }
+            _logger.LogError($"Message {e.Message} | {innerException}");
+        }
+
+        private string GetInnerException(Exception innerException)
+        {
+            return $"{Environment.NewLine} InnerException: {innerException.Message}";
         }
     }
 }
