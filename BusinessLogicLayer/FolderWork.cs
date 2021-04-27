@@ -95,7 +95,7 @@ namespace BusinessLogicLayer
             switch (fileFormat)
             {
                 case FileFormat.TXT:
-                    newFilepath = Conversion.Conversion.ConvertToTxt(newFilepath); //Conversion.ConvertToTxt(newFilepath);
+                    newFilepath = Conversion.Conversion.ConvertToTxt(newFilepath);
                     break;
                 case FileFormat.RTF:
                     newFilepath = Conversion.Conversion.ConvertToRtf(newFilepath);
@@ -110,8 +110,6 @@ namespace BusinessLogicLayer
                     string filepathForArchive = userFolder + "\\html";
                     newFilepath = userFolder + "\\html.zip";
                     ZipFile.CreateFromDirectory(filepathForArchive, newFilepath);
-                    //newFilepath = Conversion.Conversion.ConvertToHtml(newFilepath);
-                    
                     break;
                 case FileFormat.PDF:
                     newFilepath = Conversion.Conversion.ConvertToPdf(newFilepath);
@@ -123,8 +121,6 @@ namespace BusinessLogicLayer
                     break;
             }
 
-
-            //FileInfo file = new DirectoryInfo(userFolder).GetFiles().Where(f => f.FullName == newFilepath).FirstOrDefault();
             FileInfo file = new FileInfo(newFilepath);
             fileBytes = File.ReadAllBytes(file.FullName);
             fileExtension = file.Extension;

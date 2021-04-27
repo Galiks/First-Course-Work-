@@ -1,0 +1,7 @@
+body{ font-family:'Times New Roman'; font-size:1em; }
+ul, ol{ margin-top: 0; margin-bottom: 0; }
+.Normal{page-break-inside:auto;page-break-after:auto;page-break-before:auto;line-height:1.08;margin-top:0pt;margin-bottom:8pt;margin-left:0pt;text-indent:0pt;border-top-style: none;border-left-style: none;border-right-style: none;border-bottom-style: none;font-size:11pt;font-family:Calibri;mso-fareast-font-family:Calibri;mso-bidi-font-family:'Times New Roman';lang:RU-RU;mso-fareast-language:EN-US;mso-ansi-language:AR-SA;}
+.Default-Paragraph-Font{font-family:Calibri;mso-fareast-font-family:Calibri;mso-bidi-font-family:'Times New Roman';}
+.Normal-Table{}
+.Table-Grid{}
+.MyReferences{text-align:left;page-break-inside:auto;page-break-after:auto;page-break-before:auto;line-height:1.08;margin-top:0pt;margin-bottom:8pt;margin-left:0pt;text-indent:0pt;border-top-style: none;border-left-style: none;border-right-style: none;border-bottom-style: none;font-size:20pt;font-family:Calibri;mso-fareast-font-family:Calibri;mso-bidi-font-family:Calibri;lang:RU-RU;mso-fareast-language:EN-US;mso-ansi-language:AR-SA;font-weight:bold;}

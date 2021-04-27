@@ -16,7 +16,7 @@
     }
     else
     {
-        <header>
+        <header class="fixed-top">
             <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
                 <div class="container">
                     <h1 class="h1 text-center">Приветствую Вас на сайте по добавлению гипертекста в текст!</h1>
@@ -24,20 +24,23 @@
             </nav>
         </header>
 
-        <div class="justify-content-center">
-            <div>
-                <h3>Пожалуйста, загрузите файл.</h3>
-                <form asp-action="Index" asp-controller="Home" method="post" enctype="multipart/form-data">
-                    <input type="file" name="file" />
-                    <button>Отправить</button>
-                </form>
+
+        <div style="margin-top: 145px;">
+            <div class="justify-content-center">
+                <div>
+                    <h3>Пожалуйста, загрузите файл.</h3>
+                    <form asp-action="Index" asp-controller="Home" method="post" enctype="multipart/form-data">
+                        <input type="file" name="file" />
+                        <button>Отправить</button>
+                    </form>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(ViewBag.FileFormatErrorMessage))
+                {
+                    <p>@ViewBag.FileFormatErrorMessage</p>
+                }
+
             </div>
-
-            @if (!string.IsNullOrWhiteSpace(ViewBag.FileFormatErrorMessage))
-            {
-                <p>@ViewBag.FileFormatErrorMessage</p>
-            }
-
         </div>
     }
 

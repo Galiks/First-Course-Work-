@@ -397,7 +397,13 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:BusinessLogicLayer.WordDocument.GetBookmarks">
+        <member name="M:BusinessLogicLayer.WordDocument.GetTextBookmarks">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:BusinessLogicLayer.WordDocument.GetImageBookmarks">
             <summary>
             
             </summary>

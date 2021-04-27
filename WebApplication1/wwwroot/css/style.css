@@ -1,4 +1,9 @@
-﻿textarea{
+﻿textarea {
 	width: 80%;
 	height: 800px;
+}
+
+.header {
+	position: fixed;
+	top: 0;
 }

@@ -756,10 +756,10 @@ namespace BusinessLogicLayer
 
 
                 }
-                else
-                {
-                    throw new Exception("Подобная закладка уже есть!");
-                }
+                //else
+                //{
+                //    throw new Exception("Подобная закладка уже есть!");
+                //}
 
                 return para;
             }
@@ -1447,17 +1447,66 @@ namespace BusinessLogicLayer
         /// 
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<Bookmark> GetBookmarks()
+        public HashSet<(BookmarkStart bookmark, string text)> GetTextBookmarks()
         {
-            //HashSet<Bookmark> hashSetBookmarks = new HashSet<Bookmark>();
+            var tuples = new HashSet<(BookmarkStart bookmark, string text)>();
             BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(Document);
             var bookmarks = bookmarksNavigator.Document.Bookmarks;
 
             foreach (Bookmark bookmark in bookmarks)
             {
-                yield return bookmark;
+                string text = "";
+                var childObjects = bookmark.BookmarkStart.OwnerParagraph.ChildObjects;
+                foreach (DocumentObject child in childObjects)
+                {
+                    if (child.DocumentObjectType == DocumentObjectType.TextRange)
+                    {
+                        var innerText = child as TextRange;
+                        text += innerText.Text;
+                    }
+                }
+                if (!string.IsNullOrWhiteSpace(text))
+                {
+                    var tuple = (bookmark: bookmark.BookmarkStart, text: text);
+                    tuples.Add(tuple); 
+                }
             }
+
+            return tuples;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public List<(BookmarkStart bookmark, byte[] image)> GetImageBookmarks()
+        {
+            var tuples = new List<(BookmarkStart bookmark, byte[] image)>();
+            BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(Document);
+            var bookmarks = bookmarksNavigator.Document.Bookmarks;
+
+            foreach (Bookmark bookmark in bookmarks)
+            {
+                byte[] image = null;
+                var childObjects = bookmark.BookmarkStart.OwnerParagraph.ChildObjects;
+                foreach (DocumentObject child in childObjects)
+                {
+                    if (child.DocumentObjectType == DocumentObjectType.Picture)
+                    {
+                        var innerImage = child as DocPicture;
+                        image = innerImage.ImageBytes;
+                    }
+                }
+                if (image != null)
+                {
+                    var tuple = (bookmark: bookmark.BookmarkStart, image);
+                    tuples.Add(tuple); 
+                }
+            }
+
+            return tuples;
+        }
+
         /// <summary>
         /// 
         /// </summary>

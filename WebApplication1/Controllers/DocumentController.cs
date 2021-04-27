@@ -153,7 +153,6 @@ namespace WebApplication1.Controllers
 
                 ViewBag.Messages = wordDocument.Messages;
                 ViewBag.LongText = wordDocument.GetTextFromDocument();
-                //ViewBag.Footnotes = wordDocument.GetFootnotes();
                 return View();
             }
             catch (Exception e)
@@ -174,8 +173,10 @@ namespace WebApplication1.Controllers
             {
                 var hyperlinks = wordDocument.GetHyperlinks().ToList();
                 ViewBag.Hyperlinks = hyperlinks;
-                var bookmarks = wordDocument.GetBookmarks().ToList();
-                ViewBag.Bookmarks = bookmarks;
+                var textBookmarks = wordDocument.GetTextBookmarks().ToList();
+                ViewBag.Bookmarks = textBookmarks;
+                var imageBookmarks = wordDocument.GetImageBookmarks().ToList();
+                ViewBag.ImageBookmarks = imageBookmarks;
                 var images = wordDocument.GetImages().ToList();
                 ViewBag.Images = images;
             }
@@ -293,8 +294,6 @@ namespace WebApplication1.Controllers
                 return null;
             }
         }
-
-
 
         private void DeleteFile(FileInfo file)
         {
