@@ -67,7 +67,6 @@ namespace BusinessLogicLayer
         {
             try
             {
-                //loggerUser.Info($"Начата работа с файлом: {filename}");
                 this.filename = filename;
                 Document = new Document();
                 //проблема с дублями файла
@@ -283,21 +282,13 @@ namespace BusinessLogicLayer
                     return;
                 }
                 //Create bookmark objects
-                //BookmarkStart start = new BookmarkStart(document, referencesWord);
-                //BookmarkEnd end = new BookmarkEnd(document, referencesWord);
-
                 AppendTextBookmark(text, referencesWord);
-
                 TextSelection[] textSelection = Document.FindAllString(word, true, true);
-
-
-
                 if (textSelection == null || textSelection.Length == 0)
                 {
                     loggerException.Error($"Не было найдено слов");
                     return;
                 }
-
                 //Get the keywords
                 for (int i = 0; i < textSelection.Length; i++)
                 {
@@ -338,10 +329,7 @@ namespace BusinessLogicLayer
                 loggerException.Error($"Message {e.Message}");
                 WriteExceptionInLog(e);
                 throw e;
-            }
-
-
-            
+            } 
         }
 
         private void AppendTextBookmark(string text, string referencesWord)
