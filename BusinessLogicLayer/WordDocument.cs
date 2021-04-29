@@ -512,8 +512,6 @@ namespace BusinessLogicLayer
 
         private void CreateBookmark(Paragraph paragraph, string referencesWord, bool isCheckField = true)
         {
-
-
             try
             {
                 if (isCheckField)
@@ -908,42 +906,6 @@ namespace BusinessLogicLayer
                 WriteExceptionInLog(e);
                 throw e;
             }
-            #region Parallel version
-            //ParallelOptions po = new ParallelOptions();
-
-            //try
-            //{
-            //    Parallel.For(0, text.Length, i =>
-            //        {
-            //            TextSelection seletion = text[i];
-
-            //    //Get the text range
-
-            //    if (usersCountOfAddedWord != default)
-            //            {
-            //                if (usersCountOfAddedWord > countOfAddedLink)
-            //                {
-            //                    CreateHyperlink(hyperlink, seletion);
-            //                    countOfAddedLink++;
-            //                }
-            //                else
-            //                {
-            //                    isStopCreateLink = true;
-            //                    po.CancellationToken.ThrowIfCancellationRequested();
-            //                }
-            //            }
-            //            else
-            //            {
-            //                CreateHyperlink(hyperlink, seletion);
-            //            }
-
-            //        });
-            //}
-            //catch (OperationCanceledException)
-            //{
-            //    return;
-            //} 
-            #endregion  
         }
         /// <summary>
         /// 
@@ -1166,13 +1128,11 @@ namespace BusinessLogicLayer
                 string[] splitFilename = filename.Split("\\");
                 string pathToHtmlFile = null;
 
-                //for (int i = 0; i < splitFilename.Length; i++)
                 Parallel.For(0, splitFilename.Length, i =>
                 {
                     if (splitFilename[i].Equals("wwwroot"))
                     {
                         pathToHtmlFile = @"\" + string.Join(@"\", splitFilename, i + 1, splitFilename.Length - i - 1);
-                    //return splitFilename.Join("\\", splitFilename, i, splitFilename.Length - 1);
                 }
                 });
 
@@ -1193,153 +1153,8 @@ namespace BusinessLogicLayer
                 WriteExceptionInLog(e);
                 throw e;
             }
-            #region old version
-            //StringBuilder longText = new StringBuilder();
-            //GetAllFootnotes();
-            //foreach (Section section in document.Sections)
-            //{
-            //    bool flagForNumbered = false;
-            //    longText.AppendLine(" < div>");
-            //    foreach (Paragraph paragraph in section.Paragraphs)
-            //    {
-            //        string aligment = GetAligment(paragraph);
-            //        string fontName = "";
-            //        float? fontSize = default;
-            //        StringBuilder paragraphText = new StringBuilder();
-
-            //        #region нерабочий список
-            //        if (paragraph.NextSibling != null)
-            //        {
-            //            Paragraph nextParagraph = paragraph.NextSibling as Paragraph;
-            //            if (nextParagraph?.ListFormat.ListType == ListType.Numbered & flagForNumbered == false)
-            //            {
-            //                paragraphText.Append("<ol>");
-            //                flagForNumbered = true;
-            //            }
-            //            else if (nextParagraph?.ListFormat.ListType != ListType.Numbered & flagForNumbered)
-            //            {
-            //                paragraphText.Append("</ol>");
-            //                flagForNumbered = false;
-            //            }
-            //        }
-            //        else
-            //        {
-            //            paragraphText.Append("</ol>");
-            //        }
-
-            //        if (paragraph.ListFormat.ListType == ListType.Numbered)
-            //        {
-            //            paragraphText.Append($"<li>");
-            //        }
-            //        #endregion
-
-            //        var children = paragraph.ChildObjects;
-
-            //        for (int i = 0; i < children.Count; i++)
-            //        {
-            //            DocumentObject child = children[i];
-            //            if (child.DocumentObjectType == DocumentObjectType.TextRange)
-            //            {
-            //                TextRange textRange = child as TextRange;
-            //                fontName = textRange?.CharacterFormat.FontName;
-            //                fontSize = textRange?.CharacterFormat.FontSize;
-            //                paragraphText.Append(textRange.Text);
-            //            }
-            //            else if (child.DocumentObjectType == DocumentObjectType.Field)
-            //            {
-            //                Field field = child as Field;
-            //                if (field.Type == FieldType.FieldHyperlink & !string.IsNullOrWhiteSpace(field.FieldText))
-            //                {
-            //                    if (marking)
-            //                    {
-            //                        paragraphText.Append($"<a href='{field.Code}'>{field.FieldText}</a>");
-            //                        i += 2;
-            //                        continue;
-            //                    }
-            //                    else
-            //                    {
-            //                        paragraphText.Append($"{field.FieldText}");
-            //                        i += 2;
-            //                        continue;
-            //                    }
-            //                }
-            //                else if (field.Type == FieldType.FieldRef & !string.IsNullOrWhiteSpace(field.FieldText))
-            //                {
-            //                    if (marking)
-            //                    {
-            //                        paragraphText.Append($"<strong>{field.FieldText}</strong>");
-            //                        i += 2;
-            //                        continue;
-            //                    }
-            //                    else
-            //                    {
-            //                        paragraphText.Append($"{field.FieldText}");
-            //                        i += 2;
-            //                        continue;
-            //                    }
-
-            //                }
-            //            }
-            //            else if (child.DocumentObjectType == DocumentObjectType.Break)
-            //            {
-            //                Break @break = child as Break;
-            //                if (@break.BreakType == BreakType.LineBreak)
-            //                {
-            //                    paragraphText.Replace("\v", $"<br>");
-            //                }
-            //            }
-            //            else if (child.DocumentObjectType == DocumentObjectType.Picture)
-            //            {
-            //                DocPicture picture = child as DocPicture;
-            //                paragraphText.Append($"<img width='{picture.Width}px' height='{picture.Height}px' src=\"data:image/jpeg;base64," + Convert.ToBase64String(picture.ImageBytes) + "\" />");
-            //            }
-            //        }
-
-            //        if (paragraph.ListFormat.ListType == ListType.Numbered)
-            //        {
-            //            paragraphText.Append($"</li>");
-            //        }
-
-            //        fontName = string.IsNullOrWhiteSpace(fontName) ? "Time New Roman" : fontName;
-            //        fontSize = fontSize == default ? 12 : fontSize;
-
-            //        longText.AppendLine($"<p align='{aligment}'><font size='{fontSize}' face='{fontName}'>{paragraphText}</font></p>");
-            //    }
-            //    for (int i = 0; i < 5; i++)
-            //    {
-            //        longText.AppendLine("<br>");
-            //    }
-            //    longText.AppendLine("</div>");
-            //}
-
-            //return longText.ToString(); 
-            #endregion
         }
-        #region old method
-        //private string GetAligment(Paragraph paragraph)
-        //{
-        //    if (paragraph.Format.HorizontalAlignment == HorizontalAlignment.Left)
-        //    {
-        //        return "left";
-        //    }
-        //    else if (paragraph.Format.HorizontalAlignment == HorizontalAlignment.Right)
-        //    {
-        //        return "right";
-        //    }
-        //    else if (paragraph.Format.HorizontalAlignment == HorizontalAlignment.Center)
-        //    {
-        //        return "center";
-        //    }
-        //    else if (paragraph.Format.HorizontalAlignment == HorizontalAlignment.Justify)
-        //    {
-        //        return "justify";
-        //    }
-        //    else
-        //    {
-        //        return "";
-        //    }
-        //} 
-        #endregion
+
         /// <summary>
         /// 
         /// </summary>
@@ -1352,7 +1167,6 @@ namespace BusinessLogicLayer
                 var links = new List<Field>();
 
                 foreach (DocumentObject sec in section.Body.ChildObjects)
-                //Parallel.ForEach<DocumentObjectCollection>(section.Body.ChildObjects, sec =>
                 {
                     if (sec.DocumentObjectType == DocumentObjectType.Paragraph)
                     {
@@ -1374,7 +1188,6 @@ namespace BusinessLogicLayer
                         }
                     }
                 }
-                //);
                 return links;
             }
             catch (Exception e)
@@ -1396,17 +1209,14 @@ namespace BusinessLogicLayer
                 var links = new HashSet<Field>();
 
                 foreach (Section section in Document.Sections)
-                //Parallel.For(0, Document.Sections.Count, i =>
                 {
 
                     var childObjects = section.Body.ChildObjects;
                     foreach (DocumentObject sec in section.Body.ChildObjects)
-                    //Parallel.For(0, childObjects.Count, i =>
                     {
                         if (sec.DocumentObjectType == DocumentObjectType.Paragraph)
                         {
                             foreach (DocumentObject para in (sec as Paragraph).ChildObjects)
-                            //Parallel.For(0, paragraphs.Count, i =>
                             {
                                 if (para.DocumentObjectType == DocumentObjectType.Field)
                                 {
@@ -1505,7 +1315,8 @@ namespace BusinessLogicLayer
             try
             {
                 BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(Document);
-
+                bookmarksNavigator.MoveToBookmark(TransformWord(bookmarkText));
+                var temp = bookmarksNavigator.CurrentBookmark;
 
                 Section tempSection = Document.AddSection();
                 tempSection.AddParagraph().AppendText(text);
@@ -1515,7 +1326,6 @@ namespace BusinessLogicLayer
                 TextBodySelection textBodySelection = new TextBodySelection(paragraphBaseFirstItem, paragraphBaseLastItem);
                 TextBodyPart textBodyPart = new TextBodyPart(textBodySelection);
 
-                bookmarksNavigator.MoveToBookmark(TransformWord(bookmarkText));
                 bookmarksNavigator.ReplaceBookmarkContent(textBodyPart);
 
                 Document.Sections.Remove(tempSection);
@@ -1572,7 +1382,6 @@ namespace BusinessLogicLayer
                             break;
                         }
                     }
-
                     if (index > -1)
                     {
                         var footnotes = paragraph.ChildObjects[index].Document.Footnotes;
@@ -1590,19 +1399,9 @@ namespace BusinessLogicLayer
                     }
                 }
             }
-
             return result;
         }
-        //private string GetWordFromFootnoteForHyperlink(Paragraph footnote)
-        //{
-        //    int countChildObjects = footnote.ChildObjects.Count;
-        //    while (countChildObjects % 2 != 0)
-        //    {
-        //        countChildObjects--;
-        //    }
 
-        //    return null;
-        //}
         /// <summary>
         /// 
         /// </summary>

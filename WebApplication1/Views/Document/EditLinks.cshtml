@@ -42,12 +42,12 @@
             margin: 0px;
         }
 
-        #maincontainer > div {
-            border: 1px double black;
-            display: inline-block;
-            height: 100%;
-            text-align: right;
-        }
+            #maincontainer > div {
+                border: 1px double black;
+                display: inline-block;
+                height: 100%;
+                text-align: right;
+            }
 
         .conteiner {
             margin: 0px;
@@ -57,7 +57,9 @@
     <div>
         <h2 id="hyperlinks" style="
     margin-top: 100px;
-">Тектовые гиперссылки</h2>
+">
+            Тектовые гиперссылки
+        </h2>
         <div id="maincontainer">
             <div id="leftcolumn">
                 <table border="1" style="
@@ -141,7 +143,7 @@
                                 <form asp-action="UpdateBookmark" asp-controller="Document" method="post">
                                     <input type="text" name="text" style="
     height: 200px;
-"/>
+" />
                                     <input type="text" name="bookmark" hidden value="@bookmark.Name" />
 
                                     <button>Редактировать</button>
@@ -165,23 +167,23 @@
                     {
                         var bookmark = ViewBag.ImageBookmarks[i].Item1;
                         var image = ViewBag.ImageBookmarks[i].Item2;
-                    <tr>
-                        <td>@bookmark.Name</td>
-                        <td><img width='200px' height='200px' src='data:image/jpeg;base64,@Convert.ToBase64String(image)' /></td>
-                        <td width="40px">
-                            <form asp-action="UpdateBookmark" asp-controller="Document" method="post" enctype="multipart/form-data">
-                                <label for="image">
-                                    Фото:
-                                    <input type="file" id="image" name="image" />
-                                </label>
-                                <input type="text" name="bookmark" hidden value="@bookmark.Name" />
-                                <button>Редактировать картинку</button>
-                            </form>
-                        </td>
-                        <td>
-                            @Html.ActionLink("Удалить", "DeleteBookmark", new { bookmark = bookmark.Name })
-                        </td>
-                    </tr>
+                        <tr>
+                            <td>@bookmark.Name</td>
+                            <td><img width='200px' height='200px' src='data:image/jpeg;base64,@Convert.ToBase64String(image)' /></td>
+                            <td width="40px">
+                                <form asp-action="UpdateBookmark" asp-controller="Document" method="post" enctype="multipart/form-data">
+                                    <label for="image">
+                                        Фото:
+                                        <input type="file" id="image" name="image" />
+                                    </label>
+                                    <input type="text" name="bookmark" hidden value="@bookmark.Name" />
+                                    <button>Редактировать картинку</button>
+                                </form>
+                            </td>
+                            <td>
+                                @Html.ActionLink("Удалить", "DeleteBookmark", new { bookmark = bookmark.Name })
+                            </td>
+                        </tr>
 
                     }
                 </table>
