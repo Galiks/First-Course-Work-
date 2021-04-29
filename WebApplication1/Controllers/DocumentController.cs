@@ -242,13 +242,43 @@ namespace WebApplication1.Controllers
             return Redirect("EditLinks");
         }
 
-        public IActionResult UpdateBookmark(string bookmark, string text)
+        public async Task<IActionResult> UpdateBookmarkAsync(string bookmark, string text, IFormFile image)
         {
+
+            string path = null;
+            if (image != null)
+            {
+                path = _appEnvironment.WebRootPath + "/Images/" + image.FileName;
+                try
+                {
+                    await FolderWork.SaveImage(image, path);
+                    _logger.LogInformation($"Изображение {image.FileName} сохранено по пути {path}.");
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError($"Не удалось сохранить изображение {image.FileName}.");
+                    WriteExceptionInLog(e);
+                    ViewBag.Messages = e.Message.ToString();
+                    ViewBag.LongText = wordDocument.GetTextFromDocument();
+                    return View();
+                }
+            }
+
             try
             {
-                _logger.LogInformation($"Начато изменение закладки {bookmark} на {text}");
-                wordDocument.EditTextInBookmark(bookmark, text);
-                _logger.LogInformation($"Завершилось изменение закладки {bookmark} на {text}");
+                if (string.IsNullOrWhiteSpace(path))
+                {
+                    _logger.LogInformation($"Начато изменение закладки {bookmark} на {text}");
+                    wordDocument.EditTextInBookmark(bookmark, text);
+                    _logger.LogInformation($"Завершилось изменение закладки {bookmark} на {text}");
+                } 
+                else
+                {
+                    _logger.LogInformation($"Начато изменение изображения закладки {bookmark}");
+                    wordDocument.EditImageInBookmark(bookmark, path);
+                    _logger.LogInformation($"Завершилось изменение изображения закладки {bookmark}");
+                }
+                
             }
             catch (Exception e)
             {

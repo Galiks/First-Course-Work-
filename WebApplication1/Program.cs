@@ -30,30 +30,34 @@ namespace WebApplication1
             }
         }
 
-        public static IWebHost BuildWebHost(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
-                .UseUrls(urls: "http://localhost:8080")
-                .ConfigureLogging(logging =>
-                {
-                    logging.ClearProviders();
-                    logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
-                })
-                .UseNLog()
-                .Build();
+        public static IWebHost BuildWebHost(string[] args)
+        {
+            return WebHost.CreateDefaultBuilder(args)
+.UseStartup<Startup>()
+.UseUrls(urls: "http://localhost:8080")
+.ConfigureLogging(logging =>
+{
+    logging.ClearProviders();
+    logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
+})
+.UseNLog()
+.Build();
+        }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-           Host.CreateDefaultBuilder(args)
-               .ConfigureWebHostDefaults(webBuilder =>
-               {
-                   webBuilder.UseStartup<Startup>();
-                   webBuilder.UseUrls(urls: "http://localhost:8000");
-               })
-               .ConfigureLogging(logging =>
-               {
-                   logging.ClearProviders();
-                   logging.SetMinimumLevel(LogLevel.Information);
-               })
-               .UseNLog();
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            return Host.CreateDefaultBuilder(args)
+.ConfigureWebHostDefaults(webBuilder =>
+{
+    webBuilder.UseStartup<Startup>();
+    webBuilder.UseUrls(urls: "http://localhost:8000");
+})
+.ConfigureLogging(logging =>
+{
+    logging.ClearProviders();
+    logging.SetMinimumLevel(LogLevel.Information);
+})
+.UseNLog();
+        }
     }
 }

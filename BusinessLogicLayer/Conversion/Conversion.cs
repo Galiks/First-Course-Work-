@@ -1,10 +1,7 @@
 ﻿using NLog;
 using Spire.Doc;
 using Spire.Pdf;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace BusinessLogicLayer.Conversion
 {

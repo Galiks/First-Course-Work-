@@ -737,16 +737,8 @@ namespace BusinessLogicLayer
                     picture.Height = height;
                     para.AppendBookmarkEnd(referencesWord);
 
-
                     SaveCurrentDocument();
-
-
                 }
-                //else
-                //{
-                //    throw new Exception("Подобная закладка уже есть!");
-                //}
-
                 return para;
             }
             catch (Exception e)
@@ -1254,15 +1246,16 @@ namespace BusinessLogicLayer
             foreach (Bookmark bookmark in bookmarks)
             {
                 string text = "";
-                var childObjects = bookmark.BookmarkStart.OwnerParagraph.ChildObjects;
-                foreach (DocumentObject child in childObjects)
+                var child = bookmark.BookmarkStart.NextSibling;
+                if (child.DocumentObjectType is DocumentObjectType.Field)
                 {
-                    if (child.DocumentObjectType == DocumentObjectType.TextRange)
+                    Field field = child as Field;
+                    if (field.Type is FieldType.FieldRef)
                     {
-                        var innerText = child as TextRange;
-                        text += innerText.Text;
+                        text = field.FieldText;
                     }
                 }
+                
                 if (!string.IsNullOrWhiteSpace(text))
                 {
                     var tuple = (bookmark: bookmark.BookmarkStart, text: text);
@@ -1277,15 +1270,16 @@ namespace BusinessLogicLayer
         /// 
         /// </summary>
         /// <returns></returns>
-        public List<(BookmarkStart bookmark, byte[] image)> GetImageBookmarks()
+        public List<(BookmarkStart bookmark, byte[] image, string text)> GetImageBookmarks()
         {
-            var tuples = new List<(BookmarkStart bookmark, byte[] image)>();
+            var tuples = new List<(BookmarkStart bookmark, byte[] image, string text)>();
             BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(Document);
             var bookmarks = bookmarksNavigator.Document.Bookmarks;
 
             foreach (Bookmark bookmark in bookmarks)
             {
                 byte[] image = null;
+                string text = "";
                 var childObjects = bookmark.BookmarkStart.OwnerParagraph.ChildObjects;
                 foreach (DocumentObject child in childObjects)
                 {
@@ -1295,9 +1289,18 @@ namespace BusinessLogicLayer
                         image = innerImage.ImageBytes;
                     }
                 }
-                if (image != null)
+                var nextChild = bookmark.BookmarkStart.NextSibling;
+                if (nextChild.DocumentObjectType is DocumentObjectType.Field)
                 {
-                    var tuple = (bookmark: bookmark.BookmarkStart, image);
+                    Field field = nextChild as Field;
+                    if (field.Type is FieldType.FieldRef)
+                    {
+                        text = field.Value;
+                    }
+                }
+                if (image != null && !string.IsNullOrWhiteSpace(text))
+                {
+                    var tuple = (bookmark: bookmark.BookmarkStart, image, text);
                     tuples.Add(tuple); 
                 }
             }
@@ -1316,19 +1319,14 @@ namespace BusinessLogicLayer
             {
                 BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(Document);
                 bookmarksNavigator.MoveToBookmark(TransformWord(bookmarkText));
-                var temp = bookmarksNavigator.CurrentBookmark;
 
-                Section tempSection = Document.AddSection();
-                tempSection.AddParagraph().AppendText(text);
-
-                ParagraphBase paragraphBaseFirstItem = tempSection.Paragraphs[0].Items.FirstItem as ParagraphBase;
-                ParagraphBase paragraphBaseLastItem = tempSection.Paragraphs[tempSection.Paragraphs.Count - 1].Items.LastItem as ParagraphBase;
-                TextBodySelection textBodySelection = new TextBodySelection(paragraphBaseFirstItem, paragraphBaseLastItem);
-                TextBodyPart textBodyPart = new TextBodyPart(textBodySelection);
-
-                bookmarksNavigator.ReplaceBookmarkContent(textBodyPart);
-
-                Document.Sections.Remove(tempSection);
+                var child = bookmarksNavigator.CurrentBookmark.BookmarkStart.NextSibling;
+                if (child.DocumentObjectType is DocumentObjectType.Field)
+                {
+                    Field field = child as Field;
+                    field.FieldText = text;
+            
+                }
 
                 SaveCurrentDocument();
             }
@@ -1338,7 +1336,39 @@ namespace BusinessLogicLayer
                 WriteExceptionInLog(e);
                 throw e;
             }
+        }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="bookmarkText"></param>
+        /// <param name="pathToImage"></param>
+        public void EditImageInBookmark(string bookmarkText, string pathToImage)
+        {
+            try
+            {
+                BookmarksNavigator bookmarksNavigator = new BookmarksNavigator(Document);
+                bookmarksNavigator.MoveToBookmark(TransformWord(bookmarkText));
+                var childObjects = bookmarksNavigator.CurrentBookmark.BookmarkStart.OwnerParagraph.ChildObjects;
+                foreach (DocumentObject child in childObjects)
+                {
+                    if (child.DocumentObjectType == DocumentObjectType.Picture)
+                    {
+                        DocPicture picture = new DocPicture(Document);
+                        picture.LoadImage(pathToImage);
+                        var innerImage = child as DocPicture;
+                        innerImage.ReplaceImage(picture.ImageBytes, true);
+                    }
+                }
+
+                SaveCurrentDocument();
+            }
+            catch (Exception e)
+            {
+                loggerException.Error($"Message {e.Message}");
+                WriteExceptionInLog(e);
+                throw e;
+            }
         }
         /// <summary>
         /// 
@@ -1419,10 +1449,6 @@ namespace BusinessLogicLayer
 
                     paragraphForReferences.AppendText("Сноски");
                     paragraphForReferences.AppendBreak(BreakType.LineBreak);
-                    //chapterForReferences.ApplyStyle(BuiltinStyle.Heading1);
-                    //chapterForReferences.ApplyStyle(BuiltinStyle.Title);
-
-                    //referencesParagraph = sectionForReferences.AddParagraph();
                     referencesParagraph = paragraphForReferences;
                     ReferencesSection = sectionForReferences;
                     IndexReferencesSection = Document.GetIndex(sectionForReferences);

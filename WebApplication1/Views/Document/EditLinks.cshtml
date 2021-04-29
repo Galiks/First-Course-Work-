@@ -167,8 +167,9 @@
                     {
                         var bookmark = ViewBag.ImageBookmarks[i].Item1;
                         var image = ViewBag.ImageBookmarks[i].Item2;
+                        var text = ViewBag.ImageBookmarks[i].Item3;
                         <tr>
-                            <td>@bookmark.Name</td>
+                            <td>@text</td>
                             <td><img width='200px' height='200px' src='data:image/jpeg;base64,@Convert.ToBase64String(image)' /></td>
                             <td width="40px">
                                 <form asp-action="UpdateBookmark" asp-controller="Document" method="post" enctype="multipart/form-data">

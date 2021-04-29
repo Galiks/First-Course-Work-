@@ -416,6 +416,13 @@
             <param name="bookmarkText"></param>
             <param name="text"></param>
         </member>
+        <member name="M:BusinessLogicLayer.WordDocument.EditImageInBookmark(System.String,System.String)">
+            <summary>
+            
+            </summary>
+            <param name="bookmarkText"></param>
+            <param name="pathToImage"></param>
+        </member>
         <member name="M:BusinessLogicLayer.WordDocument.EditLinkInHypertext(Spire.Doc.Fields.Field,System.String)">
             <summary>
             

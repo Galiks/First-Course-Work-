@@ -12,7 +12,7 @@ namespace WebApplication1.Controllers
 {
     public class HomeController : Controller
     {
-        readonly IWebHostEnvironment _appEnvironment;
+        private readonly IWebHostEnvironment _appEnvironment;
         private readonly ILogger<HomeController> _logger;
         private readonly List<string> formats;
         public static string filepath;

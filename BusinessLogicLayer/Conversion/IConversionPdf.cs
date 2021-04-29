@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BusinessLogicLayer.Conversion
+﻿namespace BusinessLogicLayer.Conversion
 {
     /// <summary>
     /// 
