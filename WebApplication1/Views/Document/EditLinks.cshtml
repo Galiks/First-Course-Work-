@@ -21,6 +21,9 @@
                         <li>
                             <a class="nav-link text-dark" asp-area="" asp-controller="Document" asp-action="UsingHypertext">Использование гипертекста</a>
                         </li>
+                        <li>
+                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Выбрать другой файл</a>
+                        </li>
                     </ul>
                 </div>
 
@@ -58,7 +61,7 @@
         <h2 id="hyperlinks" style="
     margin-top: 100px;
 ">
-            Тектовые гиперссылки
+            Текстовые гиперссылки
         </h2>
         <div id="maincontainer">
             <div id="leftcolumn">
@@ -137,13 +140,11 @@
                         var bookmark = ViewBag.Bookmarks[i].Item1;
                         var text = ViewBag.Bookmarks[i].Item2;
                         <tr>
-                            <td>@bookmark.Name</td>
+                            <td>@bookmark.NextSibling.Value</td>
                             <td width="400px">@text</td>
                             <td width="40px">
                                 <form asp-action="UpdateBookmark" asp-controller="Document" method="post">
-                                    <input type="text" name="text" style="
-    height: 200px;
-" />
+                                    <textarea name="text" style="height: 200px;"></textarea>
                                     <input type="text" name="bookmark" hidden value="@bookmark.Name" />
 
                                     <button>Редактировать</button>

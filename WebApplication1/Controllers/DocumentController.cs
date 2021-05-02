@@ -34,17 +34,27 @@ namespace WebApplication1.Controllers
                 string path = null;
                 if (image != null)
                 {
-                    path = _appEnvironment.WebRootPath + "/Images/" + image.FileName;
-                    try
+
+                    if (Path.GetExtension(image.FileName).Equals(".png") || Path.GetExtension(image.FileName).Equals(".jpg"))
                     {
-                        await FolderWork.SaveImage(image, path);
-                        _logger.LogInformation($"Изображение {image.FileName} сохранено по пути {path}.");
+                        path = _appEnvironment.WebRootPath + "/Images/" + image.FileName;
+                        try
+                        {
+                            await FolderWork.SaveImage(image, path);
+                            _logger.LogInformation($"Изображение {image.FileName} сохранено по пути {path}.");
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.LogError($"Не удалось сохранить изображение {image.FileName}.");
+                            WriteExceptionInLog(e);
+                            ViewBag.Messages = e.Message.ToString();
+                            ViewBag.LongText = wordDocument.GetTextFromDocument();
+                            return View();
+                        } 
                     }
-                    catch (Exception e)
+                    else
                     {
-                        _logger.LogError($"Не удалось сохранить изображение {image.FileName}.");
-                        WriteExceptionInLog(e);
-                        ViewBag.Messages = e.Message.ToString();
+                        ViewBag.Messages = "Неверный формат файла. Должен быть PNG или JPG";
                         ViewBag.LongText = wordDocument.GetTextFromDocument();
                         return View();
                     }
@@ -163,8 +173,8 @@ namespace WebApplication1.Controllers
                 ViewBag.LongText = wordDocument.GetTextFromDocument();
                 return View();
             }
-            
-            
+
+
         }
 
         public IActionResult EditLinks()
@@ -248,17 +258,26 @@ namespace WebApplication1.Controllers
             string path = null;
             if (image != null)
             {
-                path = _appEnvironment.WebRootPath + "/Images/" + image.FileName;
-                try
+                if (Path.GetExtension(image.FileName).Equals(".png") || Path.GetExtension(image.FileName).Equals(".jpg"))
                 {
-                    await FolderWork.SaveImage(image, path);
-                    _logger.LogInformation($"Изображение {image.FileName} сохранено по пути {path}.");
-                }
-                catch (Exception e)
+                    path = _appEnvironment.WebRootPath + "/Images/" + image.FileName;
+                    try
+                    {
+                        await FolderWork.SaveImage(image, path);
+                        _logger.LogInformation($"Изображение {image.FileName} сохранено по пути {path}.");
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogError($"Не удалось сохранить изображение {image.FileName}.");
+                        WriteExceptionInLog(e);
+                        ViewBag.Messages = e.Message.ToString();
+                        ViewBag.LongText = wordDocument.GetTextFromDocument();
+                        return View();
+                    }
+                } 
+                else
                 {
-                    _logger.LogError($"Не удалось сохранить изображение {image.FileName}.");
-                    WriteExceptionInLog(e);
-                    ViewBag.Messages = e.Message.ToString();
+                    ViewBag.Messages = "Неверный формат файла. Должен быть PNG или JPG";
                     ViewBag.LongText = wordDocument.GetTextFromDocument();
                     return View();
                 }
@@ -271,14 +290,14 @@ namespace WebApplication1.Controllers
                     _logger.LogInformation($"Начато изменение закладки {bookmark} на {text}");
                     wordDocument.EditTextInBookmark(bookmark, text);
                     _logger.LogInformation($"Завершилось изменение закладки {bookmark} на {text}");
-                } 
+                }
                 else
                 {
                     _logger.LogInformation($"Начато изменение изображения закладки {bookmark}");
                     wordDocument.EditImageInBookmark(bookmark, path);
                     _logger.LogInformation($"Завершилось изменение изображения закладки {bookmark}");
                 }
-                
+
             }
             catch (Exception e)
             {

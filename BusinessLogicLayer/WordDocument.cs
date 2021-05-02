@@ -422,6 +422,13 @@ namespace BusinessLogicLayer
                 {
                     tr = keywordOne.GetAsOneRange();
                 }
+                catch (NullReferenceException e)
+                {
+                    loggerException.Error($"Не было найдено слов");
+                    var nullWordException = new Exception("Не было найдено слов", e);
+                    WriteExceptionInLog(nullWordException);
+                    throw nullWordException;
+                }
                 catch (Exception e)
                 {
                     loggerException.Error($"Message {e.Message}");
@@ -730,7 +737,6 @@ namespace BusinessLogicLayer
 
                 if (bn.CurrentBookmark == null)
                 {
-
                     para.AppendBookmarkStart(referencesWord);
                     DocPicture picture = para.AppendPicture(path);
                     picture.Width = width;
@@ -980,6 +986,8 @@ namespace BusinessLogicLayer
             tr.OwnerParagraph.ChildObjects.Insert(index + 3, fmend);
 
             field.End = fmend;
+
+            SaveCurrentDocument();
         }
 
         /// <summary>
