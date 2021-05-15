@@ -956,10 +956,7 @@ namespace BusinessLogicLayer
                     return;
                 }
             }
-
             //Add hyperlink
-
-
             Field field = new Field(Document)
             {
                 Code = "HYPERLINK \"" + hyperlink + "\"",
