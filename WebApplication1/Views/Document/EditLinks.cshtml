@@ -140,7 +140,15 @@
                         var bookmark = ViewBag.Bookmarks[i].Item1;
                         var text = ViewBag.Bookmarks[i].Item2;
                         <tr>
-                            <td>@bookmark.NextSibling.Value</td>
+                            @try
+                            {
+                                <td>@bookmark.NextSibling.Value</td>
+                            }
+                            catch (Exception)
+                            {
+                                <td>@bookmark.NextSibling.Text</td>
+                            }
+                            
                             <td width="400px">@text</td>
                             <td width="40px">
                                 <form asp-action="UpdateBookmark" asp-controller="Document" method="post">

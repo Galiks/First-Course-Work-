@@ -1260,12 +1260,9 @@ namespace BusinessLogicLayer
                         text = field.FieldText;
                     }
                 }
-                
-                if (!string.IsNullOrWhiteSpace(text))
-                {
-                    var tuple = (bookmark: bookmark.BookmarkStart, text: text);
-                    tuples.Add(tuple); 
-                }
+
+                var tuple = (bookmark: bookmark.BookmarkStart, text: text);
+                tuples.Add(tuple);
             }
 
             return tuples;
@@ -1303,10 +1300,10 @@ namespace BusinessLogicLayer
                         text = field.Value;
                     }
                 }
-                if (image != null && !string.IsNullOrWhiteSpace(text))
+                if (image != null)
                 {
                     var tuple = (bookmark: bookmark.BookmarkStart, image, text);
-                    tuples.Add(tuple); 
+                    tuples.Add(tuple);
                 }
             }
 
@@ -1330,7 +1327,11 @@ namespace BusinessLogicLayer
                 {
                     Field field = child as Field;
                     field.FieldText = text;
-            
+                }
+                else if (child.DocumentObjectType is DocumentObjectType.TextRange)
+                {
+                    TextRange textRange = child as TextRange;
+                    textRange.Text = text;
                 }
 
                 SaveCurrentDocument();
@@ -1687,6 +1688,22 @@ namespace BusinessLogicLayer
                     Document.Bookmarks.Remove(bookmarksNavigator.CurrentBookmark);
                 }
 
+                DeleteHelper(bookmarkText);
+
+                SaveCurrentDocument();
+            }
+            catch (Exception e)
+            {
+                loggerException.Error($"Message {e.Message}");
+                WriteExceptionInLog(e);
+                throw e;
+            }
+        }
+
+        private void DeleteHelper(string bookmarkText)
+        {
+            try
+            {
                 foreach (Section section in Document.Sections)
                 {
                     foreach (Paragraph paragraph in section.Paragraphs)
@@ -1708,21 +1725,23 @@ namespace BusinessLogicLayer
                                     paragraph.ChildObjects.Remove(nextFieldMark);
                                     paragraph.ChildObjects.Remove(previousFieldMark);
                                     paragraph.ChildObjects.Remove(child);
+                                    paragraph.ChildObjects.Remove(field);
                                     break;
                                 }
                             }
                         }
                     }
                 }
-
-                SaveCurrentDocument();
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                DeleteHelper(bookmarkText);
             }
             catch (Exception e)
             {
-                loggerException.Error($"Message {e.Message}");
-                WriteExceptionInLog(e);
                 throw e;
             }
+
         }
 
         /// <summary>
