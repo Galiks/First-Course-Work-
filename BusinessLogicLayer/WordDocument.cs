@@ -329,7 +329,7 @@ namespace BusinessLogicLayer
                 loggerException.Error($"Message {e.Message}");
                 WriteExceptionInLog(e);
                 throw e;
-            } 
+            }
         }
 
         private void AppendTextBookmark(string text, string referencesWord)
@@ -601,7 +601,7 @@ namespace BusinessLogicLayer
                 WriteExceptionInLog(e);
                 throw e;
             }
-           
+
         }
 
         /// <summary>
@@ -1130,7 +1130,7 @@ namespace BusinessLogicLayer
                     if (splitFilename[i].Equals("wwwroot"))
                     {
                         pathToHtmlFile = @"\" + string.Join(@"\", splitFilename, i + 1, splitFilename.Length - i - 1);
-                }
+                    }
                 });
 
                 if (string.IsNullOrWhiteSpace(pathToHtmlFile))
@@ -1260,9 +1260,14 @@ namespace BusinessLogicLayer
                         text = field.FieldText;
                     }
                 }
-
-                var tuple = (bookmark: bookmark.BookmarkStart, text: text);
-                tuples.Add(tuple);
+                if (
+                    bookmark.BookmarkStart.NextSibling.DocumentObjectType != DocumentObjectType.BookmarkEnd &&
+                    bookmark.BookmarkStart.NextSibling.DocumentObjectType != DocumentObjectType.BookmarkStart
+                    )
+                {
+                    var tuple = (bookmark: bookmark.BookmarkStart, text: text);
+                    tuples.Add(tuple);
+                }
             }
 
             return tuples;
